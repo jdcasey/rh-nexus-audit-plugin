@@ -1,7 +1,11 @@
 package com.redhat.jcasey.test.nexus.plugin.rest;
 
+import java.util.List;
+
+import org.codehaus.plexus.component.annotations.Requirement;
 import org.jdom.Document;
 import org.jdom.Element;
+import org.jdom.output.XMLOutputter;
 import org.restlet.Context;
 import org.restlet.data.Reference;
 import org.restlet.data.Request;
@@ -10,6 +14,8 @@ import org.restlet.resource.ResourceException;
 import org.restlet.resource.Variant;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.sonatype.nexus.proxy.registry.RepositoryRegistry;
+import org.sonatype.nexus.proxy.repository.Repository;
 import org.sonatype.plexus.rest.resource.AbstractPlexusResource;
 import org.sonatype.plexus.rest.resource.PathProtectionDescriptor;
 import org.sonatype.plexus.rest.resource.PlexusResource;
@@ -24,6 +30,9 @@ public class HelloWorldPlexusResource
 {
 
     private final Logger logger = LoggerFactory.getLogger( getClass() );
+
+    @Requirement
+    RepositoryRegistry registry;
 
     @Override
     public Object getPayloadInstance()
@@ -53,15 +62,20 @@ public class HelloWorldPlexusResource
     public Object get( final Context context, final Request request, final Response response, final Variant variant )
         throws ResourceException
     {
-
-        // you can basically return any object, and it will be serialized
-
-        // we will keep it simple
-        logger.info( request.getResourceRef()
-                            .getQuery() );
+        final List<Repository> repos = registry.getRepositories();
 
         final Element root = new Element( "info" );
         final Document doc = new Document( root );
+
+        for ( final Repository repo : repos )
+        {
+            final Element child = new Element( "repo" );
+            child.setAttribute( "name", repo.getName() );
+            child.setAttribute( "id", repo.getId() );
+            child.setAttribute( "path-prefix", repo.getPathPrefix() );
+
+            root.addContent( child );
+        }
 
         final Reference ref = request.getResourceRef()
                                      .getRelativeRef();
@@ -74,6 +88,6 @@ public class HelloWorldPlexusResource
             root.addContent( child );
         }
 
-        return doc;
+        return new XMLOutputter().outputString( doc );
     }
 }
