@@ -1,5 +1,6 @@
 package com.redhat.jcasey.test.nexus.plugin.rest;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.codehaus.plexus.component.annotations.Requirement;
@@ -15,18 +16,20 @@ import org.restlet.resource.Variant;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.sonatype.nexus.proxy.registry.RepositoryRegistry;
+import org.sonatype.nexus.proxy.repository.GroupRepository;
 import org.sonatype.nexus.proxy.repository.Repository;
+import org.sonatype.nexus.proxy.repository.RepositoryKind;
 import org.sonatype.plexus.rest.resource.AbstractPlexusResource;
 import org.sonatype.plexus.rest.resource.PathProtectionDescriptor;
 import org.sonatype.plexus.rest.resource.PlexusResource;
+
+import com.redhat.devel.pp.PrettyPrinter;
 
 /**
  * A sample rest resoruce to get you started. By default this will automatically be mounted at:
  * http://localhost:8081/nexus/service/local/sample/hello
  */
-public class HelloWorldPlexusResource
-    extends AbstractPlexusResource
-    implements PlexusResource
+public class HelloWorldPlexusResource extends AbstractPlexusResource implements PlexusResource
 {
 
     private final Logger logger = LoggerFactory.getLogger( getClass() );
@@ -69,18 +72,28 @@ public class HelloWorldPlexusResource
 
         for ( final Repository repo : repos )
         {
+            logger.info( PrettyPrinter.pp( repo ) );
+
             final Element child = new Element( "repo" );
-            child.setAttribute( "name", repo.getName() );
-            child.setAttribute( "id", repo.getId() );
-            child.setAttribute( "path-prefix", repo.getPathPrefix() );
+            final List<Element> elements = new ArrayList<Element>();
+
+            elements.add( new Element( "id" ).setText( repo.getId() ) );
+            elements.add( new Element( "name" ).setText( repo.getName() ) );
+            elements.add( new Element( "path-prefix", repo.getPathPrefix() ) );
+            elements.add( new Element( "status" ).setText( repo.getLocalStatus().name() ) );
+
+            final RepositoryKind kind = repo.getRepositoryKind();
+            elements.add( new Element( "group" ).setText( Boolean.toString( kind.isFacetAvailable( GroupRepository.class ) ) ) );
+
+            child.addContent( elements );
 
             root.addContent( child );
         }
 
-        final Reference ref = request.getResourceRef()
-                                     .getRelativeRef();
-        final String[] parts = ref.getPath()
-                                  .split( "\\/" );
+        final Reference ref = request.getResourceRef().getRelativeRef();
+
+        final String[] parts = ref.getPath().split( "\\/" );
+
         for ( final String part : parts )
         {
             final Element child = new Element( "part" );
