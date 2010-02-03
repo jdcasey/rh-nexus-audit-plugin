@@ -3,19 +3,19 @@ package com.redhat.jcasey.test.nexus.plugin;
 import javax.inject.Inject;
 import javax.inject.Named;
 
-import com.redhat.jcasey.test.nexus.plugin.events.InfectedItemFoundEvent;
 import org.sonatype.nexus.proxy.ResourceStoreRequest;
 import org.sonatype.nexus.proxy.access.Action;
 import org.sonatype.nexus.proxy.item.AbstractStorageItem;
 import org.sonatype.nexus.proxy.item.StorageFileItem;
 import org.sonatype.nexus.proxy.repository.ProxyRepository;
 import org.sonatype.nexus.proxy.repository.Repository;
-import org.sonatype.nexus.proxy.repository.RequestProcessor;
 import org.sonatype.plexus.appevents.ApplicationEventMulticaster;
+
+import com.redhat.jcasey.test.nexus.plugin.events.InfectedItemFoundEvent;
 
 @Named( "virusScanner" )
 public class VirusScannerRequestProcessor
-    implements RequestProcessor
+// implements RequestProcessor
 {
     @Inject
     private ApplicationEventMulticaster applicationEventMulticaster;
@@ -27,7 +27,7 @@ public class VirusScannerRequestProcessor
     // @Inject
     // private @Named("A") CommonDependency commonDependency;
 
-    public boolean process( Repository repository, ResourceStoreRequest request, Action action )
+    public boolean process( final Repository repository, final ResourceStoreRequest request, final Action action )
     {
         // Check dependency
         // System.out.println( "VirusScannerRequestProcessor --- CommonDependency data: " + commonDependency.getData()
@@ -37,25 +37,26 @@ public class VirusScannerRequestProcessor
         return true;
     }
 
-    public boolean shouldProxy( ProxyRepository repository, ResourceStoreRequest request )
+    public boolean shouldProxy( final ProxyRepository repository, final ResourceStoreRequest request )
     {
         // don't decide until have content
         return true;
     }
 
-    public boolean shouldCache( ProxyRepository repository, AbstractStorageItem item )
+    public boolean shouldCache( final ProxyRepository repository, final AbstractStorageItem item )
     {
         if ( item instanceof StorageFileItem )
         {
-            StorageFileItem file = (StorageFileItem) item;
+            final StorageFileItem file = (StorageFileItem) item;
 
             // do a virus scan
-            boolean hasVirus = virusScanner.hasVirus( file );
+            final boolean hasVirus = virusScanner.hasVirus( file );
 
             if ( hasVirus )
             {
-                applicationEventMulticaster.notifyEventListeners( new InfectedItemFoundEvent( item
-                    .getRepositoryItemUid().getRepository(), file ) );
+                applicationEventMulticaster.notifyEventListeners( new InfectedItemFoundEvent( item.getRepositoryItemUid()
+                                                                                                  .getRepository(),
+                    file ) );
             }
 
             return !hasVirus;

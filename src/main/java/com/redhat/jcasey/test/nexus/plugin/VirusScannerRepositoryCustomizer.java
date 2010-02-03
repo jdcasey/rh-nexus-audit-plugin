@@ -4,28 +4,29 @@ import javax.inject.Inject;
 import javax.inject.Named;
 
 import org.sonatype.configuration.ConfigurationException;
-import org.sonatype.nexus.plugins.RepositoryCustomizer;
 import org.sonatype.nexus.proxy.repository.ProxyRepository;
 import org.sonatype.nexus.proxy.repository.Repository;
 import org.sonatype.nexus.proxy.repository.RequestProcessor;
 
 public class VirusScannerRepositoryCustomizer
-    implements RepositoryCustomizer
+// implements RepositoryCustomizer
 {
     @Inject
     private @Named( "virusScanner" )
     RequestProcessor virusScannerRequestProcessor;
 
-    public boolean isHandledRepository( Repository repository )
+    public boolean isHandledRepository( final Repository repository )
     {
         // handle proxy reposes only
-        return repository.getRepositoryKind().isFacetAvailable( ProxyRepository.class );
+        return repository.getRepositoryKind()
+                         .isFacetAvailable( ProxyRepository.class );
     }
 
-    public void configureRepository( Repository repository )
+    public void configureRepository( final Repository repository )
         throws ConfigurationException
     {
-        repository.getRequestProcessors().put( "virusScanner", virusScannerRequestProcessor );
+        repository.getRequestProcessors()
+                  .put( "virusScanner", virusScannerRequestProcessor );
     }
 
 }
