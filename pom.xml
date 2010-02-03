@@ -6,11 +6,11 @@
 
   <groupId>com.redhat.jcasey.test.nexus</groupId>
   <artifactId>nexus-plugin-test2</artifactId>
+  <name>Test Plugin</name>
   <version>1.0-SNAPSHOT</version>
 
   <packaging>nexus-plugin</packaging>
 
-  <name>Nexus Plugin Archetype</name>
 
   <properties>
     <!-- Set the Nexus version here, against which you build the plugin -->

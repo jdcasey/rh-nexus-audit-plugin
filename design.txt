@@ -1,0 +1,19 @@
+CapturePlugin.init()
+ - Create new capture repository group
+ - Register new repository type descriptor for path = /capture/*
+ - Register new repository for each group/tag where repo-id = {tag}, type = CaptureM2GroupRepository.class
+    * Need some way to specify the composition of MEAD repos in each capture repo
+    * Need some way to specify the capture source (probably will be something like /groups/capture-source, and will include central, etc.)
+
+CaptureM2GroupRepository.doRetrieve()
+ - establish a build-id:
+    * require build-name in path structure
+    * if build-number provided in path structure, combine with build-name for build-id
+    * else, combine logged-in username with build-name for build-id
+ - try to resolve from MEAD repos proxied
+ - if not found:
+    * look for capture-proxy repository with id == build-id
+    * if not found, create capture-proxy repository to proxy the capture-target repo/group, and register it.
+    * call retrieveItem() on the capture-proxy repository
+
+NOTE: REVISE THIS WITH REPO TEMPLATE, TEMPLATE PROVIDER, ETC.

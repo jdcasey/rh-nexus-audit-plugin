@@ -1,7 +1,10 @@
 package com.redhat.jcasey.test.nexus.plugin.rest;
 
+import java.lang.ref.WeakReference;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.codehaus.plexus.component.annotations.Requirement;
 import org.jdom.Document;
@@ -37,7 +40,10 @@ public class HelloWorldPlexusResource
     private final Logger logger = LoggerFactory.getLogger( getClass() );
 
     @Requirement
-    RepositoryRegistry registry;
+    private RepositoryRegistry registry;
+
+    private final Map<String, WeakReference<Repository>> captureRepos =
+        new HashMap<String, WeakReference<Repository>>();
 
     @Override
     public Object getPayloadInstance()
@@ -83,8 +89,7 @@ public class HelloWorldPlexusResource
             elements.add( new Element( "id" ).setText( repo.getId() ) );
             elements.add( new Element( "name" ).setText( repo.getName() ) );
             elements.add( new Element( "path-prefix" ).setText( repo.getPathPrefix() ) );
-            elements.add( new Element( "status" ).setText( repo.getLocalStatus()
-                                                               .name() ) );
+            elements.add( new Element( "status" ).setText( repo.getLocalStatus().name() ) );
 
             final RepositoryKind kind = repo.getRepositoryKind();
             elements.add( new Element( "group" ).setText( Boolean.toString( kind.isFacetAvailable( GroupRepository.class ) ) ) );
@@ -94,11 +99,9 @@ public class HelloWorldPlexusResource
             root.addContent( child );
         }
 
-        final Reference ref = request.getResourceRef()
-                                     .getRelativeRef();
+        final Reference ref = request.getResourceRef().getRelativeRef();
 
-        final String[] parts = ref.getPath()
-                                  .split( "\\/" );
+        final String[] parts = ref.getPath().split( "\\/" );
 
         for ( final String part : parts )
         {
