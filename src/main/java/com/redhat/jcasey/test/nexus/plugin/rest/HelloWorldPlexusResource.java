@@ -29,7 +29,9 @@ import com.redhat.devel.pp.PrettyPrinter;
  * A sample rest resoruce to get you started. By default this will automatically be mounted at:
  * http://localhost:8081/nexus/service/local/sample/hello
  */
-public class HelloWorldPlexusResource extends AbstractPlexusResource implements PlexusResource
+public class HelloWorldPlexusResource
+    extends AbstractPlexusResource
+    implements PlexusResource
 {
 
     private final Logger logger = LoggerFactory.getLogger( getClass() );
@@ -72,15 +74,17 @@ public class HelloWorldPlexusResource extends AbstractPlexusResource implements 
 
         for ( final Repository repo : repos )
         {
-            logger.info( PrettyPrinter.pp( repo ) );
+            final String pp = PrettyPrinter.pp( repo );
+            logger.info( pp );
 
             final Element child = new Element( "repo" );
             final List<Element> elements = new ArrayList<Element>();
 
             elements.add( new Element( "id" ).setText( repo.getId() ) );
             elements.add( new Element( "name" ).setText( repo.getName() ) );
-            elements.add( new Element( "path-prefix", repo.getPathPrefix() ) );
-            elements.add( new Element( "status" ).setText( repo.getLocalStatus().name() ) );
+            elements.add( new Element( "path-prefix" ).setText( repo.getPathPrefix() ) );
+            elements.add( new Element( "status" ).setText( repo.getLocalStatus()
+                                                               .name() ) );
 
             final RepositoryKind kind = repo.getRepositoryKind();
             elements.add( new Element( "group" ).setText( Boolean.toString( kind.isFacetAvailable( GroupRepository.class ) ) ) );
@@ -90,9 +94,11 @@ public class HelloWorldPlexusResource extends AbstractPlexusResource implements 
             root.addContent( child );
         }
 
-        final Reference ref = request.getResourceRef().getRelativeRef();
+        final Reference ref = request.getResourceRef()
+                                     .getRelativeRef();
 
-        final String[] parts = ref.getPath().split( "\\/" );
+        final String[] parts = ref.getPath()
+                                  .split( "\\/" );
 
         for ( final String part : parts )
         {
