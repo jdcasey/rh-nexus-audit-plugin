@@ -1,3 +1,25 @@
+toby
+:  http://svn.sonatype.org/nexus/trunk/nexus/nexus-core-plugins/nexus-plugin-console-plugin/src/main/java/org/sonatype/nexus/plugins/plugin/console/api/PluginInfoListPlexusResource.java
+[5:40PM] toby: so for the pathProtectionDescriptor defined in that class
+[5:41PM] toby: the "authcBasic,perms[nexus:pluginconsoleplugininfos]"
+[5:41PM]
+jdcasey
+:  wow, thanks
+[5:41PM]
+toby
+:  and that permission is defined by: http://svn.sonatype.org/nexus/trunk/nexus/nexus-core-plugins/nexus-plugin-console-plugin/src/main/java/org/sonatype/nexus/plugins/plugin/console/security/PluginConsoleSecurityResource.java
+[5:42PM] toby: which is most cases just loads an xml file
+[5:42PM]
+jdcasey
+:  so, the plugin-console-plugin defines a permission, then uses it?
+[5:42PM] jdcasey: cool
+[5:42PM]
+toby
+:  yup
+
+
+// DEPRECATED. USING /service/local/capture/build-tag-repo/capture-source-repo/** instead.
+
 CapturePlugin.init()
  - Create new capture repository group
  - Register new repository type descriptor for path = /capture/*
