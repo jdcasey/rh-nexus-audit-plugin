@@ -1,5 +1,7 @@
 package com.redhat.jcasey.test.nexus.plugin.rest;
 
+import java.io.IOException;
+
 import org.codehaus.plexus.component.annotations.Component;
 import org.restlet.Context;
 import org.restlet.data.Request;
@@ -9,10 +11,12 @@ import org.restlet.resource.Variant;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.sonatype.nexus.proxy.AccessDeniedException;
+import org.sonatype.nexus.proxy.IllegalOperationException;
 import org.sonatype.nexus.proxy.ItemNotFoundException;
 import org.sonatype.nexus.proxy.NoSuchResourceStoreException;
 import org.sonatype.nexus.proxy.ResourceStore;
 import org.sonatype.nexus.proxy.ResourceStoreRequest;
+import org.sonatype.nexus.proxy.StorageException;
 import org.sonatype.nexus.proxy.item.StorageItem;
 import org.sonatype.nexus.proxy.repository.Repository;
 import org.sonatype.nexus.rest.AbstractResourceStoreContentPlexusResource;
@@ -87,6 +91,11 @@ public class RepositoryAuditingResource
             }
             catch ( final ItemNotFoundException e )
             {
+                if ( capture == null )
+                {
+                    return handleNotFound( e, context, request, response, variant, req );
+                }
+
                 // FIXME: Can we be more pro-active to determine whether the user has access to even attempt this part??
                 logger.info(
                              "Resolve from build-tag repository: '{}' MISSED! Attempting to resolve from capture-source: '{}'",
@@ -100,15 +109,7 @@ public class RepositoryAuditingResource
                 }
                 catch ( final ItemNotFoundException eCap )
                 {
-                    if ( isDescribe( request ) )
-                    {
-                        return renderDescribeItem( context, request, response, variant, req, null );
-                    }
-                    else
-                    {
-                        // FIXME: This will hide the build-tag source of the ItemNotFoundException...
-                        throw eCap;
-                    }
+                    return handleNotFound( eCap, context, request, response, variant, req );
                 }
                 catch ( final AccessDeniedException accessEx )
                 {
@@ -144,10 +145,32 @@ public class RepositoryAuditingResource
         }
     }
 
+    private Object handleNotFound( final ItemNotFoundException e, final Context context, final Request request,
+                                   final Response response, final Variant variant, final ResourceStoreRequest req )
+        throws AccessDeniedException,
+            StorageException,
+            IOException,
+            NoSuchResourceStoreException,
+            IllegalOperationException,
+            ItemNotFoundException,
+            ResourceException
+    {
+        if ( isDescribe( request ) )
+        {
+            return renderDescribeItem( context, request, response, variant, req, null );
+        }
+        else
+        {
+            // FIXME: This will hide the build-tag source of the ItemNotFoundException...
+            throw e;
+        }
+    }
+
     // NOTE: Not Used. We're overriding the method that requires this.
     @Override
     protected ResourceStore getResourceStore( final Request request )
-        throws NoSuchResourceStoreException, ResourceException
+        throws NoSuchResourceStoreException,
+            ResourceException
     {
         return null;
     }
