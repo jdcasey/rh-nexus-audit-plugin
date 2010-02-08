@@ -3,6 +3,8 @@ package com.redhat.jcasey.test.nexus.plugin.rest;
 import java.io.IOException;
 
 import org.codehaus.plexus.component.annotations.Component;
+import org.jsecurity.SecurityUtils;
+import org.jsecurity.subject.Subject;
 import org.restlet.Context;
 import org.restlet.data.Request;
 import org.restlet.data.Response;
@@ -23,6 +25,8 @@ import org.sonatype.nexus.rest.AbstractResourceStoreContentPlexusResource;
 import org.sonatype.plexus.rest.resource.PathProtectionDescriptor;
 import org.sonatype.plexus.rest.resource.PlexusResource;
 
+import com.redhat.devel.pp.PrettyPrinter;
+
 /**
  * Capture resource, which will try to resolve first from a build-tag repository (first part of URL after /capture/),
  * then from a capture-source repository (second part of the URL after /capture/). <br/>
@@ -37,7 +41,7 @@ public class RepositoryAuditingResource
     private static final String CAPTURE_SOURCE_REPO_ID_KEY = "capture-source";
 
     private static final String BUILD_TAG_REPO_ID_KEY = "build-tag";
-
+    
     private final Logger logger = LoggerFactory.getLogger( getClass() );
 
     @Override
@@ -55,7 +59,7 @@ public class RepositoryAuditingResource
 
         // for an anonymous resoruce
         // return new PathProtectionDescriptor( "/capture/*/*/content/**", "authcBasic" );
-        return new PathProtectionDescriptor( "/capture/**", "authcBasic" );
+        return new PathProtectionDescriptor( "/capture/*/*/**", "authcBasic" );
     }
 
     @Override
@@ -75,7 +79,7 @@ public class RepositoryAuditingResource
         // request.getAttributes().get( AbstractRepositoryPlexusResource.REPOSITORY_ID_KEY ).toString()
         final String buildTag = request.getAttributes().get( BUILD_TAG_REPO_ID_KEY ).toString();
         final String capture = request.getAttributes().get( CAPTURE_SOURCE_REPO_ID_KEY ).toString();
-
+        
         logger.info( "AUDIT REPO: Using build-tag: '{}' and capture-source: '{}'", buildTag, capture );
 
         try
@@ -119,22 +123,25 @@ public class RepositoryAuditingResource
                 }
             }
 
+            Subject subject = SecurityUtils.getSubject();
+            PrettyPrinter.ppOut( subject.getPrincipals(), System.out );
+            
             return renderItem( context, request, response, variant, item );
         }
         catch ( final Exception e )
         {
-            System.out.println( "Unprotected Registry:\n\n" );
-            for ( final Repository repo : getUnprotectedRepositoryRegistry().getRepositories() )
-            {
-                System.out.println( repo.getId() );
-            }
-
-            System.out.println( "\n\nProtected Registry:\n\n" );
-            for ( final Repository repo : getRepositoryRegistry().getRepositories() )
-            {
-                System.out.println( repo.getId() );
-            }
-            System.out.println( "\n\n" );
+//            System.out.println( "Unprotected Registry:\n\n" );
+//            for ( final Repository repo : getUnprotectedRepositoryRegistry().getRepositories() )
+//            {
+//                System.out.println( repo.getId() );
+//            }
+//
+//            System.out.println( "\n\nProtected Registry:\n\n" );
+//            for ( final Repository repo : getRepositoryRegistry().getRepositories() )
+//            {
+//                System.out.println( repo.getId() );
+//            }
+//            System.out.println( "\n\n" );
 
             logger.error( "Capture failed. Error: {}\nMessage: {}", e.getClass().getName(), e.getMessage() );
             e.printStackTrace();
