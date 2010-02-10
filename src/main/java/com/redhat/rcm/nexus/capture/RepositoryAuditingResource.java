@@ -1,4 +1,4 @@
-package com.redhat.jcasey.test.nexus.plugin.rest;
+package com.redhat.rcm.nexus.capture;
 
 import java.io.IOException;
 
