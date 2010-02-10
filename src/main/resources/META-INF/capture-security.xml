@@ -1,0 +1,33 @@
+<?xml version="1.0"?>
+<security>
+  <version>2.0.3</version>
+  <roles>
+    <role>
+      <id>capture-user</id>
+      <name>Capture Repository User</name>
+      <description>Allow access to capture repositories</description>
+      <sessionTimeout>5</sessionTimeout>
+      <privileges>
+        <privilege>capture-access</privilege>
+      </privileges>
+    </role>
+  </roles>
+  <privileges>
+    <privilege>
+      <id>capture-access</id>
+      <type>method</type>
+      <name>Capture Repository: access</name>
+      <description>Access to capture repositories.</description>
+      <properties>
+        <property>
+          <key>method</key>
+          <value>read</value>
+        </property>
+        <property>
+          <key>permission</key>
+          <value>nexus:capture-access</value>
+        </property>
+      </properties>
+    </privilege>
+  </privileges>
+</security>
