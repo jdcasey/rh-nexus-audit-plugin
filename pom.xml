@@ -4,13 +4,14 @@
 
   <modelVersion>4.0.0</modelVersion>
 
-  <groupId>com.redhat.jcasey.test.nexus</groupId>
-  <artifactId>nexus-plugin-test2</artifactId>
-  <name>Test Plugin</name>
+  <groupId>com.redhat.rcm.nexus</groupId>
+  <artifactId>nexus-capture-plugin</artifactId>
+  <name>Capture Plugin</name>
   <version>1.0-SNAPSHOT</version>
 
   <packaging>nexus-plugin</packaging>
-
+  
+  <description>Nexus plugin used to capture the list of external artifacts used in a given build</description>
 
   <properties>
     <!-- Set the Nexus version here, against which you build the plugin -->
