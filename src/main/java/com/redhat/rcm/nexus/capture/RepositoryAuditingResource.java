@@ -55,6 +55,7 @@ public class RepositoryAuditingResource
     public PathProtectionDescriptor getResourceProtection()
     {
         return new PathProtectionDescriptor( "/capture/*/*/**", "authcBasic,perms[nexus:capture-access]" );
+        // return new PathProtectionDescriptor( "/capture/*/*/**", "authcBasic" );
     }
 
     @Override
@@ -67,6 +68,10 @@ public class RepositoryAuditingResource
     public Object get( final Context context, final Request request, final Response response, final Variant variant )
         throws ResourceException
     {
+        final Subject subject = SecurityUtils.getSubject();
+        subject.getPrincipal();
+        PrettyPrinter.ppOut( subject.getPrincipals(), System.out );
+
         final ResourceStoreRequest req = getResourceStoreRequest( request );
 
         final String buildTag = request.getAttributes()
@@ -120,9 +125,6 @@ public class RepositoryAuditingResource
                     return null;
                 }
             }
-
-            final Subject subject = SecurityUtils.getSubject();
-            PrettyPrinter.ppOut( subject.getPrincipals(), System.out );
 
             return renderItem( context, request, response, variant, item );
         }
