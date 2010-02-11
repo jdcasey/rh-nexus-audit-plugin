@@ -4,11 +4,20 @@
   <roles>
     <role>
       <id>capture-user</id>
-      <name>Capture Repository User</name>
-      <description>Allow access to capture repositories</description>
+      <name>Capture Session User</name>
+      <description>Allow access to a capture session</description>
       <sessionTimeout>5</sessionTimeout>
       <privileges>
         <privilege>capture-access</privilege>
+      </privileges>
+    </role>
+    <role>
+      <id>capture-external-user</id>
+      <name>Capture Session External User</name>
+      <description>Allow access to a external repositories from a capture session</description>
+      <sessionTimeout>5</sessionTimeout>
+      <privileges>
+        <privilege>capture-external-access</privilege>
       </privileges>
     </role>
   </roles>
@@ -26,6 +35,22 @@
         <property>
           <key>permission</key>
           <value>nexus:capture-access</value>
+        </property>
+      </properties>
+    </privilege>
+    <privilege>
+      <id>capture-external-access</id>
+      <type>method</type>
+      <name>Capture Repository: external access</name>
+      <description>Access to external repositories from a capture session.</description>
+      <properties>
+        <property>
+          <key>method</key>
+          <value>read</value>
+        </property>
+        <property>
+          <key>permission</key>
+          <value>nexus:capture-external-access</value>
         </property>
       </properties>
     </privilege>

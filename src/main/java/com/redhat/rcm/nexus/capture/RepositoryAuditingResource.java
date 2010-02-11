@@ -3,7 +3,9 @@ package com.redhat.rcm.nexus.capture;
 import java.io.IOException;
 
 import org.codehaus.plexus.component.annotations.Component;
+import org.codehaus.plexus.component.annotations.Requirement;
 import org.jsecurity.SecurityUtils;
+import org.jsecurity.authz.AuthorizationException;
 import org.jsecurity.subject.Subject;
 import org.restlet.Context;
 import org.restlet.data.Request;
@@ -25,7 +27,8 @@ import org.sonatype.nexus.rest.AbstractResourceStoreContentPlexusResource;
 import org.sonatype.plexus.rest.resource.PathProtectionDescriptor;
 import org.sonatype.plexus.rest.resource.PlexusResource;
 
-import com.redhat.devel.pp.PrettyPrinter;
+import com.redhat.rcm.nexus.capture.db.CaptureStore;
+import com.redhat.rcm.nexus.capture.db.CaptureStoreException;
 
 /**
  * Capture resource, which will try to resolve first from a build-tag repository (first part of URL after /capture/),
@@ -42,7 +45,14 @@ public class RepositoryAuditingResource
 
     private static final String BUILD_TAG_REPO_ID_KEY = "build-tag";
 
+    private static final String CAPTURE_PERMISSION = "nexus:capture-access:read";
+
+    private static final String EXTERNAL_RESOLVE_PERMISSION = "nexus:capture-external-access:read";
+
     private final Logger logger = LoggerFactory.getLogger( getClass() );
+
+    @Requirement( hint = "json" )
+    private CaptureStore captureStore;
 
     @Override
     public Object getPayloadInstance()
@@ -54,7 +64,10 @@ public class RepositoryAuditingResource
     @Override
     public PathProtectionDescriptor getResourceProtection()
     {
-        return new PathProtectionDescriptor( "/capture/*/*/**", "authcBasic,perms[nexus:capture-access]" );
+        return new PathProtectionDescriptor( "/capture/*/*/**", String.format( "authcBasic,perms[%s]",
+                                                                               CAPTURE_PERMISSION ) );
+
+        // NOTE: Using this will result in 'anonymous' being the subject.
         // return new PathProtectionDescriptor( "/capture/*/*/**", "authcBasic" );
     }
 
@@ -68,19 +81,15 @@ public class RepositoryAuditingResource
     public Object get( final Context context, final Request request, final Response response, final Variant variant )
         throws ResourceException
     {
-        final Subject subject = SecurityUtils.getSubject();
-        subject.getPrincipal();
-        PrettyPrinter.ppOut( subject.getPrincipals(), System.out );
-
         final ResourceStoreRequest req = getResourceStoreRequest( request );
 
-        final String buildTag = request.getAttributes()
-                                       .get( BUILD_TAG_REPO_ID_KEY )
-                                       .toString();
+        final String buildTag = request.getAttributes().get( BUILD_TAG_REPO_ID_KEY ).toString();
+        final String capture = request.getAttributes().get( CAPTURE_SOURCE_REPO_ID_KEY ).toString();
 
-        final String capture = request.getAttributes()
-                                      .get( CAPTURE_SOURCE_REPO_ID_KEY )
-                                      .toString();
+        final Subject subject = SecurityUtils.getSubject();
+        final String user = subject.getPrincipal().toString();
+
+        Object result = null;
 
         logger.info( "AUDIT REPO: Using build-tag: '{}' and capture-source: '{}'", buildTag, capture );
 
@@ -93,61 +102,91 @@ public class RepositoryAuditingResource
             StorageItem item = null;
             try
             {
+                // NOTE: Not recording successful resolution from the build-tag repo.
                 item = buildTagRepo.retrieveItem( req );
+
+                result = renderItem( context, request, response, variant, item );
             }
             catch ( final ItemNotFoundException e )
             {
                 if ( capture == null )
                 {
-                    return handleNotFound( e, context, request, response, variant, req );
+                    // NOTE: Not recording this...
+                    result = handleNotFound( e, context, request, response, variant, req );
                 }
-
-                // FIXME: Can we be more pro-active to determine whether the user has access to even attempt this part??
-                logger.info(
-                    "Resolve from build-tag repository: '{}' MISSED! Attempting to resolve from capture-source: '{}'",
-                    buildTag, capture );
-
-                final Repository captureRepo = getUnprotectedRepositoryRegistry().getRepository( capture );
-
-                try
+                else
                 {
-                    item = captureRepo.retrieveItem( req );
-                }
-                catch ( final ItemNotFoundException eCap )
-                {
-                    // FIXME: This will hide the build-tag instance of ItemNotFoundException...
-                    return handleNotFound( eCap, context, request, response, variant, req );
-                }
-                catch ( final AccessDeniedException accessEx )
-                {
-                    logger.error( "Capture failed. Access to: '{}' was denied.", capture );
+                    try
+                    {
+                        result = resolveExternal( user, buildTag, capture, context, request, response, variant, req );
+                        if ( result == null )
+                        {
+                            result = handleNotFound( e, context, request, response, variant, req );
+                        }
+                    }
+                    catch ( final AuthorizationException authzEx )
+                    {
+                        logger.warn( "User: '" + user
+                                        + "' does not have permission to resolve dependencies from capture source." );
 
-                    return null;
+                        // NOTE: Not recording this...
+                        result = handleNotFound( e, context, request, response, variant, req );
+                    }
                 }
             }
-
-            return renderItem( context, request, response, variant, item );
         }
         catch ( final Exception e )
         {
-            // System.out.println( "Unprotected Registry:\n\n" );
-            // for ( final Repository repo : getUnprotectedRepositoryRegistry().getRepositories() )
-            // {
-            // System.out.println( repo.getId() );
-            // }
-            //
-            // System.out.println( "\n\nProtected Registry:\n\n" );
-            // for ( final Repository repo : getRepositoryRegistry().getRepositories() )
-            // {
-            // System.out.println( repo.getId() );
-            // }
-            // System.out.println( "\n\n" );
-
-            logger.error( "Capture failed. Error: {}\nMessage: {}", e.getClass()
-                                                                     .getName(), e.getMessage() );
+            logger.error( "Capture failed. Error: {}\nMessage: {}", e.getClass().getName(), e.getMessage() );
             e.printStackTrace();
 
             handleException( request, response, e );
+        }
+
+        return result;
+    }
+
+    private Object resolveExternal( final String user, final String buildTag, final String capture,
+                                    final Context context, final Request request, final Response response,
+                                    final Variant variant, final ResourceStoreRequest req )
+        throws CaptureStoreException,
+            AccessDeniedException,
+            IOException,
+            NoSuchResourceStoreException,
+            ItemNotFoundException,
+            ResourceException,
+            IllegalOperationException
+    {
+        final Subject subject = SecurityUtils.getSubject();
+
+        if ( !subject.isPermitted( EXTERNAL_RESOLVE_PERMISSION ) )
+        {
+            logger.info( "User: '" + user + "' does not have permission to resolve dependencies from capture source." );
+            return null;
+        }
+
+        logger.info( "Resolve from build-tag repository: '{}' MISSED! Attempting to resolve from capture-source: '{}'",
+                     buildTag, capture );
+
+        final Repository captureRepo = getUnprotectedRepositoryRegistry().getRepository( capture );
+
+        try
+        {
+            final StorageItem item = captureRepo.retrieveItem( req );
+            captureStore.record( user, buildTag, capture, req.getProcessedRepositories(), req.getRequestPath(), true );
+
+            return renderItem( context, request, response, variant, item );
+        }
+        catch ( final ItemNotFoundException eCap )
+        {
+            captureStore.record( user, buildTag, capture, req.getProcessedRepositories(), req.getRequestPath(), false );
+
+            // FIXME: This will hide the build-tag instance of ItemNotFoundException...
+            return handleNotFound( eCap, context, request, response, variant, req );
+        }
+        catch ( final AccessDeniedException accessEx )
+        {
+            logger.error( "Capture failed. Access to: '{}' was denied.", capture );
 
             return null;
         }
@@ -155,8 +194,13 @@ public class RepositoryAuditingResource
 
     private Object handleNotFound( final ItemNotFoundException e, final Context context, final Request request,
                                    final Response response, final Variant variant, final ResourceStoreRequest req )
-        throws AccessDeniedException, StorageException, IOException, NoSuchResourceStoreException,
-        IllegalOperationException, ItemNotFoundException, ResourceException
+        throws AccessDeniedException,
+            StorageException,
+            IOException,
+            NoSuchResourceStoreException,
+            IllegalOperationException,
+            ItemNotFoundException,
+            ResourceException
     {
         if ( isDescribe( request ) )
         {
@@ -171,7 +215,8 @@ public class RepositoryAuditingResource
     // NOTE: Not Used. We're overriding the method that requires this.
     @Override
     protected ResourceStore getResourceStore( final Request request )
-        throws NoSuchResourceStoreException, ResourceException
+        throws NoSuchResourceStoreException,
+            ResourceException
     {
         return null;
     }
