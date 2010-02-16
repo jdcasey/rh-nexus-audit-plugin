@@ -1,36 +1,147 @@
 package com.redhat.rcm.nexus.capture.db;
 
+import static com.redhat.rcm.nexus.capture.serialize.CaptureSerializationUtils.getGson;
+import static com.redhat.rcm.nexus.capture.serialize.CaptureSerializationUtils.getXStream;
+import static org.easymock.EasyMock.createMock;
+import static org.easymock.EasyMock.expect;
+import static org.easymock.EasyMock.replay;
+import static org.easymock.EasyMock.verify;
+
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 
+import org.junit.After;
 import org.junit.Test;
+import org.sonatype.nexus.artifact.Gav;
+import org.sonatype.nexus.artifact.IllegalArtifactCoordinateException;
+import org.sonatype.nexus.proxy.item.StorageItem;
 
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
+import com.redhat.rcm.nexus.capture.model.CaptureSession;
+import com.redhat.rcm.nexus.capture.model.CaptureTarget;
 
 public class CaptureSessionTest
 {
 
+    private final List<Object> mocks = new ArrayList<Object>();
+
+    // call manually...
+    public void replayMocks()
+    {
+        if ( mocks != null )
+        {
+            for ( final Object mock : mocks )
+            {
+                replay( mock );
+            }
+        }
+    }
+
+    @After
+    public void verifyMocks()
+    {
+        if ( mocks != null )
+        {
+            for ( final Object mock : mocks )
+            {
+                verify( mock );
+            }
+        }
+    }
+
     @Test
-    public void serialize()
+    public void testToJSON()
+        throws IllegalArtifactCoordinateException
     {
         final CaptureSession session = new CaptureSession( "user", "build-tag", "capture-source" );
 
-        session.add( new CaptureRecord( Arrays.asList( new String[] { "central", "codehaus", "jboss-releases" } ),
-                                        "/org/groupId/artifactId/VER/artifactId-VER.pom", true ) );
+        final StorageItem[] items =
+            { newStorageItem( "/org/groupId/artifactId/VER/artifactId-VER.pom" ),
+             newStorageItem( "/org/groupId/artifactId/VER/artifactId-VER.jar" ),
+             newStorageItem( "/org/groupId/beetifactId/VER/beetifactId-VER.pom" ),
+             newStorageItem( "/org/groupId/beetifactId/VER/beetifactId-VER.jar" ) };
 
-        session.add( new CaptureRecord( Arrays.asList( new String[] { "central", "codehaus", "jboss-releases" } ),
-                                        "/org/groupId/artifactId/VER/artifactId-VER.jar", true ) );
+        final Gav[] gavs =
+            { new Gav( "org.groupId", "artifactId", "VER" ), new Gav( "org.groupId", "beetifactId", "VER" ) };
 
-        session.add( new CaptureRecord( Arrays.asList( new String[] { "central", "codehaus", "jboss-releases" } ),
-                                        "/org/groupId/beetifactId/VER/beetifactId-VER.pom", true ) );
+        replayMocks();
 
-        session.add( new CaptureRecord( Arrays.asList( new String[] { "central", "codehaus", "jboss-releases" } ),
-                                        "/org/groupId/beetifactId/VER/beetifactId-VER.jar", true ) );
+        int i = 0;
+        session.add( new CaptureTarget( Arrays.asList( new String[] { "central", "codehaus", "jboss-releases" } ),
+                                        "/org/groupId/artifactId/VER/artifactId-VER.pom",
+                                        gavs[0],
+                                        items[i++] ) );
 
-        final Gson gson = new GsonBuilder().setPrettyPrinting().create();
+        session.add( new CaptureTarget( Arrays.asList( new String[] { "central", "codehaus", "jboss-releases" } ),
+                                        "/org/groupId/artifactId/VER/artifactId-VER.jar",
+                                        gavs[0],
+                                        items[i++] ) );
 
-        final String result = gson.toJson( session );
+        session.add( new CaptureTarget( Arrays.asList( new String[] { "central", "codehaus", "jboss-releases" } ),
+                                        "/org/groupId/beetifactId/VER/beetifactId-VER.pom",
+                                        gavs[1],
+                                        items[i++] ) );
+
+        session.add( new CaptureTarget( Arrays.asList( new String[] { "central", "codehaus", "jboss-releases" } ),
+                                        "/org/groupId/beetifactId/VER/beetifactId-VER.jar",
+                                        gavs[1],
+                                        items[i++] ) );
+
+        final String result = getGson().toJson( session );
         System.out.println( result );
+    }
+
+    @Test
+    public void testToXML()
+        throws IllegalArtifactCoordinateException
+    {
+        final CaptureSession session = new CaptureSession( "user", "build-tag", "capture-source" );
+
+        final StorageItem[] items =
+            { newStorageItem( "/org/groupId/artifactId/VER/artifactId-VER.pom" ),
+             newStorageItem( "/org/groupId/artifactId/VER/artifactId-VER.jar" ),
+             newStorageItem( "/org/groupId/beetifactId/VER/beetifactId-VER.pom" ),
+             newStorageItem( "/org/groupId/beetifactId/VER/beetifactId-VER.jar" ) };
+
+        final Gav[] gavs =
+            { new Gav( "org.groupId", "artifactId", "VER" ), new Gav( "org.groupId", "beetifactId", "VER" ) };
+
+        replayMocks();
+
+        int i = 0;
+        session.add( new CaptureTarget( Arrays.asList( new String[] { "central", "codehaus", "jboss-releases" } ),
+                                        "/org/groupId/artifactId/VER/artifactId-VER.pom",
+                                        gavs[0],
+                                        items[i++] ) );
+
+        session.add( new CaptureTarget( Arrays.asList( new String[] { "central", "codehaus", "jboss-releases" } ),
+                                        "/org/groupId/artifactId/VER/artifactId-VER.jar",
+                                        gavs[0],
+                                        items[i++] ) );
+
+        session.add( new CaptureTarget( Arrays.asList( new String[] { "central", "codehaus", "jboss-releases" } ),
+                                        "/org/groupId/beetifactId/VER/beetifactId-VER.pom",
+                                        gavs[1],
+                                        items[i++] ) );
+
+        session.add( new CaptureTarget( Arrays.asList( new String[] { "central", "codehaus", "jboss-releases" } ),
+                                        "/org/groupId/beetifactId/VER/beetifactId-VER.jar",
+                                        gavs[1],
+                                        items[i++] ) );
+
+        final String result = getXStream().toXML( session );
+        System.out.println( result );
+    }
+
+    private StorageItem newStorageItem( final String path )
+    {
+        final StorageItem item = createMock( StorageItem.class );
+        mocks.add( item );
+
+        expect( item.getPath() ).andReturn( path ).anyTimes();
+        expect( item.getRepositoryId() ).andReturn( "fooRepo" ).anyTimes();
+
+        return item;
     }
 
     // @Test

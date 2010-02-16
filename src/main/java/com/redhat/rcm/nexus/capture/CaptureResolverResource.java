@@ -27,27 +27,19 @@ import org.sonatype.nexus.rest.AbstractResourceStoreContentPlexusResource;
 import org.sonatype.plexus.rest.resource.PathProtectionDescriptor;
 import org.sonatype.plexus.rest.resource.PlexusResource;
 
-import com.redhat.rcm.nexus.capture.db.CaptureStore;
-import com.redhat.rcm.nexus.capture.db.CaptureStoreException;
+import com.redhat.rcm.nexus.capture.serialize.CaptureStore;
+import com.redhat.rcm.nexus.capture.serialize.CaptureStoreException;
 
 /**
  * Capture resource, which will try to resolve first from a build-tag repository (first part of URL after /capture/),
  * then from a capture-source repository (second part of the URL after /capture/). <br/>
  * NOTE: If the user does not have access to the capture-source repository, the retrieve attempt will fail.
  */
-@Component( role = PlexusResource.class, hint = "RepositoryAuditingResource" )
-public class RepositoryAuditingResource
+@Component( role = PlexusResource.class, hint = "CaptureResolverResource" )
+public class CaptureResolverResource
     extends AbstractResourceStoreContentPlexusResource
     implements PlexusResource
 {
-
-    private static final String CAPTURE_SOURCE_REPO_ID_KEY = "capture-source";
-
-    private static final String BUILD_TAG_REPO_ID_KEY = "build-tag";
-
-    private static final String CAPTURE_PERMISSION = "nexus:capture-access:read";
-
-    private static final String EXTERNAL_RESOLVE_PERMISSION = "nexus:capture-external-access:read";
 
     private final Logger logger = LoggerFactory.getLogger( getClass() );
 
@@ -64,8 +56,8 @@ public class RepositoryAuditingResource
     @Override
     public PathProtectionDescriptor getResourceProtection()
     {
-        return new PathProtectionDescriptor( "/capture/*/*/**", String.format( "authcBasic,perms[%s]",
-                                                                               CAPTURE_PERMISSION ) );
+        return new PathProtectionDescriptor( "/capture/*/*/content/**",
+                                             String.format( "authcBasic,perms[%s]", CaptureResourceConstants.CAPTURE_PERMISSION ) );
 
         // NOTE: Using this will result in 'anonymous' being the subject.
         // return new PathProtectionDescriptor( "/capture/*/*/**", "authcBasic" );
@@ -74,7 +66,8 @@ public class RepositoryAuditingResource
     @Override
     public String getResourceUri()
     {
-        return "/capture/{" + BUILD_TAG_REPO_ID_KEY + "}/{" + CAPTURE_SOURCE_REPO_ID_KEY + "}";
+        return "/capture/{" + CaptureResourceConstants.BUILD_TAG_REPO_ID_KEY + "}/{"
+                        + CaptureResourceConstants.CAPTURE_SOURCE_REPO_ID_KEY + "}/content";
     }
 
     @Override
@@ -83,8 +76,8 @@ public class RepositoryAuditingResource
     {
         final ResourceStoreRequest req = getResourceStoreRequest( request );
 
-        final String buildTag = request.getAttributes().get( BUILD_TAG_REPO_ID_KEY ).toString();
-        final String capture = request.getAttributes().get( CAPTURE_SOURCE_REPO_ID_KEY ).toString();
+        final String buildTag = request.getAttributes().get( CaptureResourceConstants.BUILD_TAG_REPO_ID_KEY ).toString();
+        final String capture = request.getAttributes().get( CaptureResourceConstants.CAPTURE_SOURCE_REPO_ID_KEY ).toString();
 
         final Subject subject = SecurityUtils.getSubject();
         final String user = subject.getPrincipal().toString();
@@ -159,7 +152,7 @@ public class RepositoryAuditingResource
     {
         final Subject subject = SecurityUtils.getSubject();
 
-        if ( !subject.isPermitted( EXTERNAL_RESOLVE_PERMISSION ) )
+        if ( !subject.isPermitted( CaptureResourceConstants.EXTERNAL_RESOLVE_PERMISSION ) )
         {
             logger.info( "User: '" + user + "' does not have permission to resolve dependencies from capture source." );
             return null;
@@ -172,14 +165,17 @@ public class RepositoryAuditingResource
 
         try
         {
+            logger.info( String.format( "\n\n\n\n%s\n\n\n\n", request.getRootRef().toString() ) );
+
             final StorageItem item = captureRepo.retrieveItem( req );
-            captureStore.record( user, buildTag, capture, req.getProcessedRepositories(), req.getRequestPath(), true );
+            captureStore.logResolved( user, buildTag, capture, req.getProcessedRepositories(), req.getRequestPath(),
+                                      item );
 
             return renderItem( context, request, response, variant, item );
         }
         catch ( final ItemNotFoundException eCap )
         {
-            captureStore.record( user, buildTag, capture, req.getProcessedRepositories(), req.getRequestPath(), false );
+            captureStore.logUnresolved( user, buildTag, capture, req.getProcessedRepositories(), req.getRequestPath() );
 
             // FIXME: This will hide the build-tag instance of ItemNotFoundException...
             return handleNotFound( eCap, context, request, response, variant, req );

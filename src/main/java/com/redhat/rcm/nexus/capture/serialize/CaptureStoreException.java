@@ -1,4 +1,4 @@
-package com.redhat.rcm.nexus.capture.db;
+package com.redhat.rcm.nexus.capture.serialize;
 
 import java.text.MessageFormat;
 
