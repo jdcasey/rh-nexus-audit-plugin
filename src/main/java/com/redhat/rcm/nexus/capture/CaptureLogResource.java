@@ -15,6 +15,7 @@ import org.restlet.data.Request;
 import org.restlet.data.Response;
 import org.restlet.data.Status;
 import org.restlet.resource.ResourceException;
+import org.restlet.resource.StringRepresentation;
 import org.restlet.resource.Variant;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -117,18 +118,23 @@ public class CaptureLogResource
             }
         }
 
+        String result = null;
+
         final MediaType mt = mediaTypeOf( request, variant );
         if ( mt == MediaType.APPLICATION_XML )
         {
-            return getXStream().toXML( data );
+            result = getXStream().toXML( data );
         }
         else if ( mt == MediaType.APPLICATION_JSON )
         {
-            return getGson().toJson( data );
+            result = getGson().toJson( data );
+        }
+        else
+        {
+            throw new ResourceException( Status.CLIENT_ERROR_NOT_ACCEPTABLE );
         }
 
-        response.setStatus( Status.CLIENT_ERROR_NOT_ACCEPTABLE );
-        return null;
+        return new StringRepresentation( result, mt );
     }
 
     @Override
