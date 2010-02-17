@@ -6,8 +6,10 @@ import java.util.List;
 public enum RequestMode
 {
 
-    TABLE_OF_CONTENTS( "list", "toc" ),
-    DEFAULT( "def", "default" );
+    TABLE_OF_CONTENTS( "LIST", "TOC" ),
+    DEFAULT( "DEF" );
+
+    // private static final Logger logger = LoggerFactory.getLogger( RequestMode.class );
 
     private List<String> tokens;
 

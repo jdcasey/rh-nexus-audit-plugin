@@ -15,7 +15,7 @@ import org.sonatype.nexus.rest.AbstractResourceStoreContentPlexusResource;
 import org.sonatype.plexus.rest.resource.PathProtectionDescriptor;
 import org.sonatype.plexus.rest.resource.PlexusResource;
 
-import com.redhat.rcm.nexus.capture.serialize.CaptureStore;
+import com.redhat.rcm.nexus.capture.store.CaptureStore;
 
 @Component( role = PlexusResource.class, hint = "CaptureShowLogResource" )
 public class CaptureShowLogResource

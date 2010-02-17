@@ -2,8 +2,8 @@ package com.redhat.rcm.nexus.capture;
 
 import static com.redhat.rcm.nexus.capture.request.RequestUtils.mediaTypeOf;
 import static com.redhat.rcm.nexus.capture.request.RequestUtils.modeOf;
-import static com.redhat.rcm.nexus.capture.serialize.CaptureSerializationUtils.getGson;
-import static com.redhat.rcm.nexus.capture.serialize.CaptureSerializationUtils.getXStream;
+import static com.redhat.rcm.nexus.capture.serialize.SerializationUtils.getGson;
+import static com.redhat.rcm.nexus.capture.serialize.SerializationUtils.getXStream;
 
 import org.codehaus.plexus.component.annotations.Component;
 import org.codehaus.plexus.component.annotations.Requirement;
@@ -24,10 +24,10 @@ import org.sonatype.plexus.rest.resource.PathProtectionDescriptor;
 import org.sonatype.plexus.rest.resource.PlexusResource;
 
 import com.redhat.rcm.nexus.capture.request.RequestMode;
-import com.redhat.rcm.nexus.capture.serialize.CaptureStore;
-import com.redhat.rcm.nexus.capture.serialize.CaptureStoreException;
+import com.redhat.rcm.nexus.capture.store.CaptureStore;
+import com.redhat.rcm.nexus.capture.store.CaptureStoreException;
 
-@Component( role = PlexusResource.class, hint = "CaptureEmailLogResource" )
+@Component( role = PlexusResource.class, hint = "CaptureLogResource" )
 public class CaptureLogResource
     extends AbstractNexusPlexusResource
     implements PlexusResource

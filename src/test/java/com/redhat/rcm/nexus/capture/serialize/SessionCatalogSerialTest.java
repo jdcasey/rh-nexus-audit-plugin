@@ -1,7 +1,7 @@
-package com.redhat.rcm.nexus.capture.db;
+package com.redhat.rcm.nexus.capture.serialize;
 
-import static com.redhat.rcm.nexus.capture.serialize.CaptureSerializationUtils.getGson;
-import static com.redhat.rcm.nexus.capture.serialize.CaptureSerializationUtils.getXStream;
+import static com.redhat.rcm.nexus.capture.serialize.SerializationUtils.getGson;
+import static com.redhat.rcm.nexus.capture.serialize.SerializationUtils.getXStream;
 
 import java.io.File;
 
@@ -10,11 +10,11 @@ import org.junit.Test;
 import com.redhat.rcm.nexus.capture.model.CaptureSession;
 import com.redhat.rcm.nexus.capture.model.CaptureSessionCatalog;
 
-public class SessionCatalogTest
+public class SessionCatalogSerialTest
 {
 
     @Test
-    public void serializeToJSON()
+    public void roundTripJSON()
         throws InterruptedException
     {
         final String user = "user";
@@ -31,10 +31,12 @@ public class SessionCatalogTest
 
         final String result = getGson().toJson( cat );
         System.out.println( result );
+
+        final CaptureSessionCatalog resultCat = getGson().fromJson( result, CaptureSessionCatalog.class );
     }
 
     @Test
-    public void serializeToXML()
+    public void roundTripXML()
         throws InterruptedException
     {
         final String user = "user";
@@ -51,6 +53,8 @@ public class SessionCatalogTest
 
         final String result = getXStream().toXML( cat );
         System.out.println( result );
+
+        final CaptureSessionCatalog resultCat = (CaptureSessionCatalog) getXStream().fromXML( result );
     }
 
 }

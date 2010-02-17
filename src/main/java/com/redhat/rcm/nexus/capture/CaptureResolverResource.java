@@ -27,8 +27,8 @@ import org.sonatype.nexus.rest.AbstractResourceStoreContentPlexusResource;
 import org.sonatype.plexus.rest.resource.PathProtectionDescriptor;
 import org.sonatype.plexus.rest.resource.PlexusResource;
 
-import com.redhat.rcm.nexus.capture.serialize.CaptureStore;
-import com.redhat.rcm.nexus.capture.serialize.CaptureStoreException;
+import com.redhat.rcm.nexus.capture.store.CaptureStore;
+import com.redhat.rcm.nexus.capture.store.CaptureStoreException;
 
 /**
  * Capture resource, which will try to resolve first from a build-tag repository (first part of URL after /capture/),
@@ -57,7 +57,8 @@ public class CaptureResolverResource
     public PathProtectionDescriptor getResourceProtection()
     {
         return new PathProtectionDescriptor( "/capture/*/*/content/**",
-                                             String.format( "authcBasic,perms[%s]", CaptureResourceConstants.CAPTURE_PERMISSION ) );
+                                             String.format( "authcBasic,perms[%s]",
+                                                            CaptureResourceConstants.CAPTURE_PERMISSION ) );
 
         // NOTE: Using this will result in 'anonymous' being the subject.
         // return new PathProtectionDescriptor( "/capture/*/*/**", "authcBasic" );
@@ -76,19 +77,28 @@ public class CaptureResolverResource
     {
         final ResourceStoreRequest req = getResourceStoreRequest( request );
 
-        final String buildTag = request.getAttributes().get( CaptureResourceConstants.BUILD_TAG_REPO_ID_KEY ).toString();
-        final String capture = request.getAttributes().get( CaptureResourceConstants.CAPTURE_SOURCE_REPO_ID_KEY ).toString();
+        final String buildTag =
+            request.getAttributes().get( CaptureResourceConstants.BUILD_TAG_REPO_ID_KEY ).toString();
+        final String capture =
+            request.getAttributes().get( CaptureResourceConstants.CAPTURE_SOURCE_REPO_ID_KEY ).toString();
 
         final Subject subject = SecurityUtils.getSubject();
         final String user = subject.getPrincipal().toString();
 
         Object result = null;
 
-        logger.info( "AUDIT REPO: Using build-tag: '{}' and capture-source: '{}'", buildTag, capture );
+        if ( logger.isDebugEnabled() )
+        {
+            logger.debug( "AUDIT REPO: Using build-tag: '{}' and capture-source: '{}'", buildTag, capture );
+        }
 
         try
         {
-            logger.info( "Attempting to resolve: '{}' from build-tag repository: '{}'", req.getRequestPath(), buildTag );
+            if ( logger.isDebugEnabled() )
+            {
+                logger.debug( "Attempting to resolve: '{}' from build-tag repository: '{}'", req.getRequestPath(),
+                              buildTag );
+            }
 
             final Repository buildTagRepo = getUnprotectedRepositoryRegistry().getRepository( buildTag );
 
@@ -119,8 +129,11 @@ public class CaptureResolverResource
                     }
                     catch ( final AuthorizationException authzEx )
                     {
-                        logger.warn( "User: '" + user
-                                        + "' does not have permission to resolve dependencies from capture source." );
+                        if ( logger.isDebugEnabled() )
+                        {
+                            logger.debug( "User: '" + user
+                                            + "' does not have permission to resolve dependencies from capture source." );
+                        }
 
                         // NOTE: Not recording this...
                         result = handleNotFound( e, context, request, response, variant, req );
@@ -154,19 +167,25 @@ public class CaptureResolverResource
 
         if ( !subject.isPermitted( CaptureResourceConstants.EXTERNAL_RESOLVE_PERMISSION ) )
         {
-            logger.info( "User: '" + user + "' does not have permission to resolve dependencies from capture source." );
+            if ( logger.isDebugEnabled() )
+            {
+                logger.debug( "User: '" + user
+                                + "' does not have permission to resolve dependencies from capture source." );
+            }
             return null;
         }
 
-        logger.info( "Resolve from build-tag repository: '{}' MISSED! Attempting to resolve from capture-source: '{}'",
-                     buildTag, capture );
+        if ( logger.isDebugEnabled() )
+        {
+            logger.debug(
+                          "Resolve from build-tag repository: '{}' MISSED! Attempting to resolve from capture-source: '{}'",
+                          buildTag, capture );
+        }
 
         final Repository captureRepo = getUnprotectedRepositoryRegistry().getRepository( capture );
 
         try
         {
-            logger.info( String.format( "\n\n\n\n%s\n\n\n\n", request.getRootRef().toString() ) );
-
             final StorageItem item = captureRepo.retrieveItem( req );
             captureStore.logResolved( user, buildTag, capture, req.getProcessedRepositories(), req.getRequestPath(),
                                       item );
@@ -182,7 +201,10 @@ public class CaptureResolverResource
         }
         catch ( final AccessDeniedException accessEx )
         {
-            logger.error( "Capture failed. Access to: '{}' was denied.", capture );
+            if ( logger.isDebugEnabled() )
+            {
+                logger.debug( "Capture failed. Access to: '{}' was denied.", capture );
+            }
 
             return null;
         }

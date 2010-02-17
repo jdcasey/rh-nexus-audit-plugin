@@ -7,34 +7,34 @@ import java.util.List;
 
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
-import com.redhat.rcm.nexus.capture.serialize.CaptureSerializationConstants;
+import com.redhat.rcm.nexus.capture.serialize.SerializationConstants;
 import com.thoughtworks.xstream.annotations.XStreamAlias;
 import com.thoughtworks.xstream.annotations.XStreamOmitField;
 
-@XStreamAlias( CaptureSerializationConstants.SESSION_ROOT )
+@XStreamAlias( SerializationConstants.SESSION_ROOT )
 public class CaptureSession
 {
 
     @XStreamOmitField
     @Expose( deserialize = false, serialize = false )
-    private File file;
+    private transient File file;
 
     private final String user;
 
-    @SerializedName( CaptureSerializationConstants.BUILD_TAG_FIELD )
-    @XStreamAlias( CaptureSerializationConstants.BUILD_TAG_FIELD )
+    @SerializedName( SerializationConstants.BUILD_TAG_FIELD )
+    @XStreamAlias( SerializationConstants.BUILD_TAG_FIELD )
     private final String buildTag;
 
-    @SerializedName( CaptureSerializationConstants.CAPTURE_SOURCE_FIELD )
-    @XStreamAlias( CaptureSerializationConstants.CAPTURE_SOURCE_FIELD )
+    @SerializedName( SerializationConstants.CAPTURE_SOURCE_FIELD )
+    @XStreamAlias( SerializationConstants.CAPTURE_SOURCE_FIELD )
     private final String captureSource;
 
-    @SerializedName( CaptureSerializationConstants.START_DATE_FIELD )
-    @XStreamAlias( CaptureSerializationConstants.START_DATE_FIELD )
+    @SerializedName( SerializationConstants.START_DATE_FIELD )
+    @XStreamAlias( SerializationConstants.START_DATE_FIELD )
     private final Date started = new Date();
 
-    @SerializedName( CaptureSerializationConstants.LAST_UPDATE_FIELD )
-    @XStreamAlias( CaptureSerializationConstants.LAST_UPDATE_FIELD )
+    @SerializedName( SerializationConstants.LAST_UPDATE_FIELD )
+    @XStreamAlias( SerializationConstants.LAST_UPDATE_FIELD )
     private Date lastUpdated = started;
 
     private final List<CaptureTarget> targets;

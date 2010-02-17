@@ -8,10 +8,10 @@ import org.sonatype.nexus.artifact.Gav;
 import org.sonatype.nexus.proxy.item.StorageItem;
 
 import com.google.gson.annotations.SerializedName;
-import com.redhat.rcm.nexus.capture.serialize.CaptureSerializationConstants;
+import com.redhat.rcm.nexus.capture.serialize.SerializationConstants;
 import com.thoughtworks.xstream.annotations.XStreamAlias;
 
-@XStreamAlias( CaptureSerializationConstants.TARGET_ROOT )
+@XStreamAlias( SerializationConstants.TARGET_ROOT )
 public class CaptureTarget
 {
 
@@ -19,18 +19,18 @@ public class CaptureTarget
 
     private boolean resolved = false;
 
-    @SerializedName( CaptureSerializationConstants.RESOLVED_REPO_FIELD )
-    @XStreamAlias( CaptureSerializationConstants.RESOLVED_REPO_FIELD )
+    @SerializedName( SerializationConstants.RESOLVED_REPO_FIELD )
+    @XStreamAlias( SerializationConstants.RESOLVED_REPO_FIELD )
     private final String repositoryId;
 
-    @SerializedName( CaptureSerializationConstants.RESOLVED_ON_FIELD )
-    @XStreamAlias( CaptureSerializationConstants.RESOLVED_ON_FIELD )
+    @SerializedName( SerializationConstants.RESOLVED_ON_FIELD )
+    @XStreamAlias( SerializationConstants.RESOLVED_ON_FIELD )
     private Date resolutionDate;
 
     private final Gav coordinate;
 
-    @SerializedName( CaptureSerializationConstants.CHECKED_REPOS_FIELD )
-    @XStreamAlias( CaptureSerializationConstants.CHECKED_REPOS_FIELD )
+    @SerializedName( SerializationConstants.CHECKED_REPOS_FIELD )
+    @XStreamAlias( SerializationConstants.CHECKED_REPOS_FIELD )
     private final List<String> processedRepositories;
 
     // Used for Gson deserialization.

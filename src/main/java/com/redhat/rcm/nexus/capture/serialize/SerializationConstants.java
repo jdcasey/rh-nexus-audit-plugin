@@ -1,6 +1,6 @@
 package com.redhat.rcm.nexus.capture.serialize;
 
-public class CaptureSerializationConstants
+public class SerializationConstants
 {
 
     public static final String CATALOG_FILENAME = "catalog.json";

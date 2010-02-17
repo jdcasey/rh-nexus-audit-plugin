@@ -1,7 +1,7 @@
-package com.redhat.rcm.nexus.capture.serialize;
+package com.redhat.rcm.nexus.capture.store;
 
 import static com.redhat.rcm.nexus.capture.model.CaptureSession.key;
-import static com.redhat.rcm.nexus.capture.serialize.CaptureSerializationUtils.getGson;
+import static com.redhat.rcm.nexus.capture.serialize.SerializationUtils.getGson;
 
 import java.io.File;
 import java.io.FileReader;
@@ -34,6 +34,7 @@ import com.google.gson.reflect.TypeToken;
 import com.redhat.rcm.nexus.capture.model.CaptureSession;
 import com.redhat.rcm.nexus.capture.model.CaptureSessionCatalog;
 import com.redhat.rcm.nexus.capture.model.CaptureTarget;
+import com.redhat.rcm.nexus.capture.serialize.SerializationConstants;
 
 @Component( role = CaptureStore.class, hint = "json" )
 public class JsonCaptureStore
@@ -127,21 +128,25 @@ public class JsonCaptureStore
     public CaptureSession readLatestLog( final String user, final String buildTag, final String captureSource )
         throws CaptureStoreException
     {
-        final CaptureSessionCatalog catalog = catalogs.get( CaptureSession.key( buildTag, captureSource, user ) );
-        if ( catalog != null )
+        CaptureSession session = getSession( user, buildTag, captureSource, false );
+        if ( session == null )
         {
-            final TreeMap<Date, File> sessions = catalog.getSessions();
-            if ( !sessions.isEmpty() )
+            final CaptureSessionCatalog catalog = catalogs.get( CaptureSession.key( buildTag, captureSource, user ) );
+            if ( catalog != null )
             {
-                final LinkedList<Date> dates = new LinkedList<Date>( sessions.keySet() );
+                final TreeMap<Date, File> sessions = catalog.getSessions();
+                if ( !sessions.isEmpty() )
+                {
+                    final LinkedList<Date> dates = new LinkedList<Date>( sessions.keySet() );
 
-                final File f = sessions.get( dates.getLast() );
+                    final File f = sessions.get( dates.getLast() );
 
-                return readSession( f );
+                    session = readSession( f );
+                }
             }
         }
 
-        return null;
+        return session;
     }
 
     private CaptureSession readSession( final File sessionFile )
@@ -169,12 +174,7 @@ public class JsonCaptureStore
                              final List<String> processedRepositories, final String path, final StorageItem item )
         throws CaptureStoreException
     {
-        CaptureSession session = sessions.get( key( buildTag, captureSource, user ) );
-        if ( session == null )
-        {
-            session = new CaptureSession( user, buildTag, captureSource );
-            sessions.put( user + buildTag + captureSource, session );
-        }
+        final CaptureSession session = getSession( user, buildTag, captureSource, true );
 
         final Gav gav = toGav( path );
         session.add( new CaptureTarget( processedRepositories, path, gav, item ) );
@@ -185,16 +185,24 @@ public class JsonCaptureStore
                                final List<String> processedRepositories, final String path )
         throws CaptureStoreException
     {
-        CaptureSession session = sessions.get( key( buildTag, captureSource, user ) );
-        if ( session == null )
-        {
-            session = new CaptureSession( user, buildTag, captureSource );
-            sessions.put( user + buildTag + captureSource, session );
-        }
+        final CaptureSession session = getSession( user, buildTag, captureSource, true );
 
         final Gav gav = toGav( path );
         session.add( new CaptureTarget( processedRepositories, path, gav ) );
         output( session );
+    }
+
+    private synchronized CaptureSession getSession( final String user, final String buildTag,
+                                                    final String captureSource, final boolean create )
+    {
+        CaptureSession session = sessions.get( key( buildTag, captureSource, user ) );
+        if ( create && session == null )
+        {
+            session = new CaptureSession( user, buildTag, captureSource );
+            sessions.put( session.key(), session );
+        }
+
+        return session;
     }
 
     private Gav toGav( final String path )
@@ -270,7 +278,7 @@ public class JsonCaptureStore
     private void readCatalogs()
         throws IOException
     {
-        final File catalogFile = new File( workDir(), CaptureSerializationConstants.CATALOG_FILENAME );
+        final File catalogFile = new File( workDir(), SerializationConstants.CATALOG_FILENAME );
         if ( catalogFile.exists() && catalogFile.length() > 0 )
         {
             FileReader reader = null;
@@ -285,8 +293,7 @@ public class JsonCaptureStore
                 {
                     for ( final CaptureSessionCatalog cat : cats )
                     {
-                        catalogs.put( CaptureSession.key( cat.getBuildTag(), cat.getCaptureSource(), cat.getUser() ),
-                                      cat );
+                        catalogs.put( key( cat.getBuildTag(), cat.getCaptureSource(), cat.getUser() ), cat );
                     }
                 }
             }
@@ -300,7 +307,7 @@ public class JsonCaptureStore
     private void writeCatalogs()
         throws CaptureStoreException
     {
-        final File catalogFile = new File( workDir(), CaptureSerializationConstants.CATALOG_FILENAME );
+        final File catalogFile = new File( workDir(), SerializationConstants.CATALOG_FILENAME );
         catalogFile.getParentFile().mkdirs();
 
         FileWriter writer = null;
@@ -329,8 +336,8 @@ public class JsonCaptureStore
         if ( sessionFile == null )
         {
             final String filename =
-                String.format( "%1$s-%2$tY-%2$tm-%2$td_%2$tH-%2$tM-%2$tS%2$tz.json", session.getBuildTag(),
-                               session.getStartDate() );
+                String.format( "%1$s-%3$s-%2$tY-%2$tm-%2$td_%2$tH-%2$tM-%2$tS%2$tz.json", session.getBuildTag(),
+                               session.getStartDate(), session.getCaptureSource() );
 
             sessionFile = join( workDir(), session.getUser(), filename );
 

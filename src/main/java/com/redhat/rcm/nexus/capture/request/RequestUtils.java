@@ -1,7 +1,7 @@
 package com.redhat.rcm.nexus.capture.request;
 
-import static com.redhat.rcm.nexus.capture.serialize.CaptureSerializationUtils.getGson;
-import static com.redhat.rcm.nexus.capture.serialize.CaptureSerializationUtils.getXStream;
+import static com.redhat.rcm.nexus.capture.serialize.SerializationUtils.getGson;
+import static com.redhat.rcm.nexus.capture.serialize.SerializationUtils.getXStream;
 
 import org.restlet.data.Form;
 import org.restlet.data.MediaType;
@@ -14,6 +14,8 @@ public final class RequestUtils
     private static final String PARAM_MODE = "mode";
 
     private static final String PARAM_FORMAT = "format";
+
+    // private static final Logger logger = LoggerFactory.getLogger( RequestUtils.class );
 
     private RequestUtils()
     {
@@ -59,6 +61,7 @@ public final class RequestUtils
         final String mode = query.getFirstValue( PARAM_MODE );
 
         final RequestMode m = RequestMode.find( mode );
+
         return m == null ? RequestMode.DEFAULT : m;
     }
 

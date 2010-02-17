@@ -11,6 +11,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 
+import org.sonatype.nexus.artifact.Gav;
+import org.sonatype.nexus.artifact.IllegalArtifactCoordinateException;
+
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.InstanceCreator;
@@ -33,7 +36,7 @@ import com.thoughtworks.xstream.converters.UnmarshallingContext;
 import com.thoughtworks.xstream.io.HierarchicalStreamReader;
 import com.thoughtworks.xstream.io.HierarchicalStreamWriter;
 
-public final class CaptureSerializationUtils
+public final class SerializationUtils
 {
 
     private static final String DATE_FORMAT = "yyyy-MM-dd HH:mm:ss Z";
@@ -42,13 +45,14 @@ public final class CaptureSerializationUtils
     {
     };
 
-    private CaptureSerializationUtils()
+    private SerializationUtils()
     {
     }
 
     public static Gson getGson()
     {
         return new GsonBuilder().setPrettyPrinting()
+                                .registerTypeAdapter( Gav.class, new GavCreator() )
                                 .registerTypeAdapter( DATE_TO_FILE_MAP_TT.getType(),
                                                       new DateToFileMapTypeAdapter( DATE_FORMAT, "session" ) )
                                 .create();
@@ -61,8 +65,10 @@ public final class CaptureSerializationUtils
         xs.setMode( XStream.NO_REFERENCES );
 
         xs.registerLocalConverter( CaptureTarget.class, "processedRepositories", new StringListConverter( "repository" ) );
+
         xs.registerLocalConverter( CaptureSessionCatalog.class, "sessions", new DateToFileMapTypeAdapter( DATE_FORMAT,
                                                                                                           "session" ) );
+
         xs.registerConverter( new CustomFormatDateConverter( DATE_FORMAT ) );
 
         xs.processAnnotations( CaptureSession.class );
@@ -70,6 +76,24 @@ public final class CaptureSerializationUtils
         xs.processAnnotations( CaptureSessionCatalog.class );
 
         return xs;
+    }
+
+    private static final class GavCreator
+        implements InstanceCreator<Gav>
+    {
+        public Gav createInstance( final Type type )
+        {
+            try
+            {
+                return new Gav( null, null, null, null, null, null, null, null, false, false, null, false, null );
+            }
+            catch ( final IllegalArtifactCoordinateException e )
+            {
+                throw new IllegalStateException( String.format( "Failed to create deserialization target: GAV."
+                                + "\nReason: %1$s", e.getMessage() ), e );
+            }
+        }
+
     }
 
     private static final class DateToFileMapTypeAdapter

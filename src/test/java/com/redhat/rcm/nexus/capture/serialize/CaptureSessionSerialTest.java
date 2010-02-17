@@ -1,7 +1,7 @@
-package com.redhat.rcm.nexus.capture.db;
+package com.redhat.rcm.nexus.capture.serialize;
 
-import static com.redhat.rcm.nexus.capture.serialize.CaptureSerializationUtils.getGson;
-import static com.redhat.rcm.nexus.capture.serialize.CaptureSerializationUtils.getXStream;
+import static com.redhat.rcm.nexus.capture.serialize.SerializationUtils.getGson;
+import static com.redhat.rcm.nexus.capture.serialize.SerializationUtils.getXStream;
 import static org.easymock.EasyMock.createMock;
 import static org.easymock.EasyMock.expect;
 import static org.easymock.EasyMock.replay;
@@ -20,7 +20,7 @@ import org.sonatype.nexus.proxy.item.StorageItem;
 import com.redhat.rcm.nexus.capture.model.CaptureSession;
 import com.redhat.rcm.nexus.capture.model.CaptureTarget;
 
-public class CaptureSessionTest
+public class CaptureSessionSerialTest
 {
 
     private final List<Object> mocks = new ArrayList<Object>();
@@ -50,7 +50,7 @@ public class CaptureSessionTest
     }
 
     @Test
-    public void testToJSON()
+    public void roundTripJSON()
         throws IllegalArtifactCoordinateException
     {
         final CaptureSession session = new CaptureSession( "user", "build-tag", "capture-source" );
@@ -89,10 +89,12 @@ public class CaptureSessionTest
 
         final String result = getGson().toJson( session );
         System.out.println( result );
+
+        final CaptureSession resultSess = getGson().fromJson( result, CaptureSession.class );
     }
 
     @Test
-    public void testToXML()
+    public void roundTripXML()
         throws IllegalArtifactCoordinateException
     {
         final CaptureSession session = new CaptureSession( "user", "build-tag", "capture-source" );
@@ -131,6 +133,8 @@ public class CaptureSessionTest
 
         final String result = getXStream().toXML( session );
         System.out.println( result );
+
+        final CaptureSession resultSess = (CaptureSession) getXStream().fromXML( result );
     }
 
     private StorageItem newStorageItem( final String path )
