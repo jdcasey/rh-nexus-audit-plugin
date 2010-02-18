@@ -1,14 +1,15 @@
 package com.redhat.rcm.nexus.capture;
 
 import static com.redhat.rcm.nexus.capture.request.RequestUtils.mediaTypeOf;
-import static com.redhat.rcm.nexus.capture.request.RequestUtils.modeOf;
+import static com.redhat.rcm.nexus.capture.request.RequestUtils.parseUrlDate;
 import static com.redhat.rcm.nexus.capture.serialize.SerializationUtils.getGson;
 import static com.redhat.rcm.nexus.capture.serialize.SerializationUtils.getXStream;
 
+import java.text.ParseException;
+import java.util.Date;
+
 import org.codehaus.plexus.component.annotations.Component;
 import org.codehaus.plexus.component.annotations.Requirement;
-import org.jsecurity.SecurityUtils;
-import org.jsecurity.subject.Subject;
 import org.restlet.Context;
 import org.restlet.data.MediaType;
 import org.restlet.data.Request;
@@ -23,7 +24,7 @@ import org.sonatype.nexus.rest.AbstractNexusPlexusResource;
 import org.sonatype.plexus.rest.resource.PathProtectionDescriptor;
 import org.sonatype.plexus.rest.resource.PlexusResource;
 
-import com.redhat.rcm.nexus.capture.request.RequestMode;
+import com.redhat.rcm.nexus.capture.model.CaptureSessionRef;
 import com.redhat.rcm.nexus.capture.store.CaptureStore;
 import com.redhat.rcm.nexus.capture.store.CaptureStoreException;
 
@@ -38,12 +39,6 @@ public class CaptureLogResource
     @Requirement( hint = "json" )
     private CaptureStore captureStore;
 
-    // @Requirement
-    // private SecuritySystem securitySystem;
-
-    // @Requirement
-    // private NexusEmailer emailer;
-
     @Override
     public Object getPayloadInstance()
     {
@@ -54,68 +49,63 @@ public class CaptureLogResource
     @Override
     public PathProtectionDescriptor getResourceProtection()
     {
-        return new PathProtectionDescriptor( "/capture/*/*/log",
+        return new PathProtectionDescriptor( "/capture/log/*/*/*/*",
                                              String.format( "authcBasic,perms[%s]",
-                                                            CaptureResourceConstants.CAPTURE_PERMISSION ) );
+                                                            CaptureResourceConstants.PRIV_LOG_ACCESS ) );
     }
 
     @Override
     public String getResourceUri()
     {
-        return "/capture/{" + CaptureResourceConstants.BUILD_TAG_REPO_ID_KEY + "}/{"
-                        + CaptureResourceConstants.CAPTURE_SOURCE_REPO_ID_KEY + "}/log";
+        return "/capture/log/{" + CaptureResourceConstants.ATTR_USER + "}/{"
+                        + CaptureResourceConstants.ATTR_BUILD_TAG_REPO_ID + "}/{"
+                        + CaptureResourceConstants.ATTR_CAPTURE_SOURCE_REPO_ID + "}/{"
+                        + CaptureResourceConstants.ATTR_DATE + "}";
     }
 
     @Override
     public Object get( final Context context, final Request request, final Response response, final Variant variant )
         throws ResourceException
     {
+        final String user = request.getAttributes().get( CaptureResourceConstants.ATTR_USER ).toString();
+
         final String buildTag =
-            request.getAttributes().get( CaptureResourceConstants.BUILD_TAG_REPO_ID_KEY ).toString();
+            request.getAttributes().get( CaptureResourceConstants.ATTR_BUILD_TAG_REPO_ID ).toString();
 
         final String captureSource =
-            request.getAttributes().get( CaptureResourceConstants.CAPTURE_SOURCE_REPO_ID_KEY ).toString();
+            request.getAttributes().get( CaptureResourceConstants.ATTR_CAPTURE_SOURCE_REPO_ID ).toString();
 
-        final Subject subject = SecurityUtils.getSubject();
-        final String user = subject.getPrincipal().toString();
+        final String dateValue = request.getAttributes().get( CaptureResourceConstants.ATTR_DATE ).toString();
 
         Object data = null;
-
-        final RequestMode mode = modeOf( request );
-        if ( mode != null )
+        try
         {
-            if ( mode == RequestMode.TABLE_OF_CONTENTS )
-            {
-                try
-                {
-                    data = captureStore.getLogs( user, buildTag, captureSource );
-                }
-                catch ( final CaptureStoreException e )
-                {
-                    logger.error( "Failed to retrieve capture-log listing. Error: {}\nMessage: {}", e.getClass()
-                                                                                                     .getName(),
-                                  e.getMessage() );
-                    e.printStackTrace();
+            final Date date = parseUrlDate( dateValue );
+            final CaptureSessionRef ref = new CaptureSessionRef( user, buildTag, captureSource, date );
 
-                    throw new ResourceException( Status.SERVER_ERROR_INTERNAL, e.getMessage() );
-                }
-            }
+            data = captureStore.readLog( ref );
         }
-
-        if ( data == null )
+        catch ( final CaptureStoreException e )
         {
-            try
-            {
-                data = captureStore.readLatestLog( user, buildTag, captureSource );
-            }
-            catch ( final CaptureStoreException e )
-            {
-                logger.error( "Failed to retrieve capture log. Error: {}\nMessage: {}", e.getClass().getName(),
-                              e.getMessage() );
-                e.printStackTrace();
+            final String message =
+                String.format( "Failed to retrieve capture log. Error: %s\nMessage: %s", e.getClass().getName(),
+                               e.getMessage() );
 
-                throw new ResourceException( Status.SERVER_ERROR_INTERNAL, e.getMessage() );
-            }
+            logger.error( message, e );
+            e.printStackTrace();
+
+            throw new ResourceException( Status.SERVER_ERROR_INTERNAL, message );
+        }
+        catch ( final ParseException e )
+        {
+            final String message =
+                String.format( "Failed to retrieve capture log. Invalid date format: '%s' Error: %s\nMessage: %s",
+                               dateValue, e.getClass().getName(), e.getMessage() );
+
+            logger.error( message, e );
+            e.printStackTrace();
+
+            throw new ResourceException( Status.SERVER_ERROR_INTERNAL, message );
         }
 
         String result = null;
@@ -137,24 +127,4 @@ public class CaptureLogResource
         return new StringRepresentation( result, mt );
     }
 
-    @Override
-    public Object post( final Context context, final Request request, final Response response, final Object payload )
-        throws ResourceException
-    {
-        throw new ResourceException( Status.CLIENT_ERROR_METHOD_NOT_ALLOWED );
-    }
-
-    @Override
-    public Object put( final Context context, final Request request, final Response response, final Object payload )
-        throws ResourceException
-    {
-        throw new ResourceException( Status.CLIENT_ERROR_METHOD_NOT_ALLOWED );
-    }
-
-    @Override
-    public void delete( final Context context, final Request request, final Response response )
-        throws ResourceException
-    {
-        throw new ResourceException( Status.CLIENT_ERROR_METHOD_NOT_ALLOWED );
-    }
 }

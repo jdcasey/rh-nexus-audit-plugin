@@ -1,11 +1,12 @@
 package com.redhat.rcm.nexus.capture.store;
 
-import java.util.Date;
 import java.util.List;
 
 import org.sonatype.nexus.proxy.item.StorageItem;
 
 import com.redhat.rcm.nexus.capture.model.CaptureSession;
+import com.redhat.rcm.nexus.capture.model.CaptureSessionQuery;
+import com.redhat.rcm.nexus.capture.model.CaptureSessionRef;
 
 public interface CaptureStore
 {
@@ -13,13 +14,13 @@ public interface CaptureStore
     CaptureSession closeCurrentLog( String user, String buildTag, String captureSource )
         throws CaptureStoreException;
 
-    void expireLogs( String user, String buildTag, String captureSource, Date olderThan )
+    void deleteLogs( CaptureSessionQuery query )
         throws CaptureStoreException;
 
-    List<Date> getLogs( String user, String buildTag, String captureSource )
+    List<CaptureSessionRef> getLogs( CaptureSessionQuery query, String baseUrl )
         throws CaptureStoreException;
 
-    CaptureSession readLog( String user, String buildTag, String captureSource, Date startDate )
+    CaptureSession readLog( CaptureSessionRef ref )
         throws CaptureStoreException;
 
     CaptureSession readLatestLog( String user, String buildTag, String captureSource )

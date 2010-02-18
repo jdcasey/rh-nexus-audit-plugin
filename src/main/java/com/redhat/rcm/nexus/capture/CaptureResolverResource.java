@@ -56,19 +56,19 @@ public class CaptureResolverResource
     @Override
     public PathProtectionDescriptor getResourceProtection()
     {
-        return new PathProtectionDescriptor( "/capture/*/*/content/**",
-                                             String.format( "authcBasic,perms[%s]",
-                                                            CaptureResourceConstants.CAPTURE_PERMISSION ) );
-
         // NOTE: Using this will result in 'anonymous' being the subject.
         // return new PathProtectionDescriptor( "/capture/*/*/**", "authcBasic" );
+
+        return new PathProtectionDescriptor( "/capture/resolve/*/*/**",
+                                             String.format( "authcBasic,perms[%s]",
+                                                            CaptureResourceConstants.PRIV_ACCESS ) );
     }
 
     @Override
     public String getResourceUri()
     {
-        return "/capture/{" + CaptureResourceConstants.BUILD_TAG_REPO_ID_KEY + "}/{"
-                        + CaptureResourceConstants.CAPTURE_SOURCE_REPO_ID_KEY + "}/content";
+        return "/capture/resolve/{" + CaptureResourceConstants.ATTR_BUILD_TAG_REPO_ID + "}/{"
+                        + CaptureResourceConstants.ATTR_CAPTURE_SOURCE_REPO_ID + "}";
     }
 
     @Override
@@ -78,9 +78,9 @@ public class CaptureResolverResource
         final ResourceStoreRequest req = getResourceStoreRequest( request );
 
         final String buildTag =
-            request.getAttributes().get( CaptureResourceConstants.BUILD_TAG_REPO_ID_KEY ).toString();
+            request.getAttributes().get( CaptureResourceConstants.ATTR_BUILD_TAG_REPO_ID ).toString();
         final String capture =
-            request.getAttributes().get( CaptureResourceConstants.CAPTURE_SOURCE_REPO_ID_KEY ).toString();
+            request.getAttributes().get( CaptureResourceConstants.ATTR_CAPTURE_SOURCE_REPO_ID ).toString();
 
         final Subject subject = SecurityUtils.getSubject();
         final String user = subject.getPrincipal().toString();
@@ -165,7 +165,7 @@ public class CaptureResolverResource
     {
         final Subject subject = SecurityUtils.getSubject();
 
-        if ( !subject.isPermitted( CaptureResourceConstants.EXTERNAL_RESOLVE_PERMISSION ) )
+        if ( !subject.isPermitted( CaptureResourceConstants.PERM_EXTERNAL_GET ) )
         {
             if ( logger.isDebugEnabled() )
             {

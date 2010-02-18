@@ -9,6 +9,8 @@ public class SerializationConstants
 
     public static final String SESSION_ROOT = "session";
 
+    public static final String SESSION_REF_ROOT = "session-ref";
+
     public static final String TARGET_ROOT = "target";
 
     public static final String CAPTURE_SOURCE_FIELD = "external-source";
@@ -24,5 +26,7 @@ public class SerializationConstants
     public static final String CHECKED_REPOS_FIELD = "checked-repositories";
 
     public static final String RESOLVED_REPO_FIELD = "resolved-from";
+
+    public static final String DATE_FIELD = "date";
 
 }

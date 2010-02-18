@@ -17,7 +17,21 @@
       <description>Allow access to a external repositories from a capture session</description>
       <sessionTimeout>5</sessionTimeout>
       <privileges>
-        <privilege>capture-external-access</privilege>
+        <privilege>capture-access</privilege>
+        <privilege>capture-external-resolve</privilege>
+        <privilege>capture-log-access</privilege>
+      </privileges>
+    </role>
+    <role>
+      <id>capture-admin</id>
+      <name>Capture Sessions Administrator</name>
+      <description>Maintain capture session configurations, logs, etc.</description>
+      <sessionTimeout>60</sessionTimeout>
+      <privileges>
+        <privilege>capture-access</privilege>
+        <privilege>capture-external-resolve</privilege>
+        <privilege>capture-log-access</privilege>
+        <privilege>capture-admin</privilege>
       </privileges>
     </role>
   </roles>
@@ -39,7 +53,7 @@
       </properties>
     </privilege>
     <privilege>
-      <id>capture-external-access</id>
+      <id>capture-external-resolve</id>
       <type>method</type>
       <name>Capture Repository: external access</name>
       <description>Access to external repositories from a capture session.</description>
@@ -50,7 +64,39 @@
         </property>
         <property>
           <key>permission</key>
-          <value>nexus:capture-external-access</value>
+          <value>nexus:capture-external-resolve</value>
+        </property>
+      </properties>
+    </privilege>
+    <privilege>
+      <id>capture-log-access</id>
+      <type>method</type>
+      <name>Capture Session: Log Access</name>
+      <description>Access to view/maintain your own capture-session logs.</description>
+      <properties>
+        <property>
+          <key>method</key>
+          <value>create,read,update,delete</value>
+        </property>
+        <property>
+          <key>permission</key>
+          <value>nexus:capture-log</value>
+        </property>
+      </properties>
+    </privilege>
+    <privilege>
+      <id>capture-admin</id>
+      <type>method</type>
+      <name>Capture Session: Administration</name>
+      <description>Access to configure/maintain capture-session functions.</description>
+      <properties>
+        <property>
+          <key>method</key>
+          <value>create,read,update,delete</value>
+        </property>
+        <property>
+          <key>permission</key>
+          <value>nexus:capture-admin</value>
         </property>
       </properties>
     </privilege>

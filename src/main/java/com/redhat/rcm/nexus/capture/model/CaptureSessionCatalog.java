@@ -2,6 +2,7 @@ package com.redhat.rcm.nexus.capture.model;
 
 import java.io.File;
 import java.util.Date;
+import java.util.LinkedList;
 import java.util.Map;
 import java.util.TreeMap;
 
@@ -59,7 +60,12 @@ public final class CaptureSessionCatalog
 
     public CaptureSessionCatalog remove( final Date sessionDate )
     {
-        sessions.remove( sessionDate );
+        final File removed = sessions.remove( sessionDate );
+        if ( removed.exists() )
+        {
+            removed.delete();
+        }
+
         return this;
     }
 
@@ -165,4 +171,13 @@ public final class CaptureSessionCatalog
         return sessions;
     }
 
+    public Date getEarliest()
+    {
+        return sessions.isEmpty() ? null : sessions.keySet().iterator().next();
+    }
+
+    public Date getLatest()
+    {
+        return sessions.isEmpty() ? null : new LinkedList<Date>( sessions.keySet() ).getLast();
+    }
 }

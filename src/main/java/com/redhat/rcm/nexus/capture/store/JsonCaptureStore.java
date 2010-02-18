@@ -33,7 +33,10 @@ import org.sonatype.nexus.proxy.item.StorageItem;
 import com.google.gson.reflect.TypeToken;
 import com.redhat.rcm.nexus.capture.model.CaptureSession;
 import com.redhat.rcm.nexus.capture.model.CaptureSessionCatalog;
+import com.redhat.rcm.nexus.capture.model.CaptureSessionQuery;
+import com.redhat.rcm.nexus.capture.model.CaptureSessionRef;
 import com.redhat.rcm.nexus.capture.model.CaptureTarget;
+import com.redhat.rcm.nexus.capture.model.CaptureSessionQuery.QueryMode;
 import com.redhat.rcm.nexus.capture.serialize.SerializationConstants;
 
 @Component( role = CaptureStore.class, hint = "json" )
@@ -69,60 +72,108 @@ public class JsonCaptureStore
         return session;
     }
 
-    public void expireLogs( final String user, final String buildTag, final String captureSource, final Date olderThan )
+    public void deleteLogs( final CaptureSessionQuery query )
         throws CaptureStoreException
     {
-        final CaptureSessionCatalog catalog = catalogs.get( CaptureSession.key( buildTag, captureSource, user ) );
-        if ( catalog != null )
+        boolean changed = false;
+        for ( final Map.Entry<String, CaptureSession> entry : new HashMap<String, CaptureSession>( sessions ).entrySet() )
         {
-            final TreeMap<Date, File> sessions = catalog.getSessions();
-            if ( sessions != null && !sessions.isEmpty() )
+            if ( query.matches( entry.getValue() ) )
             {
-                for ( final Date d : new HashSet<Date>( sessions.keySet() ) )
+                if ( sessions.remove( entry.getKey() ) != null )
                 {
-                    if ( !d.after( olderThan ) )
+                    final CaptureSessionCatalog catalog = catalogs.get( entry.getKey() );
+                    catalog.remove( entry.getValue().getStartDate() );
+
+                    if ( QueryMode.FIRST_MATCHING == query.getMode() )
                     {
-                        sessions.remove( d );
+                        changed = true;
+                        break;
                     }
                 }
-
-                writeCatalogs();
             }
+        }
+
+        if ( !changed || QueryMode.ALL_MATCHING == query.getMode() )
+        {
+            catalogs: for ( final Map.Entry<String, CaptureSessionCatalog> entry : new HashMap<String, CaptureSessionCatalog>( catalogs ).entrySet() )
+            {
+                final CaptureSessionCatalog catalog = entry.getValue();
+                if ( query.matches( catalog ) && catalog.getSessions() != null && !catalog.getSessions().isEmpty() )
+                {
+                    for ( final Date startDate : new HashSet<Date>( catalog.getSessions().keySet() ) )
+                    {
+                        if ( query.matches( startDate ) )
+                        {
+                            catalog.remove( startDate );
+                            changed = true;
+
+                            if ( QueryMode.FIRST_MATCHING == query.getMode() )
+                            {
+                                break catalogs;
+                            }
+                        }
+                    }
+
+                    if ( !changed && QueryMode.FIRST_MATCHING == query.getMode() )
+                    {
+                        // we matched a catalog, but not a session...QUIT.
+                        break;
+                    }
+                }
+            }
+        }
+
+        if ( changed )
+        {
+            writeCatalogs();
         }
     }
 
-    public List<Date> getLogs( final String user, final String buildTag, final String captureSource )
+    public List<CaptureSessionRef> getLogs( final CaptureSessionQuery query, final String baseUrl )
         throws CaptureStoreException
     {
-        final CaptureSessionCatalog catalog = catalogs.get( CaptureSession.key( buildTag, captureSource, user ) );
-        if ( catalog != null )
+        final List<CaptureSessionRef> result = new ArrayList<CaptureSessionRef>();
+        for ( final CaptureSessionCatalog catalog : catalogs.values() )
         {
-            final TreeMap<Date, File> sessions = catalog.getSessions();
-            if ( sessions != null && !sessions.isEmpty() )
+            if ( query.matches( catalog ) && catalog.getSessions() != null )
             {
-                return new ArrayList<Date>( sessions.keySet() );
+                for ( final Map.Entry<Date, File> entry : catalog.getSessions().entrySet() )
+                {
+                    if ( query.matches( entry.getKey() ) )
+                    {
+                        result.add( new CaptureSessionRef( catalog.getUser(),
+                                                           catalog.getBuildTag(),
+                                                           catalog.getCaptureSource(),
+                                                           entry.getKey(),
+                                                           baseUrl ) );
+                    }
+                }
             }
         }
 
-        return null;
+        return result;
     }
 
-    public CaptureSession readLog( final String user, final String buildTag, final String captureSource,
-                                   final Date startDate )
+    public CaptureSession readLog( final CaptureSessionRef ref )
         throws CaptureStoreException
     {
-        final CaptureSessionCatalog catalog = catalogs.get( CaptureSession.key( buildTag, captureSource, user ) );
-        if ( catalog != null )
+        CaptureSession session = sessions.get( ref.key() );
+        if ( session == null || !ref.getDate().equals( session.getStartDate() ) )
         {
-            final TreeMap<Date, File> sessions = catalog.getSessions();
-            final File f = sessions.get( startDate );
-            if ( f != null && f.exists() )
+            final CaptureSessionCatalog catalog = catalogs.get( ref.key() );
+            if ( catalog != null )
             {
-                return readSession( f );
+                final TreeMap<Date, File> sessions = catalog.getSessions();
+                final File f = sessions.get( ref.getDate() );
+                if ( f != null && f.exists() )
+                {
+                    session = readSession( f );
+                }
             }
         }
 
-        return null;
+        return session;
     }
 
     public CaptureSession readLatestLog( final String user, final String buildTag, final String captureSource )
