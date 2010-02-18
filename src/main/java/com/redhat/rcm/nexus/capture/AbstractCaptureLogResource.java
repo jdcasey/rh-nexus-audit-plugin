@@ -19,7 +19,7 @@ import org.sonatype.plexus.rest.resource.PlexusResource;
 
 import com.redhat.rcm.nexus.capture.model.CaptureSessionQuery;
 import com.redhat.rcm.nexus.capture.model.CaptureSessionRef;
-import com.redhat.rcm.nexus.capture.render.CaptureSessionRefResource;
+import com.redhat.rcm.nexus.capture.model.render.CaptureSessionRefResource;
 import com.redhat.rcm.nexus.capture.store.CaptureStore;
 import com.redhat.rcm.nexus.capture.store.CaptureStoreException;
 

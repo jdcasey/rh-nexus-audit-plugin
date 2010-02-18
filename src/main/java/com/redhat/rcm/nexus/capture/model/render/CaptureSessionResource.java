@@ -1,4 +1,4 @@
-package com.redhat.rcm.nexus.capture.render;
+package com.redhat.rcm.nexus.capture.model.render;
 
 import static com.redhat.rcm.nexus.capture.request.RequestUtils.buildUri;
 import static com.redhat.rcm.nexus.capture.request.RequestUtils.formatUrlDate;

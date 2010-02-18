@@ -1,6 +1,6 @@
-package com.redhat.rcm.nexus.capture.render;
+package com.redhat.rcm.nexus.capture.model.render;
 
-import static com.redhat.rcm.nexus.capture.render.CaptureSessionResource.buildResourceUri;
+import static com.redhat.rcm.nexus.capture.model.render.CaptureSessionResource.buildResourceUri;
 
 import java.util.Date;
 
