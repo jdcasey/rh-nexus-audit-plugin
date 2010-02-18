@@ -23,8 +23,8 @@ import org.sonatype.plexus.rest.resource.PathProtectionDescriptor;
 import org.sonatype.plexus.rest.resource.PlexusResource;
 
 import com.redhat.rcm.nexus.capture.model.CaptureSession;
-import com.redhat.rcm.nexus.capture.model.CaptureSessionRef;
 import com.redhat.rcm.nexus.capture.model.render.CaptureSessionResource;
+import com.redhat.rcm.nexus.capture.store.CaptureSessionRef;
 import com.redhat.rcm.nexus.capture.store.CaptureStoreException;
 
 @Component( role = PlexusResource.class, hint = "CaptureLogResource" )

@@ -1,8 +1,11 @@
-package com.redhat.rcm.nexus.capture.model;
+package com.redhat.rcm.nexus.capture.store;
 
 import static org.codehaus.plexus.util.StringUtils.isNotEmpty;
 
 import java.util.Date;
+
+import com.redhat.rcm.nexus.capture.model.CaptureSession;
+import com.redhat.rcm.nexus.capture.model.CaptureSessionCatalog;
 
 public class CaptureSessionQuery
 {

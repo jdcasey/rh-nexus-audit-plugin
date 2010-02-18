@@ -5,8 +5,6 @@ import java.util.List;
 import org.sonatype.nexus.proxy.item.StorageItem;
 
 import com.redhat.rcm.nexus.capture.model.CaptureSession;
-import com.redhat.rcm.nexus.capture.model.CaptureSessionQuery;
-import com.redhat.rcm.nexus.capture.model.CaptureSessionRef;
 
 public interface CaptureStore
 {
