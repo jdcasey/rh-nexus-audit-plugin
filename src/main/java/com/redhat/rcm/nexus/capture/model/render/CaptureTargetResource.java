@@ -10,7 +10,7 @@ import org.sonatype.nexus.artifact.Gav;
 import com.google.gson.annotations.SerializedName;
 import com.redhat.rcm.nexus.capture.CaptureResourceConstants;
 import com.redhat.rcm.nexus.capture.model.CaptureTarget;
-import com.redhat.rcm.nexus.capture.serialize.SerializationConstants;
+import com.redhat.rcm.nexus.capture.model.serialize.SerializationConstants;
 import com.thoughtworks.xstream.annotations.XStreamAlias;
 
 @XStreamAlias( SerializationConstants.TARGET_ROOT )

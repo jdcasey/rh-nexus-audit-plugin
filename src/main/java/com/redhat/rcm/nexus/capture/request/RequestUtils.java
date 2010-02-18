@@ -1,7 +1,7 @@
 package com.redhat.rcm.nexus.capture.request;
 
-import static com.redhat.rcm.nexus.capture.serialize.SerializationUtils.getGson;
-import static com.redhat.rcm.nexus.capture.serialize.SerializationUtils.getXStream;
+import static com.redhat.rcm.nexus.capture.model.serialize.SerializationUtils.getGson;
+import static com.redhat.rcm.nexus.capture.model.serialize.SerializationUtils.getXStream;
 import static org.codehaus.plexus.util.StringUtils.isNotEmpty;
 
 import java.text.ParseException;

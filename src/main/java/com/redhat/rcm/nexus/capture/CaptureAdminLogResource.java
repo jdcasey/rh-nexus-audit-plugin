@@ -1,10 +1,10 @@
 package com.redhat.rcm.nexus.capture;
 
+import static com.redhat.rcm.nexus.capture.model.serialize.SerializationUtils.getGson;
+import static com.redhat.rcm.nexus.capture.model.serialize.SerializationUtils.getXStream;
 import static com.redhat.rcm.nexus.capture.request.RequestUtils.mediaTypeOf;
 import static com.redhat.rcm.nexus.capture.request.RequestUtils.modeOf;
 import static com.redhat.rcm.nexus.capture.request.RequestUtils.query;
-import static com.redhat.rcm.nexus.capture.serialize.SerializationUtils.getGson;
-import static com.redhat.rcm.nexus.capture.serialize.SerializationUtils.getXStream;
 
 import java.util.ArrayList;
 import java.util.List;

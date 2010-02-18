@@ -1,4 +1,4 @@
-package com.redhat.rcm.nexus.capture.serialize;
+package com.redhat.rcm.nexus.capture.model.serialize;
 
 import java.io.File;
 import java.io.IOException;

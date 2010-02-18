@@ -9,7 +9,7 @@ import java.util.TreeMap;
 import org.slf4j.LoggerFactory;
 
 import com.google.gson.annotations.SerializedName;
-import com.redhat.rcm.nexus.capture.serialize.SerializationConstants;
+import com.redhat.rcm.nexus.capture.model.serialize.SerializationConstants;
 import com.thoughtworks.xstream.annotations.XStreamAlias;
 
 @XStreamAlias( SerializationConstants.CATALOG_ROOT )

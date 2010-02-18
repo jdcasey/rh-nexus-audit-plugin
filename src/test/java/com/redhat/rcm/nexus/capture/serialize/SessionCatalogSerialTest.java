@@ -1,7 +1,7 @@
 package com.redhat.rcm.nexus.capture.serialize;
 
-import static com.redhat.rcm.nexus.capture.serialize.SerializationUtils.getGson;
-import static com.redhat.rcm.nexus.capture.serialize.SerializationUtils.getXStream;
+import static com.redhat.rcm.nexus.capture.model.serialize.SerializationUtils.getGson;
+import static com.redhat.rcm.nexus.capture.model.serialize.SerializationUtils.getXStream;
 
 import java.io.File;
 
