@@ -1,18 +1,20 @@
-package com.redhat.rcm.nexus.capture.model;
+package com.redhat.rcm.nexus.capture.render;
 
-import java.util.ArrayList;
+import static com.redhat.rcm.nexus.capture.request.RequestUtils.buildUri;
+
 import java.util.Date;
 import java.util.List;
 
 import org.sonatype.nexus.artifact.Gav;
-import org.sonatype.nexus.proxy.item.StorageItem;
 
 import com.google.gson.annotations.SerializedName;
+import com.redhat.rcm.nexus.capture.CaptureResourceConstants;
+import com.redhat.rcm.nexus.capture.model.CaptureTarget;
 import com.redhat.rcm.nexus.capture.serialize.SerializationConstants;
 import com.thoughtworks.xstream.annotations.XStreamAlias;
 
 @XStreamAlias( SerializationConstants.TARGET_ROOT )
-public class CaptureTarget
+public class CaptureTargetResource
 {
 
     private final String path;
@@ -33,36 +35,32 @@ public class CaptureTarget
     @XStreamAlias( SerializationConstants.CHECKED_REPOS_FIELD )
     private final List<String> processedRepositories;
 
+    private final String url;
+
     // Used for Gson deserialization.
     @SuppressWarnings( "unused" )
-    private CaptureTarget()
+    private CaptureTargetResource()
     {
         this.processedRepositories = null;
         this.coordinate = null;
         this.path = null;
         this.resolved = false;
         this.repositoryId = null;
+        this.url = null;
     }
 
-    public CaptureTarget( final List<String> processedRepositories, final String path, final Gav gav,
-                          final StorageItem item )
+    public CaptureTargetResource( final CaptureTarget target, final String applicationUrl )
     {
-        this.coordinate = gav;
-        this.processedRepositories = new ArrayList<String>( processedRepositories );
-        this.path = path;
-        this.resolved = true;
-        this.resolutionDate = new Date();
-        this.repositoryId = item.getRepositoryId();
-    }
+        this.coordinate = target.getCoordinate();
+        this.processedRepositories = target.getProcessedRepositories();
+        this.path = target.getPath();
+        this.resolved = target.isResolved();
+        this.resolutionDate = target.getResolutionDate();
+        this.repositoryId = target.getRepositoryId();
 
-    public CaptureTarget( final List<String> processedRepositories, final String path, final Gav gav )
-    {
-        this.coordinate = gav;
-        this.processedRepositories = new ArrayList<String>( processedRepositories );
-        this.path = path;
-        this.resolved = false;
-        this.resolutionDate = new Date();
-        this.repositoryId = null;
+        this.url =
+            buildUri( applicationUrl, CaptureResourceConstants.REPOSITORY_RESOURCE_BASEURI, repositoryId,
+                      CaptureResourceConstants.REPOSITORY_CONTENT_URLPART, path );
     }
 
     public Date getResolutionDate()
@@ -93,6 +91,11 @@ public class CaptureTarget
     public String getRepositoryId()
     {
         return repositoryId;
+    }
+
+    public String getUrl()
+    {
+        return url;
     }
 
 }

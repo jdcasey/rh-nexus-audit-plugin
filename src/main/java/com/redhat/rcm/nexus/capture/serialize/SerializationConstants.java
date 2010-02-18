@@ -29,4 +29,6 @@ public class SerializationConstants
 
     public static final String DATE_FIELD = "date";
 
+    public static final String RESOURCE_URI_FIELD = "resourceuri";
+
 }

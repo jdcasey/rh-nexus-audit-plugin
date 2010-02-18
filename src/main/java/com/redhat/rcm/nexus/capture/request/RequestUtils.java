@@ -28,6 +28,41 @@ public final class RequestUtils
     {
     }
 
+    public static String buildUri( final String applicationUrl, final String... parts )
+    {
+        final StringBuilder sb = new StringBuilder();
+        if ( isNotEmpty( applicationUrl ) )
+        {
+            if ( applicationUrl.endsWith( "/" ) )
+            {
+                sb.append( applicationUrl.substring( 0, applicationUrl.length() - 1 ) );
+            }
+            else
+            {
+                sb.append( applicationUrl );
+            }
+        }
+        else
+        {
+            sb.append( '/' );
+        }
+
+        for ( final String part : parts )
+        {
+            if ( isNotEmpty( part ) )
+            {
+                if ( sb.charAt( sb.length() - 1 ) != '/' && part.charAt( 0 ) != '/' )
+                {
+                    sb.append( '/' );
+                }
+
+                sb.append( part );
+            }
+        }
+
+        return sb.length() == 0 ? null : sb.toString();
+    }
+
     public static String formatUrlDate( final Date date )
     {
         return new SimpleDateFormat( FULL_DATE_FORMAT ).format( date );

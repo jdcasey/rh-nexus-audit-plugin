@@ -17,7 +17,7 @@ public interface CaptureStore
     void deleteLogs( CaptureSessionQuery query )
         throws CaptureStoreException;
 
-    List<CaptureSessionRef> getLogs( CaptureSessionQuery query, String baseUrl )
+    List<CaptureSessionRef> getLogs( CaptureSessionQuery query )
         throws CaptureStoreException;
 
     CaptureSession readLog( CaptureSessionRef ref )

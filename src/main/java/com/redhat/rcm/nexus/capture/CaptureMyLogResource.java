@@ -2,16 +2,10 @@ package com.redhat.rcm.nexus.capture;
 
 import static com.redhat.rcm.nexus.capture.request.RequestUtils.mediaTypeOf;
 import static com.redhat.rcm.nexus.capture.request.RequestUtils.modeOf;
-import static com.redhat.rcm.nexus.capture.request.RequestUtils.parseUrlDate;
-import static com.redhat.rcm.nexus.capture.request.RequestUtils.query;
 import static com.redhat.rcm.nexus.capture.serialize.SerializationUtils.getGson;
 import static com.redhat.rcm.nexus.capture.serialize.SerializationUtils.getXStream;
 
-import java.text.ParseException;
-import java.util.Date;
-
 import org.codehaus.plexus.component.annotations.Component;
-import org.codehaus.plexus.component.annotations.Requirement;
 import org.jsecurity.SecurityUtils;
 import org.jsecurity.subject.Subject;
 import org.restlet.Context;
@@ -24,25 +18,20 @@ import org.restlet.resource.StringRepresentation;
 import org.restlet.resource.Variant;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.sonatype.nexus.rest.AbstractNexusPlexusResource;
 import org.sonatype.plexus.rest.resource.PathProtectionDescriptor;
 import org.sonatype.plexus.rest.resource.PlexusResource;
 
 import com.redhat.rcm.nexus.capture.model.CaptureSessionQuery;
 import com.redhat.rcm.nexus.capture.request.RequestMode;
-import com.redhat.rcm.nexus.capture.store.CaptureStore;
 import com.redhat.rcm.nexus.capture.store.CaptureStoreException;
 
 @Component( role = PlexusResource.class, hint = "CaptureMyLogResource" )
 public class CaptureMyLogResource
-    extends AbstractNexusPlexusResource
+    extends AbstractCaptureLogResource
     implements PlexusResource
 {
 
     private final Logger logger = LoggerFactory.getLogger( getClass() );
-
-    @Requirement( hint = "json" )
-    private CaptureStore captureStore;
 
     // @Requirement
     // private SecuritySystem securitySystem;
@@ -65,7 +54,7 @@ public class CaptureMyLogResource
     @Override
     public PathProtectionDescriptor getResourceProtection()
     {
-        return new PathProtectionDescriptor( "/capture/my/log/*/*",
+        return new PathProtectionDescriptor( "/capture/my/logs/*/*",
                                              String.format( "authcBasic,perms[%s]",
                                                             CaptureResourceConstants.PRIV_LOG_ACCESS ) );
     }
@@ -73,7 +62,7 @@ public class CaptureMyLogResource
     @Override
     public String getResourceUri()
     {
-        return "/capture/my/log/{" + CaptureResourceConstants.ATTR_BUILD_TAG_REPO_ID + "}/{"
+        return "/capture/my/log/s{" + CaptureResourceConstants.ATTR_BUILD_TAG_REPO_ID + "}/{"
                         + CaptureResourceConstants.ATTR_CAPTURE_SOURCE_REPO_ID + "}";
     }
 
@@ -104,7 +93,7 @@ public class CaptureMyLogResource
                                                  .setBuildTag( buildTag )
                                                  .setCaptureSource( captureSource );
 
-                    data = captureStore.getLogs( query, request.getRootRef().toString() );
+                    data = queryLogs( query, request.getRootRef().toString() );
                 }
                 catch ( final CaptureStoreException e )
                 {
@@ -122,7 +111,7 @@ public class CaptureMyLogResource
         {
             try
             {
-                data = captureStore.readLatestLog( user, buildTag, captureSource );
+                data = getCaptureStore().readLatestLog( user, buildTag, captureSource );
             }
             catch ( final CaptureStoreException e )
             {
@@ -168,7 +157,7 @@ public class CaptureMyLogResource
 
         try
         {
-            captureStore.closeCurrentLog( user, buildTag, captureSource );
+            getCaptureStore().closeCurrentLog( user, buildTag, captureSource );
         }
         catch ( final CaptureStoreException e )
         {
@@ -203,48 +192,6 @@ public class CaptureMyLogResource
         final Subject subject = SecurityUtils.getSubject();
         final String user = subject.getPrincipal().toString();
 
-        Date before = null;
-        try
-        {
-            final String value = query( request ).getFirstValue( CaptureResourceConstants.PARAM_BEFORE );
-            before = parseUrlDate( value );
-        }
-        catch ( final ParseException e )
-        {
-            final String message =
-                String.format( "Invalid date format in %s parameter. Error: %s\nMessage: %s",
-                               CaptureResourceConstants.PARAM_BEFORE, e.getClass().getName(), e.getMessage() );
-
-            logger.error( message, e );
-
-            e.printStackTrace();
-
-            throw new ResourceException( Status.CLIENT_ERROR_BAD_REQUEST, message );
-        }
-
-        final CaptureSessionQuery query =
-            new CaptureSessionQuery().setUser( user ).setBuildTag( buildTag ).setCaptureSource( captureSource );
-
-        if ( before != null )
-        {
-            query.setBefore( before );
-        }
-
-        try
-        {
-            captureStore.deleteLogs( query );
-        }
-        catch ( final CaptureStoreException e )
-        {
-            final String message =
-                String.format( "Failed to expire capture log(s) for query:\n%s\nError: %s\nMessage: %s", query,
-                               e.getClass().getName(), e.getMessage() );
-
-            logger.error( message, e );
-
-            e.printStackTrace();
-
-            throw new ResourceException( Status.SERVER_ERROR_INTERNAL, message );
-        }
+        deleteLogs( user, buildTag, captureSource, request );
     }
 }

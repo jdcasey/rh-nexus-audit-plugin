@@ -2,13 +2,9 @@ package com.redhat.rcm.nexus.capture;
 
 import static com.redhat.rcm.nexus.capture.request.RequestUtils.mediaTypeOf;
 import static com.redhat.rcm.nexus.capture.request.RequestUtils.modeOf;
-import static com.redhat.rcm.nexus.capture.request.RequestUtils.parseUrlDate;
 import static com.redhat.rcm.nexus.capture.request.RequestUtils.query;
 import static com.redhat.rcm.nexus.capture.serialize.SerializationUtils.getGson;
 import static com.redhat.rcm.nexus.capture.serialize.SerializationUtils.getXStream;
-
-import java.text.ParseException;
-import java.util.Date;
 
 import org.codehaus.plexus.component.annotations.Component;
 import org.codehaus.plexus.component.annotations.Requirement;
@@ -23,7 +19,6 @@ import org.restlet.resource.StringRepresentation;
 import org.restlet.resource.Variant;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.sonatype.nexus.rest.AbstractNexusPlexusResource;
 import org.sonatype.plexus.rest.resource.PathProtectionDescriptor;
 import org.sonatype.plexus.rest.resource.PlexusResource;
 
@@ -34,7 +29,7 @@ import com.redhat.rcm.nexus.capture.store.CaptureStoreException;
 
 @Component( role = PlexusResource.class, hint = "CaptureAdminLogResource" )
 public class CaptureAdminLogResource
-    extends AbstractNexusPlexusResource
+    extends AbstractCaptureLogResource
     implements PlexusResource
 {
 
@@ -64,7 +59,7 @@ public class CaptureAdminLogResource
     @Override
     public PathProtectionDescriptor getResourceProtection()
     {
-        return new PathProtectionDescriptor( "/capture/admin/log",
+        return new PathProtectionDescriptor( "/capture/admin/logs",
                                              String.format( "authcBasic,perms[%s]",
                                                             CaptureResourceConstants.PRIV_LOG_ACCESS ) );
     }
@@ -72,7 +67,7 @@ public class CaptureAdminLogResource
     @Override
     public String getResourceUri()
     {
-        return "/capture/admin/log";
+        return "/capture/admin/logs";
     }
 
     @Override
@@ -98,7 +93,7 @@ public class CaptureAdminLogResource
                 try
                 {
 
-                    data = captureStore.getLogs( query, request.getRootRef().toString() );
+                    data = queryLogs( query, request.getRootRef().toString() );
                 }
                 catch ( final CaptureStoreException e )
                 {
@@ -158,48 +153,6 @@ public class CaptureAdminLogResource
         final String captureSource = requestQuery.getFirstValue( CaptureResourceConstants.PARAM_CAPTURE_SOURCE );
         final String user = requestQuery.getFirstValue( CaptureResourceConstants.PARAM_USER );
 
-        Date before = null;
-        try
-        {
-            final String value = query( request ).getFirstValue( CaptureResourceConstants.PARAM_BEFORE );
-            before = parseUrlDate( value );
-        }
-        catch ( final ParseException e )
-        {
-            final String message =
-                String.format( "Invalid date format in %s parameter. Error: %s\nMessage: %s",
-                               CaptureResourceConstants.PARAM_BEFORE, e.getClass().getName(), e.getMessage() );
-
-            logger.error( message, e );
-
-            e.printStackTrace();
-
-            throw new ResourceException( Status.CLIENT_ERROR_BAD_REQUEST, message );
-        }
-
-        final CaptureSessionQuery query =
-            new CaptureSessionQuery().setUser( user ).setBuildTag( buildTag ).setCaptureSource( captureSource );
-
-        if ( before != null )
-        {
-            query.setBefore( before );
-        }
-
-        try
-        {
-            captureStore.deleteLogs( query );
-        }
-        catch ( final CaptureStoreException e )
-        {
-            final String message =
-                String.format( "Failed to expire capture log(s) for query:\n%s\nError: %s\nMessage: %s", query,
-                               e.getClass().getName(), e.getMessage() );
-
-            logger.error( message, e );
-
-            e.printStackTrace();
-
-            throw new ResourceException( Status.SERVER_ERROR_INTERNAL, message );
-        }
+        deleteLogs( user, buildTag, captureSource, request );
     }
 }

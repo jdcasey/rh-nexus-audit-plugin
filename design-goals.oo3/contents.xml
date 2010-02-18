@@ -65,7 +65,9 @@
   </settings>
   <editor content-size="{1067, 483}" is-spellchecking-enabled="yes">
     <drawer palette-height="167"/>
-    <selected-rows ids="lqIYso4UHH7"/>
+    <selected-rows ids="e4cm0khFk93"/>
+    <selected-columns ids="jFqHUGd_Dg1"/>
+    <selected-characters range="{22, 0}"/>
   </editor>
   <columns>
     <column id="dTpN3JwYpBn" type="text" width="18" minimum-width="18" maximum-width="18" text-export-width="1" is-note-column="yes">
@@ -153,6 +155,15 @@
                       </p>
                     </text>
                   </values>
+                  <note expanded="yes">
+                    <text>
+                      <p>
+                        <run>
+                          <lit>Not as critical with the use of capture-external-resolve permission. This allows access control directly, regardless of capture-source configuration.</lit>
+                        </run>
+                      </p>
+                    </text>
+                  </note>
                 </item>
               </children>
             </item>
@@ -289,6 +300,17 @@
                               <p>
                                 <run>
                                   <lit>provide web access to these logs</lit>
+                                </run>
+                              </p>
+                            </text>
+                          </values>
+                        </item>
+                        <item id="e4cm0khFk93">
+                          <values>
+                            <text>
+                              <p>
+                                <run>
+                                  <lit>REST access (XML/JSON)</lit>
                                 </run>
                               </p>
                             </text>

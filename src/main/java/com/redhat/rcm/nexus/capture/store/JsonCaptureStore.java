@@ -130,7 +130,7 @@ public class JsonCaptureStore
         }
     }
 
-    public List<CaptureSessionRef> getLogs( final CaptureSessionQuery query, final String baseUrl )
+    public List<CaptureSessionRef> getLogs( final CaptureSessionQuery query )
         throws CaptureStoreException
     {
         final List<CaptureSessionRef> result = new ArrayList<CaptureSessionRef>();
@@ -145,8 +145,7 @@ public class JsonCaptureStore
                         result.add( new CaptureSessionRef( catalog.getUser(),
                                                            catalog.getBuildTag(),
                                                            catalog.getCaptureSource(),
-                                                           entry.getKey(),
-                                                           baseUrl ) );
+                                                           entry.getKey() ) );
                     }
                 }
             }

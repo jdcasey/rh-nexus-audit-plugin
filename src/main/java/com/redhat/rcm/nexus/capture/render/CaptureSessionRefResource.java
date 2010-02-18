@@ -1,14 +1,18 @@
-package com.redhat.rcm.nexus.capture.model;
+package com.redhat.rcm.nexus.capture.render;
+
+import static com.redhat.rcm.nexus.capture.render.CaptureSessionResource.buildResourceUri;
 
 import java.util.Date;
 
 import com.google.gson.annotations.SerializedName;
+import com.redhat.rcm.nexus.capture.model.CaptureSession;
+import com.redhat.rcm.nexus.capture.model.CaptureSessionRef;
 import com.redhat.rcm.nexus.capture.serialize.SerializationConstants;
 import com.thoughtworks.xstream.annotations.XStreamAlias;
 
 @XStreamAlias( SerializationConstants.SESSION_REF_ROOT )
-public class CaptureSessionRef
-    implements Comparable<CaptureSessionRef>
+public class CaptureSessionRefResource
+    implements Comparable<CaptureSessionRefResource>
 {
 
     private final String user;
@@ -25,22 +29,29 @@ public class CaptureSessionRef
     @XStreamAlias( SerializationConstants.DATE_FIELD )
     private final Date date;
 
+    @SerializedName( SerializationConstants.RESOURCE_URI_FIELD )
+    @XStreamAlias( SerializationConstants.RESOURCE_URI_FIELD )
+    private final String url;
+
     // used for gson deserialization
     @SuppressWarnings( "unused" )
-    private CaptureSessionRef()
+    private CaptureSessionRefResource()
     {
         this.user = null;
         this.buildTag = null;
         this.captureSource = null;
         this.date = null;
+        this.url = null;
     }
 
-    public CaptureSessionRef( final String user, final String buildTag, final String captureSource, final Date date )
+    public CaptureSessionRefResource( final CaptureSessionRef ref, final String applicationUrl )
     {
-        this.user = user;
-        this.buildTag = buildTag;
-        this.captureSource = captureSource;
-        this.date = date;
+        this.user = ref.getUser();
+        this.buildTag = ref.getBuildTag();
+        this.captureSource = ref.getCaptureSource();
+        this.date = ref.getDate();
+
+        this.url = buildResourceUri( applicationUrl, user, buildTag, date );
     }
 
     public String getUser()
@@ -63,7 +74,12 @@ public class CaptureSessionRef
         return date;
     }
 
-    public int compareTo( final CaptureSessionRef ref )
+    public String getUrl()
+    {
+        return url;
+    }
+
+    public int compareTo( final CaptureSessionRefResource ref )
     {
         return date.compareTo( ref.date );
     }
