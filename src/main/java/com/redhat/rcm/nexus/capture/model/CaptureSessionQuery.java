@@ -19,8 +19,6 @@ public class CaptureSessionQuery
 
     private String buildTag;
 
-    private String captureSource;
-
     private Date before;
 
     private Date since;
@@ -33,11 +31,6 @@ public class CaptureSessionQuery
         }
 
         if ( isNotEmpty( buildTag ) && !buildTag.equals( catalog.getBuildTag() ) )
-        {
-            return false;
-        }
-
-        if ( isNotEmpty( captureSource ) && !captureSource.equals( catalog.getCaptureSource() ) )
         {
             return false;
         }
@@ -63,11 +56,6 @@ public class CaptureSessionQuery
         }
 
         if ( isNotEmpty( buildTag ) && !buildTag.equals( session.getBuildTag() ) )
-        {
-            return false;
-        }
-
-        if ( isNotEmpty( captureSource ) && !captureSource.equals( session.getCaptureSource() ) )
         {
             return false;
         }
@@ -122,17 +110,6 @@ public class CaptureSessionQuery
         return this;
     }
 
-    public String getCaptureSource()
-    {
-        return captureSource;
-    }
-
-    public CaptureSessionQuery setCaptureSource( final String captureSource )
-    {
-        this.captureSource = captureSource;
-        return this;
-    }
-
     public Date getBefore()
     {
         return before;
@@ -174,11 +151,6 @@ public class CaptureSessionQuery
         if ( isNotEmpty( buildTag ) )
         {
             sb.append( "build-tag=" ).append( buildTag );
-        }
-
-        if ( isNotEmpty( captureSource ) )
-        {
-            sb.append( "capture-source=" ).append( captureSource );
         }
 
         if ( before != null )

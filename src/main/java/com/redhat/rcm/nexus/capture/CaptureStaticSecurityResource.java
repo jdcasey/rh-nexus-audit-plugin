@@ -4,8 +4,8 @@ import org.codehaus.plexus.component.annotations.Component;
 import org.sonatype.security.realms.tools.AbstractStaticSecurityResource;
 import org.sonatype.security.realms.tools.StaticSecurityResource;
 
-@Component( role = StaticSecurityResource.class, hint = "CaptureSecurityRef" )
-public class CaptureSecurityRef
+@Component( role = StaticSecurityResource.class, hint = "CaptureStaticSecurityResource" )
+public class CaptureStaticSecurityResource
     extends AbstractStaticSecurityResource
 {
 

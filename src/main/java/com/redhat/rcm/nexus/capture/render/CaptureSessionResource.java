@@ -24,10 +24,6 @@ public class CaptureSessionResource
     @XStreamAlias( SerializationConstants.BUILD_TAG_FIELD )
     private final String buildTag;
 
-    @SerializedName( SerializationConstants.CAPTURE_SOURCE_FIELD )
-    @XStreamAlias( SerializationConstants.CAPTURE_SOURCE_FIELD )
-    private final String captureSource;
-
     @SerializedName( SerializationConstants.START_DATE_FIELD )
     @XStreamAlias( SerializationConstants.START_DATE_FIELD )
     private final Date started;
@@ -48,7 +44,6 @@ public class CaptureSessionResource
         this.started = null;
         this.lastUpdated = null;
         this.buildTag = null;
-        this.captureSource = null;
         this.targets = null;
         this.url = null;
     }
@@ -57,7 +52,6 @@ public class CaptureSessionResource
     {
         this.user = session.getUser();
         this.buildTag = session.getBuildTag();
-        this.captureSource = session.getCaptureSource();
         this.started = session.getStartDate();
         this.lastUpdated = session.getLastUpdated();
 
@@ -97,19 +91,9 @@ public class CaptureSessionResource
         return buildTag;
     }
 
-    public String getCaptureSource()
-    {
-        return captureSource;
-    }
-
     public String getUrl()
     {
         return url;
-    }
-
-    public String key()
-    {
-        return CaptureSession.key( buildTag, captureSource, user );
     }
 
     static String buildResourceUri( final String applicationUrl, final String user, final String buildTag,

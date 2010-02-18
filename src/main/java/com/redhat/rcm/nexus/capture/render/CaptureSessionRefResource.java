@@ -5,7 +5,6 @@ import static com.redhat.rcm.nexus.capture.render.CaptureSessionResource.buildRe
 import java.util.Date;
 
 import com.google.gson.annotations.SerializedName;
-import com.redhat.rcm.nexus.capture.model.CaptureSession;
 import com.redhat.rcm.nexus.capture.model.CaptureSessionRef;
 import com.redhat.rcm.nexus.capture.serialize.SerializationConstants;
 import com.thoughtworks.xstream.annotations.XStreamAlias;
@@ -21,10 +20,6 @@ public class CaptureSessionRefResource
     @XStreamAlias( SerializationConstants.BUILD_TAG_FIELD )
     private final String buildTag;
 
-    @SerializedName( SerializationConstants.CAPTURE_SOURCE_FIELD )
-    @XStreamAlias( SerializationConstants.CAPTURE_SOURCE_FIELD )
-    private final String captureSource;
-
     @SerializedName( SerializationConstants.DATE_FIELD )
     @XStreamAlias( SerializationConstants.DATE_FIELD )
     private final Date date;
@@ -39,7 +34,6 @@ public class CaptureSessionRefResource
     {
         this.user = null;
         this.buildTag = null;
-        this.captureSource = null;
         this.date = null;
         this.url = null;
     }
@@ -48,7 +42,6 @@ public class CaptureSessionRefResource
     {
         this.user = ref.getUser();
         this.buildTag = ref.getBuildTag();
-        this.captureSource = ref.getCaptureSource();
         this.date = ref.getDate();
 
         this.url = buildResourceUri( applicationUrl, user, buildTag, date );
@@ -64,11 +57,6 @@ public class CaptureSessionRefResource
         return buildTag;
     }
 
-    public String getCaptureSource()
-    {
-        return captureSource;
-    }
-
     public Date getDate()
     {
         return date;
@@ -82,11 +70,6 @@ public class CaptureSessionRefResource
     public int compareTo( final CaptureSessionRefResource ref )
     {
         return date.compareTo( ref.date );
-    }
-
-    public String key()
-    {
-        return CaptureSession.key( buildTag, captureSource, user );
     }
 
 }

@@ -107,12 +107,12 @@ public class CaptureSession
 
     public String key()
     {
-        return key( buildTag, captureSource, user );
+        return key( user, buildTag );
     }
 
-    public static String key( final String buildTag, final String captureSource, final String user )
+    public static String key( final String user, final String buildTag )
     {
-        return String.format( "%s:%s:%s", user, buildTag, captureSource );
+        return String.format( "%s:%s:%s", user, buildTag );
     }
 
 }

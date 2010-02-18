@@ -49,7 +49,7 @@ public class CaptureLogResource
     @Override
     public PathProtectionDescriptor getResourceProtection()
     {
-        return new PathProtectionDescriptor( "/capture/log/*/*/*/*",
+        return new PathProtectionDescriptor( "/capture/log/*/*/*",
                                              String.format( "authcBasic,perms[%s]",
                                                             CaptureResourceConstants.PRIV_LOG_ACCESS ) );
     }
@@ -58,9 +58,8 @@ public class CaptureLogResource
     public String getResourceUri()
     {
         return "/capture/log/{" + CaptureResourceConstants.ATTR_USER + "}/{"
-                        + CaptureResourceConstants.ATTR_BUILD_TAG_REPO_ID + "}/{"
-                        + CaptureResourceConstants.ATTR_CAPTURE_SOURCE_REPO_ID + "}/{"
-                        + CaptureResourceConstants.ATTR_DATE + "}";
+                        + CaptureResourceConstants.ATTR_BUILD_TAG_REPO_ID + "}/{" + CaptureResourceConstants.ATTR_DATE
+                        + "}";
     }
 
     @Override
@@ -72,16 +71,13 @@ public class CaptureLogResource
         final String buildTag =
             request.getAttributes().get( CaptureResourceConstants.ATTR_BUILD_TAG_REPO_ID ).toString();
 
-        final String captureSource =
-            request.getAttributes().get( CaptureResourceConstants.ATTR_CAPTURE_SOURCE_REPO_ID ).toString();
-
         final String dateValue = request.getAttributes().get( CaptureResourceConstants.ATTR_DATE ).toString();
 
         Object data = null;
         try
         {
             final Date date = parseUrlDate( dateValue );
-            final CaptureSessionRef ref = new CaptureSessionRef( user, buildTag, captureSource, date );
+            final CaptureSessionRef ref = new CaptureSessionRef( user, buildTag, date );
 
             data = captureStore.readLog( ref );
         }

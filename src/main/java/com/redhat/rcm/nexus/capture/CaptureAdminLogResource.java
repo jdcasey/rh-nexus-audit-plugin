@@ -77,11 +77,9 @@ public class CaptureAdminLogResource
         final Form requestQuery = query( request );
 
         final String buildTag = requestQuery.getFirstValue( CaptureResourceConstants.PARAM_BUILD_TAG );
-        final String captureSource = requestQuery.getFirstValue( CaptureResourceConstants.PARAM_CAPTURE_SOURCE );
         final String user = requestQuery.getFirstValue( CaptureResourceConstants.PARAM_USER );
 
-        final CaptureSessionQuery query =
-            new CaptureSessionQuery().setUser( user ).setBuildTag( buildTag ).setCaptureSource( captureSource );
+        final CaptureSessionQuery query = new CaptureSessionQuery().setUser( user ).setBuildTag( buildTag );
 
         Object data = null;
 
@@ -112,7 +110,7 @@ public class CaptureAdminLogResource
             // TODO: Replace this with reading a list of all full sessions that match query.
             try
             {
-                data = captureStore.readLatestLog( user, buildTag, captureSource );
+                data = captureStore.readLatestLog( user, buildTag );
             }
             catch ( final CaptureStoreException e )
             {
@@ -150,9 +148,8 @@ public class CaptureAdminLogResource
         final Form requestQuery = query( request );
 
         final String buildTag = requestQuery.getFirstValue( CaptureResourceConstants.PARAM_BUILD_TAG );
-        final String captureSource = requestQuery.getFirstValue( CaptureResourceConstants.PARAM_CAPTURE_SOURCE );
         final String user = requestQuery.getFirstValue( CaptureResourceConstants.PARAM_USER );
 
-        deleteLogs( user, buildTag, captureSource, request );
+        deleteLogs( user, buildTag, request );
     }
 }

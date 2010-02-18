@@ -68,7 +68,7 @@ public class JsonCaptureStore
     public CaptureSession closeCurrentLog( final String user, final String buildTag, final String captureSource )
         throws CaptureStoreException
     {
-        final CaptureSession session = sessions.remove( key( buildTag, captureSource, user ) );
+        final CaptureSession session = sessions.remove( key( user, buildTag ) );
         return session;
     }
 
@@ -142,10 +142,7 @@ public class JsonCaptureStore
                 {
                     if ( query.matches( entry.getKey() ) )
                     {
-                        result.add( new CaptureSessionRef( catalog.getUser(),
-                                                           catalog.getBuildTag(),
-                                                           catalog.getCaptureSource(),
-                                                           entry.getKey() ) );
+                        result.add( new CaptureSessionRef( catalog.getUser(), catalog.getBuildTag(), entry.getKey() ) );
                     }
                 }
             }
@@ -175,13 +172,13 @@ public class JsonCaptureStore
         return session;
     }
 
-    public CaptureSession readLatestLog( final String user, final String buildTag, final String captureSource )
+    public CaptureSession readLatestLog( final String user, final String buildTag )
         throws CaptureStoreException
     {
-        CaptureSession session = getSession( user, buildTag, captureSource, false );
+        CaptureSession session = getSession( user, buildTag, null, false );
         if ( session == null )
         {
-            final CaptureSessionCatalog catalog = catalogs.get( CaptureSession.key( buildTag, captureSource, user ) );
+            final CaptureSessionCatalog catalog = catalogs.get( key( user, buildTag ) );
             if ( catalog != null )
             {
                 final TreeMap<Date, File> sessions = catalog.getSessions();
@@ -245,7 +242,7 @@ public class JsonCaptureStore
     private synchronized CaptureSession getSession( final String user, final String buildTag,
                                                     final String captureSource, final boolean create )
     {
-        CaptureSession session = sessions.get( key( buildTag, captureSource, user ) );
+        CaptureSession session = sessions.get( key( user, buildTag ) );
         if ( create && session == null )
         {
             session = new CaptureSession( user, buildTag, captureSource );
@@ -343,7 +340,7 @@ public class JsonCaptureStore
                 {
                     for ( final CaptureSessionCatalog cat : cats )
                     {
-                        catalogs.put( key( cat.getBuildTag(), cat.getCaptureSource(), cat.getUser() ), cat );
+                        catalogs.put( key( cat.getUser(), cat.getBuildTag() ), cat );
                     }
                 }
             }

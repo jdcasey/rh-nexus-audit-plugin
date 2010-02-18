@@ -23,7 +23,7 @@ public interface CaptureStore
     CaptureSession readLog( CaptureSessionRef ref )
         throws CaptureStoreException;
 
-    CaptureSession readLatestLog( String user, String buildTag, String captureSource )
+    CaptureSession readLatestLog( String user, String buildTag )
         throws CaptureStoreException;
 
     void logResolved( String user, String buildTag, String captureSource, List<String> processedRepositories,

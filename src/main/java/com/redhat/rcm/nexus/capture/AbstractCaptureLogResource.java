@@ -38,12 +38,10 @@ public abstract class AbstractCaptureLogResource
         return captureStore;
     }
 
-    protected void deleteLogs( final String user, final String buildTag, final String captureSource,
-                               final Request request )
+    protected void deleteLogs( final String user, final String buildTag, final Request request )
         throws ResourceException
     {
-        final CaptureSessionQuery query =
-            new CaptureSessionQuery().setUser( user ).setBuildTag( buildTag ).setCaptureSource( captureSource );
+        final CaptureSessionQuery query = new CaptureSessionQuery().setUser( user ).setBuildTag( buildTag );
 
         try
         {

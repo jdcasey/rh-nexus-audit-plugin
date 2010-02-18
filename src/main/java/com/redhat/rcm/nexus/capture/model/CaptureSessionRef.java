@@ -17,10 +17,6 @@ public class CaptureSessionRef
     @XStreamAlias( SerializationConstants.BUILD_TAG_FIELD )
     private final String buildTag;
 
-    @SerializedName( SerializationConstants.CAPTURE_SOURCE_FIELD )
-    @XStreamAlias( SerializationConstants.CAPTURE_SOURCE_FIELD )
-    private final String captureSource;
-
     @SerializedName( SerializationConstants.DATE_FIELD )
     @XStreamAlias( SerializationConstants.DATE_FIELD )
     private final Date date;
@@ -31,15 +27,13 @@ public class CaptureSessionRef
     {
         this.user = null;
         this.buildTag = null;
-        this.captureSource = null;
         this.date = null;
     }
 
-    public CaptureSessionRef( final String user, final String buildTag, final String captureSource, final Date date )
+    public CaptureSessionRef( final String user, final String buildTag, final Date date )
     {
         this.user = user;
         this.buildTag = buildTag;
-        this.captureSource = captureSource;
         this.date = date;
     }
 
@@ -51,11 +45,6 @@ public class CaptureSessionRef
     public String getBuildTag()
     {
         return buildTag;
-    }
-
-    public String getCaptureSource()
-    {
-        return captureSource;
     }
 
     public Date getDate()
@@ -70,7 +59,7 @@ public class CaptureSessionRef
 
     public String key()
     {
-        return CaptureSession.key( buildTag, captureSource, user );
+        return CaptureSession.key( user, buildTag );
     }
 
 }

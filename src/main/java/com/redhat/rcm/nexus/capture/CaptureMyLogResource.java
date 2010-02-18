@@ -33,12 +33,6 @@ public class CaptureMyLogResource
 
     private final Logger logger = LoggerFactory.getLogger( getClass() );
 
-    // @Requirement
-    // private SecuritySystem securitySystem;
-
-    // @Requirement
-    // private NexusEmailer emailer;
-
     public CaptureMyLogResource()
     {
         this.setModifiable( true );
@@ -54,7 +48,7 @@ public class CaptureMyLogResource
     @Override
     public PathProtectionDescriptor getResourceProtection()
     {
-        return new PathProtectionDescriptor( "/capture/my/logs/*/*",
+        return new PathProtectionDescriptor( "/capture/my/logs/*",
                                              String.format( "authcBasic,perms[%s]",
                                                             CaptureResourceConstants.PRIV_LOG_ACCESS ) );
     }
@@ -62,8 +56,7 @@ public class CaptureMyLogResource
     @Override
     public String getResourceUri()
     {
-        return "/capture/my/log/s{" + CaptureResourceConstants.ATTR_BUILD_TAG_REPO_ID + "}/{"
-                        + CaptureResourceConstants.ATTR_CAPTURE_SOURCE_REPO_ID + "}";
+        return "/capture/my/log/s{" + CaptureResourceConstants.ATTR_BUILD_TAG_REPO_ID + "}";
     }
 
     @Override
@@ -72,9 +65,6 @@ public class CaptureMyLogResource
     {
         final String buildTag =
             request.getAttributes().get( CaptureResourceConstants.ATTR_BUILD_TAG_REPO_ID ).toString();
-
-        final String captureSource =
-            request.getAttributes().get( CaptureResourceConstants.ATTR_CAPTURE_SOURCE_REPO_ID ).toString();
 
         final Subject subject = SecurityUtils.getSubject();
         final String user = subject.getPrincipal().toString();
@@ -88,10 +78,7 @@ public class CaptureMyLogResource
             {
                 try
                 {
-                    final CaptureSessionQuery query =
-                        new CaptureSessionQuery().setUser( user )
-                                                 .setBuildTag( buildTag )
-                                                 .setCaptureSource( captureSource );
+                    final CaptureSessionQuery query = new CaptureSessionQuery().setUser( user ).setBuildTag( buildTag );
 
                     data = queryLogs( query, request.getRootRef().toString() );
                 }
@@ -111,7 +98,7 @@ public class CaptureMyLogResource
         {
             try
             {
-                data = getCaptureStore().readLatestLog( user, buildTag, captureSource );
+                data = getCaptureStore().readLatestLog( user, buildTag );
             }
             catch ( final CaptureStoreException e )
             {
@@ -186,12 +173,9 @@ public class CaptureMyLogResource
         final String buildTag =
             request.getAttributes().get( CaptureResourceConstants.ATTR_BUILD_TAG_REPO_ID ).toString();
 
-        final String captureSource =
-            request.getAttributes().get( CaptureResourceConstants.ATTR_CAPTURE_SOURCE_REPO_ID ).toString();
-
         final Subject subject = SecurityUtils.getSubject();
         final String user = subject.getPrincipal().toString();
 
-        deleteLogs( user, buildTag, captureSource, request );
+        deleteLogs( user, buildTag, request );
     }
 }
