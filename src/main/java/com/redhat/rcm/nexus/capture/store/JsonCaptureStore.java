@@ -33,6 +33,7 @@ import org.sonatype.nexus.proxy.item.StorageItem;
 import com.google.gson.reflect.TypeToken;
 import com.redhat.rcm.nexus.capture.model.CaptureSession;
 import com.redhat.rcm.nexus.capture.model.CaptureSessionCatalog;
+import com.redhat.rcm.nexus.capture.model.CaptureSessionRef;
 import com.redhat.rcm.nexus.capture.model.CaptureTarget;
 import com.redhat.rcm.nexus.capture.serialize.SerializationConstants;
 import com.redhat.rcm.nexus.capture.store.CaptureSessionQuery.QueryMode;

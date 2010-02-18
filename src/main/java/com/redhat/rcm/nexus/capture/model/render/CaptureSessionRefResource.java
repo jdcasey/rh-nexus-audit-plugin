@@ -5,8 +5,8 @@ import static com.redhat.rcm.nexus.capture.model.render.CaptureSessionResource.b
 import java.util.Date;
 
 import com.google.gson.annotations.SerializedName;
+import com.redhat.rcm.nexus.capture.model.CaptureSessionRef;
 import com.redhat.rcm.nexus.capture.serialize.SerializationConstants;
-import com.redhat.rcm.nexus.capture.store.CaptureSessionRef;
 import com.thoughtworks.xstream.annotations.XStreamAlias;
 
 @XStreamAlias( SerializationConstants.SESSION_REF_ROOT )

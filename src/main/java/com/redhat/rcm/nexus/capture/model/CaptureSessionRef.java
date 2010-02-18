@@ -1,9 +1,8 @@
-package com.redhat.rcm.nexus.capture.store;
+package com.redhat.rcm.nexus.capture.model;
 
 import java.util.Date;
 
 import com.google.gson.annotations.SerializedName;
-import com.redhat.rcm.nexus.capture.model.CaptureSession;
 import com.redhat.rcm.nexus.capture.serialize.SerializationConstants;
 import com.thoughtworks.xstream.annotations.XStreamAlias;
 
