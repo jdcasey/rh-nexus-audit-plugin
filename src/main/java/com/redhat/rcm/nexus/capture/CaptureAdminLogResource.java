@@ -6,8 +6,10 @@ import static com.redhat.rcm.nexus.capture.request.RequestUtils.query;
 import static com.redhat.rcm.nexus.capture.serialize.SerializationUtils.getGson;
 import static com.redhat.rcm.nexus.capture.serialize.SerializationUtils.getXStream;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.codehaus.plexus.component.annotations.Component;
-import org.codehaus.plexus.component.annotations.Requirement;
 import org.restlet.Context;
 import org.restlet.data.Form;
 import org.restlet.data.MediaType;
@@ -23,8 +25,9 @@ import org.sonatype.plexus.rest.resource.PathProtectionDescriptor;
 import org.sonatype.plexus.rest.resource.PlexusResource;
 
 import com.redhat.rcm.nexus.capture.model.CaptureSessionQuery;
+import com.redhat.rcm.nexus.capture.model.CaptureSessionRef;
+import com.redhat.rcm.nexus.capture.model.render.CaptureSessionResource;
 import com.redhat.rcm.nexus.capture.request.RequestMode;
-import com.redhat.rcm.nexus.capture.store.CaptureStore;
 import com.redhat.rcm.nexus.capture.store.CaptureStoreException;
 
 @Component( role = PlexusResource.class, hint = "CaptureAdminLogResource" )
@@ -34,15 +37,6 @@ public class CaptureAdminLogResource
 {
 
     private final Logger logger = LoggerFactory.getLogger( getClass() );
-
-    @Requirement( hint = "json" )
-    private CaptureStore captureStore;
-
-    // @Requirement
-    // private SecuritySystem securitySystem;
-
-    // @Requirement
-    // private NexusEmailer emailer;
 
     public CaptureAdminLogResource()
     {
@@ -81,6 +75,9 @@ public class CaptureAdminLogResource
 
         final CaptureSessionQuery query = new CaptureSessionQuery().setUser( user ).setBuildTag( buildTag );
 
+        setBeforeDate( query, request );
+        setSinceDate( query, request );
+
         Object data = null;
 
         final RequestMode mode = modeOf( request );
@@ -107,14 +104,25 @@ public class CaptureAdminLogResource
 
         if ( data == null )
         {
-            // TODO: Replace this with reading a list of all full sessions that match query.
             try
             {
-                data = captureStore.readLatestLog( user, buildTag );
+                final List<CaptureSessionRef> logs = getCaptureStore().getLogs( query );
+                if ( logs != null )
+                {
+                    final String appUrl = request.getRootRef().toString();
+
+                    final List<CaptureSessionResource> resources = new ArrayList<CaptureSessionResource>( logs.size() );
+                    for ( final CaptureSessionRef ref : logs )
+                    {
+                        resources.add( new CaptureSessionResource( getCaptureStore().readLog( ref ), appUrl ) );
+                    }
+
+                    data = resources;
+                }
             }
             catch ( final CaptureStoreException e )
             {
-                logger.error( "Failed to retrieve capture log. Error: {}\nMessage: {}", e.getClass().getName(),
+                logger.error( "Failed to retrieve capture log(s). Error: {}\nMessage: {}", e.getClass().getName(),
                               e.getMessage() );
                 e.printStackTrace();
 

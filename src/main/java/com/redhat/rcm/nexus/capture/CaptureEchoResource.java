@@ -47,16 +47,14 @@ public class CaptureEchoResource
     @Override
     public PathProtectionDescriptor getResourceProtection()
     {
-        return new PathProtectionDescriptor( "/capture/echo/*/*/**",
-                                             String.format( "authcBasic,perms[%s]",
-                                                            CaptureResourceConstants.PRIV_ACCESS ) );
+        return new PathProtectionDescriptor( "/capture/echo/*/**", String.format( "authcBasic,perms[%s]",
+                                                                                  CaptureResourceConstants.PRIV_ACCESS ) );
     }
 
     @Override
     public String getResourceUri()
     {
-        return "/capture/echo/{" + CaptureResourceConstants.ATTR_BUILD_TAG_REPO_ID + "}/{"
-                        + CaptureResourceConstants.ATTR_CAPTURE_SOURCE_REPO_ID + "}";
+        return "/capture/echo/{" + CaptureResourceConstants.ATTR_BUILD_TAG_REPO_ID + "}";
     }
 
     @Override

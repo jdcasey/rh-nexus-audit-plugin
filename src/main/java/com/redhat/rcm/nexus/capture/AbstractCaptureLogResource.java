@@ -43,28 +43,8 @@ public abstract class AbstractCaptureLogResource
     {
         final CaptureSessionQuery query = new CaptureSessionQuery().setUser( user ).setBuildTag( buildTag );
 
-        try
-        {
-            final String value = query( request ).getFirstValue( CaptureResourceConstants.PARAM_BEFORE );
-            final Date before = parseUrlDate( value );
-
-            if ( before != null )
-            {
-                query.setBefore( before );
-            }
-        }
-        catch ( final ParseException e )
-        {
-            final String message =
-                String.format( "Invalid date format in %s parameter. Error: %s\nMessage: %s",
-                               CaptureResourceConstants.PARAM_BEFORE, e.getClass().getName(), e.getMessage() );
-
-            logger.error( message, e );
-
-            e.printStackTrace();
-
-            throw new ResourceException( Status.CLIENT_ERROR_BAD_REQUEST, message );
-        }
+        setBeforeDate( query, request );
+        setSinceDate( query, request );
 
         try
         {
@@ -82,6 +62,52 @@ public abstract class AbstractCaptureLogResource
 
             throw new ResourceException( Status.SERVER_ERROR_INTERNAL, message );
         }
+    }
+
+    protected void setBeforeDate( final CaptureSessionQuery query, final Request request )
+        throws ResourceException
+    {
+        final Date d = getDate( CaptureResourceConstants.PARAM_BEFORE, request );
+        if ( d != null )
+        {
+            query.setBefore( d );
+        }
+    }
+
+    protected void setSinceDate( final CaptureSessionQuery query, final Request request )
+        throws ResourceException
+    {
+        final Date d = getDate( CaptureResourceConstants.PARAM_SINCE, request );
+        if ( d != null )
+        {
+            query.setBefore( d );
+        }
+    }
+
+    protected Date getDate( final String param, final Request request )
+        throws ResourceException
+    {
+        Date before = null;
+        try
+        {
+            final String value = query( request ).getFirstValue( param );
+            before = parseUrlDate( value );
+        }
+        catch ( final ParseException e )
+        {
+            final String message =
+                String.format( "Invalid date format in %s parameter. Error: %s\nMessage: %s", param, e.getClass()
+                                                                                                      .getName(),
+                               e.getMessage() );
+
+            logger.error( message, e );
+
+            e.printStackTrace();
+
+            throw new ResourceException( Status.CLIENT_ERROR_BAD_REQUEST, message );
+        }
+
+        return before;
     }
 
     protected List<CaptureSessionRefResource> queryLogs( final CaptureSessionQuery query, final String appUrl )
