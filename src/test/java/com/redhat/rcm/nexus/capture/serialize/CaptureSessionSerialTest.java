@@ -1,7 +1,7 @@
 package com.redhat.rcm.nexus.capture.serialize;
 
 import static com.redhat.rcm.nexus.capture.model.serialize.SerializationUtils.getGson;
-import static com.redhat.rcm.nexus.capture.model.serialize.SerializationUtils.getXStream;
+import static com.redhat.rcm.nexus.capture.model.serialize.SerializationUtils.getXStreamForStore;
 import static org.easymock.EasyMock.createMock;
 import static org.easymock.EasyMock.expect;
 import static org.easymock.EasyMock.replay;
@@ -131,10 +131,10 @@ public class CaptureSessionSerialTest
                                         gavs[1],
                                         items[i++] ) );
 
-        final String result = getXStream().toXML( session );
+        final String result = getXStreamForStore().toXML( session );
         System.out.println( result );
 
-        final CaptureSession resultSess = (CaptureSession) getXStream().fromXML( result );
+        final CaptureSession resultSess = (CaptureSession) getXStreamForStore().fromXML( result );
     }
 
     private StorageItem newStorageItem( final String path )

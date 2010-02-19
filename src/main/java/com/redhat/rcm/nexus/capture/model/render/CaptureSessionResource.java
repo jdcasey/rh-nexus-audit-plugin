@@ -18,6 +18,10 @@ import com.thoughtworks.xstream.annotations.XStreamAlias;
 public class CaptureSessionResource
 {
 
+    @SerializedName( SerializationConstants.RESOURCE_URI_FIELD )
+    @XStreamAlias( SerializationConstants.RESOURCE_URI_FIELD )
+    private final String url;
+
     private final String user;
 
     @SerializedName( SerializationConstants.BUILD_TAG_FIELD )
@@ -33,8 +37,6 @@ public class CaptureSessionResource
     private final Date lastUpdated;
 
     private final List<CaptureTargetResource> targets;
-
-    private final String url;
 
     // used for gson deserialization
     @SuppressWarnings( "unused" )

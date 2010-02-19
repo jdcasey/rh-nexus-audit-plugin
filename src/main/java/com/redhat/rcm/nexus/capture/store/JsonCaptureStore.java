@@ -161,6 +161,7 @@ public class JsonCaptureStore
         throws CaptureStoreException
     {
         CaptureSession session = sessions.get( ref.key() );
+
         if ( session == null || !ref.getDate().equals( session.getStartDate() ) )
         {
             final CaptureSessionCatalog catalog = catalogs.get( ref.key() );

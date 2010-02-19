@@ -14,6 +14,10 @@ public class CaptureSessionRefResource
     implements Comparable<CaptureSessionRefResource>
 {
 
+    @SerializedName( SerializationConstants.RESOURCE_URI_FIELD )
+    @XStreamAlias( SerializationConstants.RESOURCE_URI_FIELD )
+    private final String url;
+
     private final String user;
 
     @SerializedName( SerializationConstants.BUILD_TAG_FIELD )
@@ -23,10 +27,6 @@ public class CaptureSessionRefResource
     @SerializedName( SerializationConstants.DATE_FIELD )
     @XStreamAlias( SerializationConstants.DATE_FIELD )
     private final Date date;
-
-    @SerializedName( SerializationConstants.RESOURCE_URI_FIELD )
-    @XStreamAlias( SerializationConstants.RESOURCE_URI_FIELD )
-    private final String url;
 
     // used for gson deserialization
     @SuppressWarnings( "unused" )

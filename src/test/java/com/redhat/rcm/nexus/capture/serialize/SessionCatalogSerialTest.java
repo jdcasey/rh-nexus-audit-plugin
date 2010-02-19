@@ -1,7 +1,7 @@
 package com.redhat.rcm.nexus.capture.serialize;
 
 import static com.redhat.rcm.nexus.capture.model.serialize.SerializationUtils.getGson;
-import static com.redhat.rcm.nexus.capture.model.serialize.SerializationUtils.getXStream;
+import static com.redhat.rcm.nexus.capture.model.serialize.SerializationUtils.getXStreamForStore;
 
 import java.io.File;
 
@@ -51,10 +51,10 @@ public class SessionCatalogSerialTest
 
         cat.add( new CaptureSession( user, buildTag, captureSource ).setFile( new File( "/path/to/session-2.json" ) ) );
 
-        final String result = getXStream().toXML( cat );
+        final String result = getXStreamForStore().toXML( cat );
         System.out.println( result );
 
-        final CaptureSessionCatalog resultCat = (CaptureSessionCatalog) getXStream().fromXML( result );
+        final CaptureSessionCatalog resultCat = (CaptureSessionCatalog) getXStreamForStore().fromXML( result );
     }
 
 }

@@ -28,7 +28,11 @@ import com.google.gson.JsonSerializer;
 import com.google.gson.reflect.TypeToken;
 import com.redhat.rcm.nexus.capture.model.CaptureSession;
 import com.redhat.rcm.nexus.capture.model.CaptureSessionCatalog;
+import com.redhat.rcm.nexus.capture.model.CaptureSessionRef;
 import com.redhat.rcm.nexus.capture.model.CaptureTarget;
+import com.redhat.rcm.nexus.capture.model.render.CaptureSessionRefResource;
+import com.redhat.rcm.nexus.capture.model.render.CaptureSessionResource;
+import com.redhat.rcm.nexus.capture.model.render.CaptureTargetResource;
 import com.thoughtworks.xstream.XStream;
 import com.thoughtworks.xstream.converters.Converter;
 import com.thoughtworks.xstream.converters.MarshallingContext;
@@ -58,22 +62,45 @@ public final class SerializationUtils
                                 .create();
     }
 
-    public static XStream getXStream()
+    public static XStream getXStreamForStore()
     {
-        final XStream xs = new XStream();
-
-        xs.setMode( XStream.NO_REFERENCES );
+        final XStream xs = createXStream();
 
         xs.registerLocalConverter( CaptureTarget.class, "processedRepositories", new StringListConverter( "repository" ) );
 
         xs.registerLocalConverter( CaptureSessionCatalog.class, "sessions", new DateToFileMapTypeAdapter( DATE_FORMAT,
                                                                                                           "session" ) );
 
-        xs.registerConverter( new CustomFormatDateConverter( DATE_FORMAT ) );
-
+        // Model/Query classes
         xs.processAnnotations( CaptureSession.class );
         xs.processAnnotations( CaptureTarget.class );
         xs.processAnnotations( CaptureSessionCatalog.class );
+        xs.processAnnotations( CaptureSessionRef.class );
+
+        return xs;
+    }
+
+    public static XStream getXStreamForREST()
+    {
+        final XStream xs = createXStream();
+
+        xs.registerLocalConverter( CaptureTargetResource.class, "processedRepositories",
+                                   new StringListConverter( "repository" ) );
+
+        // REST resource DTOs
+        xs.processAnnotations( CaptureSessionResource.class );
+        xs.processAnnotations( CaptureTargetResource.class );
+        xs.processAnnotations( CaptureSessionRefResource.class );
+
+        return xs;
+    }
+
+    private static XStream createXStream()
+    {
+        final XStream xs = new XStream();
+
+        xs.setMode( XStream.NO_REFERENCES );
+        xs.registerConverter( new CustomFormatDateConverter( DATE_FORMAT ) );
 
         return xs;
     }

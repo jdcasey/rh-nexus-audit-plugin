@@ -1,7 +1,7 @@
 package com.redhat.rcm.nexus.capture;
 
 import static com.redhat.rcm.nexus.capture.model.serialize.SerializationUtils.getGson;
-import static com.redhat.rcm.nexus.capture.model.serialize.SerializationUtils.getXStream;
+import static com.redhat.rcm.nexus.capture.model.serialize.SerializationUtils.getXStreamForREST;
 import static com.redhat.rcm.nexus.capture.request.RequestUtils.mediaTypeOf;
 import static com.redhat.rcm.nexus.capture.request.RequestUtils.parseUrlDate;
 
@@ -81,12 +81,17 @@ public class CaptureLogResource
         try
         {
             final Date date = parseUrlDate( dateValue );
+
             final CaptureSessionRef ref = new CaptureSessionRef( user, buildTag, date );
 
             final CaptureSession session = captureStore.readLog( ref );
             if ( session != null )
             {
                 data = new CaptureSessionResource( session, request.getRootRef().toString() );
+            }
+            else
+            {
+                throw new ResourceException( Status.CLIENT_ERROR_NOT_FOUND );
             }
         }
         catch ( final CaptureStoreException e )
@@ -117,7 +122,7 @@ public class CaptureLogResource
         final MediaType mt = mediaTypeOf( request, variant );
         if ( mt == MediaType.APPLICATION_XML )
         {
-            result = getXStream().toXML( data );
+            result = getXStreamForREST().toXML( data );
         }
         else if ( mt == MediaType.APPLICATION_JSON )
         {

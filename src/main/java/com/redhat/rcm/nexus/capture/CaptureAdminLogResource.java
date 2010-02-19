@@ -5,7 +5,7 @@ import static com.redhat.rcm.nexus.capture.CaptureLogUtils.queryLogs;
 import static com.redhat.rcm.nexus.capture.CaptureLogUtils.setBeforeDate;
 import static com.redhat.rcm.nexus.capture.CaptureLogUtils.setSinceDate;
 import static com.redhat.rcm.nexus.capture.model.serialize.SerializationUtils.getGson;
-import static com.redhat.rcm.nexus.capture.model.serialize.SerializationUtils.getXStream;
+import static com.redhat.rcm.nexus.capture.model.serialize.SerializationUtils.getXStreamForREST;
 import static com.redhat.rcm.nexus.capture.request.RequestUtils.mediaTypeOf;
 import static com.redhat.rcm.nexus.capture.request.RequestUtils.modeOf;
 import static com.redhat.rcm.nexus.capture.request.RequestUtils.query;
@@ -147,7 +147,7 @@ public class CaptureAdminLogResource
         final MediaType mt = mediaTypeOf( request, variant );
         if ( mt == MediaType.APPLICATION_XML )
         {
-            result = getXStream().toXML( data );
+            result = getXStreamForREST().toXML( data );
         }
         else if ( mt == MediaType.APPLICATION_JSON )
         {

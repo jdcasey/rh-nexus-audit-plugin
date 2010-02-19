@@ -1,7 +1,5 @@
 package com.redhat.rcm.nexus.capture.request;
 
-import static com.redhat.rcm.nexus.capture.model.serialize.SerializationUtils.getGson;
-import static com.redhat.rcm.nexus.capture.model.serialize.SerializationUtils.getXStream;
 import static org.codehaus.plexus.util.StringUtils.isNotEmpty;
 
 import java.text.ParseException;
@@ -24,7 +22,7 @@ public final class RequestUtils
 
     private static final String FULL_DATE_FORMAT = "yyyy-MM-dd+HH-mm-ssZ";
 
-    private static final String[] URL_DATE_FORMATs = { "yyyy-MM-dd", "yyyy-MM-dd+HH-mm-ss", FULL_DATE_FORMAT };
+    private static final String[] URL_DATE_FORMATs = { FULL_DATE_FORMAT, "yyyy-MM-dd+HH-mm-ss", "yyyy-MM-dd" };
 
     private static final Logger logger = LoggerFactory.getLogger( RequestUtils.class );
 
@@ -129,24 +127,6 @@ public final class RequestUtils
         }
 
         return d;
-    }
-
-    public static String render( final Object obj, final MediaType mt )
-    {
-        if ( mt == MediaType.APPLICATION_RSS_XML )
-        {
-            throw new UnsupportedOperationException();
-        }
-        else if ( mt == MediaType.APPLICATION_XML )
-        {
-            return getXStream().toXML( obj );
-        }
-        else if ( mt == MediaType.APPLICATION_JSON )
-        {
-            return getGson().toJson( obj );
-        }
-
-        return null;
     }
 
     public static MediaType mediaTypeOf( final Request request, final Variant variant )

@@ -49,7 +49,7 @@ public final class CaptureResourceConstants
 
     private static final String CAPTURE_SVC_BASEURI = SERVICE_BASEURI + "/capture";
 
-    public static final String LOG_RESOURCE_BASEURI = CAPTURE_SVC_BASEURI + "log";
+    public static final String LOG_RESOURCE_BASEURI = CAPTURE_SVC_BASEURI + "/log";
 
     public static final String REPOSITORY_CONTENT_URLPART = "/content";
 

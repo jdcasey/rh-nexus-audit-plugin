@@ -17,6 +17,10 @@ import com.thoughtworks.xstream.annotations.XStreamAlias;
 public class CaptureTargetResource
 {
 
+    @SerializedName( SerializationConstants.RESOURCE_URI_FIELD )
+    @XStreamAlias( SerializationConstants.RESOURCE_URI_FIELD )
+    private final String url;
+
     private final String path;
 
     private boolean resolved = false;
@@ -34,8 +38,6 @@ public class CaptureTargetResource
     @SerializedName( SerializationConstants.CHECKED_REPOS_FIELD )
     @XStreamAlias( SerializationConstants.CHECKED_REPOS_FIELD )
     private final List<String> processedRepositories;
-
-    private final String url;
 
     // Used for Gson deserialization.
     @SuppressWarnings( "unused" )
