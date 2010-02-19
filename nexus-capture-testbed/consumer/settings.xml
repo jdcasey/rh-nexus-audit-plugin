@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<settings>
+  <localRepository>/Users/jdcasey/workspace/redhat/nexus-capture-testbed/consumer/local-repo</localRepository>
+  <mirrors>
+    <mirror>
+      <id>nexus</id>
+      <name>Local Nexus</name>
+      <mirrorOf>external:*</mirrorOf>
+      <url>http://localhost:8081/nexus/service/local/capture/resolve/public/jboss</url>
+      <!-- <url>http://localhost:8081/nexus/service/local/capture/resolve/public/jb-release</url> -->
+    </mirror>
+  </mirrors>
+  <servers>
+    <server>
+      <id>nexus</id>
+      <username>jdcasey</username>
+      <password>l3tm31n</password>
+    </server>
+    <server>
+      <id>central</id>
+      <username>jdcasey</username>
+      <password>l3tm31n</password>
+    </server>
+    <!-- <server>
+      <id>nexus</id>
+      <username>admin</username>
+      <password>admin123</password>
+    </server>
+    <server>
+      <id>central</id>
+      <username>admin</username>
+      <password>admin123</password>
+    </server> -->
+  </servers>
+</settings>
