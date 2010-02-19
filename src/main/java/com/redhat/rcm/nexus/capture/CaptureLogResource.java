@@ -8,7 +8,9 @@ import static com.redhat.rcm.nexus.capture.request.RequestUtils.parseUrlDate;
 import java.text.ParseException;
 import java.util.Date;
 
-import org.codehaus.plexus.component.annotations.Component;
+import javax.inject.Inject;
+import javax.inject.Named;
+
 import org.restlet.Context;
 import org.restlet.data.MediaType;
 import org.restlet.data.Request;
@@ -19,21 +21,27 @@ import org.restlet.resource.StringRepresentation;
 import org.restlet.resource.Variant;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.sonatype.nexus.rest.AbstractNexusPlexusResource;
 import org.sonatype.plexus.rest.resource.PathProtectionDescriptor;
 import org.sonatype.plexus.rest.resource.PlexusResource;
 
 import com.redhat.rcm.nexus.capture.model.CaptureSession;
 import com.redhat.rcm.nexus.capture.model.CaptureSessionRef;
 import com.redhat.rcm.nexus.capture.model.render.CaptureSessionResource;
+import com.redhat.rcm.nexus.capture.store.CaptureStore;
 import com.redhat.rcm.nexus.capture.store.CaptureStoreException;
 
-@Component( role = PlexusResource.class, hint = "CaptureLogResource" )
+@Named( "captureLog" )
 public class CaptureLogResource
-    extends AbstractCaptureLogResource
+    extends AbstractNexusPlexusResource
     implements PlexusResource
 {
 
     private final Logger logger = LoggerFactory.getLogger( getClass() );
+
+    @Inject
+    @Named( "json" )
+    private CaptureStore captureStore;
 
     @Override
     public Object getPayloadInstance()
@@ -75,7 +83,7 @@ public class CaptureLogResource
             final Date date = parseUrlDate( dateValue );
             final CaptureSessionRef ref = new CaptureSessionRef( user, buildTag, date );
 
-            final CaptureSession session = getCaptureStore().readLog( ref );
+            final CaptureSession session = captureStore.readLog( ref );
             if ( session != null )
             {
                 data = new CaptureSessionResource( session, request.getRootRef().toString() );

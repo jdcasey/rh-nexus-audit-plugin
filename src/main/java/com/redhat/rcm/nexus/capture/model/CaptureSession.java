@@ -112,7 +112,7 @@ public class CaptureSession
 
     public static String key( final String user, final String buildTag )
     {
-        return String.format( "%s:%s:%s", user, buildTag );
+        return String.format( "%s:%s", user, buildTag );
     }
 
 }

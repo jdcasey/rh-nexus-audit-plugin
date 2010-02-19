@@ -1,12 +1,14 @@
 package com.redhat.rcm.nexus.capture;
 
-import org.codehaus.plexus.component.annotations.Component;
+import javax.inject.Named;
+
 import org.sonatype.security.realms.tools.AbstractStaticSecurityResource;
 import org.sonatype.security.realms.tools.StaticSecurityResource;
 
-@Component( role = StaticSecurityResource.class, hint = "CaptureStaticSecurityResource" )
+@Named( "captureSecurity" )
 public class CaptureStaticSecurityResource
     extends AbstractStaticSecurityResource
+    implements StaticSecurityResource
 {
 
     @Override

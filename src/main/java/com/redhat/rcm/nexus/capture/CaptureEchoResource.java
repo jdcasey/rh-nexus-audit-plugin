@@ -6,7 +6,8 @@ import static com.redhat.rcm.nexus.capture.request.RequestUtils.query;
 
 import java.util.List;
 
-import org.codehaus.plexus.component.annotations.Component;
+import javax.inject.Named;
+
 import org.jsecurity.SecurityUtils;
 import org.restlet.Context;
 import org.restlet.data.Form;
@@ -24,7 +25,7 @@ import org.sonatype.nexus.rest.AbstractNexusPlexusResource;
 import org.sonatype.plexus.rest.resource.PathProtectionDescriptor;
 import org.sonatype.plexus.rest.resource.PlexusResource;
 
-@Component( role = PlexusResource.class, hint = "CaptureEchoResource" )
+@Named( "captureEcho" )
 public class CaptureEchoResource
     extends AbstractNexusPlexusResource
     implements PlexusResource
@@ -47,14 +48,13 @@ public class CaptureEchoResource
     @Override
     public PathProtectionDescriptor getResourceProtection()
     {
-        return new PathProtectionDescriptor( "/capture/echo/*/**", String.format( "authcBasic,perms[%s]",
-                                                                                  CaptureResourceConstants.PRIV_ACCESS ) );
+        return new PathProtectionDescriptor( "/capture/echo", "authcBasic" );
     }
 
     @Override
     public String getResourceUri()
     {
-        return "/capture/echo/{" + CaptureResourceConstants.ATTR_BUILD_TAG_REPO_ID + "}";
+        return "/capture/echo";
     }
 
     @Override
@@ -80,18 +80,18 @@ public class CaptureEchoResource
     private MediaType baseInfo( final StringBuilder sb, final Context context, final Request request,
                                 final Response response, final Variant variant, final Object payload )
     {
-        final String buildTag =
-            request.getAttributes().get( CaptureResourceConstants.ATTR_BUILD_TAG_REPO_ID ).toString();
-
-        final String captureSource =
-            request.getAttributes().get( CaptureResourceConstants.ATTR_CAPTURE_SOURCE_REPO_ID ).toString();
+        // final String buildTag =
+        // request.getAttributes().get( CaptureResourceConstants.ATTR_BUILD_TAG_REPO_ID ).toString();
+        //
+        // final String captureSource =
+        // request.getAttributes().get( CaptureResourceConstants.ATTR_CAPTURE_SOURCE_REPO_ID ).toString();
 
         final Form headers = headers( request );
         final Form query = query( request );
 
         sb.append( "\nHandler Instance: " ).append( this );
-        sb.append( "\nBuild Tag: " ).append( buildTag );
-        sb.append( "\nCapture Source: " ).append( captureSource );
+        // sb.append( "\nBuild Tag: " ).append( buildTag );
+        // sb.append( "\nCapture Source: " ).append( captureSource );
         sb.append( "\nRoot URL: " ).append( request.getRootRef() );
         sb.append( "\nUser: " ).append( SecurityUtils.getSubject().getPrincipal() );
 

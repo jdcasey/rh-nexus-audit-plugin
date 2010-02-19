@@ -2,8 +2,9 @@ package com.redhat.rcm.nexus.capture;
 
 import java.io.IOException;
 
-import org.codehaus.plexus.component.annotations.Component;
-import org.codehaus.plexus.component.annotations.Requirement;
+import javax.inject.Inject;
+import javax.inject.Named;
+
 import org.jsecurity.SecurityUtils;
 import org.jsecurity.authz.AuthorizationException;
 import org.jsecurity.subject.Subject;
@@ -35,7 +36,7 @@ import com.redhat.rcm.nexus.capture.store.CaptureStoreException;
  * then from a capture-source repository (second part of the URL after /capture/). <br/>
  * NOTE: If the user does not have access to the capture-source repository, the retrieve attempt will fail.
  */
-@Component( role = PlexusResource.class, hint = "CaptureResolverResource" )
+@Named( "captureResolver" )
 public class CaptureResolverResource
     extends AbstractResourceStoreContentPlexusResource
     implements PlexusResource
@@ -43,7 +44,8 @@ public class CaptureResolverResource
 
     private final Logger logger = LoggerFactory.getLogger( getClass() );
 
-    @Requirement( hint = "json" )
+    @Inject
+    @Named( "json" )
     private CaptureStore captureStore;
 
     @Override
@@ -57,7 +59,7 @@ public class CaptureResolverResource
     public PathProtectionDescriptor getResourceProtection()
     {
         // NOTE: Using this will result in 'anonymous' being the subject.
-        // return new PathProtectionDescriptor( "/capture/*/*/**", "authcBasic" );
+        // return new PathProtectionDescriptor( "/capture/resolve/*/*/content/**", "authcBasic" );
 
         return new PathProtectionDescriptor( "/capture/resolve/*/*/**",
                                              String.format( "authcBasic,perms[%s]",
@@ -167,11 +169,7 @@ public class CaptureResolverResource
 
         if ( !subject.isPermitted( CaptureResourceConstants.PERM_EXTERNAL_GET ) )
         {
-            if ( logger.isDebugEnabled() )
-            {
-                logger.debug( "User: '" + user
-                                + "' does not have permission to resolve dependencies from capture source." );
-            }
+            logger.warn( "User: '" + user + "' does not have permission to resolve dependencies from capture source." );
             return null;
         }
 

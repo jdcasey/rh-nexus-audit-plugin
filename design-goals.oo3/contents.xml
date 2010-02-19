@@ -63,11 +63,11 @@
       <print-info-key name="OOScaleDocumentToFitPageWidth" type="boolean">true</print-info-key>
     </print-info>
   </settings>
-  <editor content-size="{1067, 483}" is-spellchecking-enabled="yes">
+  <editor content-size="{899, 591}" is-spellchecking-enabled="yes">
     <drawer palette-height="167"/>
-    <selected-rows ids="e4cm0khFk93"/>
+    <selected-rows ids="k_0gAQwMlxh"/>
     <selected-columns ids="jFqHUGd_Dg1"/>
-    <selected-characters range="{22, 0}"/>
+    <selected-characters range="{69, 0}"/>
   </editor>
   <columns>
     <column id="dTpN3JwYpBn" type="text" width="18" minimum-width="18" maximum-width="18" text-export-width="1" is-note-column="yes">
@@ -84,7 +84,7 @@
         </text>
       </title>
     </column>
-    <column id="jFqHUGd_Dg1" type="text" width="1031" minimum-width="13" maximum-width="1000000" text-export-width="72" is-outline-column="yes">
+    <column id="jFqHUGd_Dg1" type="text" width="863" minimum-width="13" maximum-width="1000000" text-export-width="72" is-outline-column="yes">
       <title>
         <text>
           <p>
@@ -272,7 +272,7 @@
                         </text>
                       </values>
                       <children>
-                        <item id="jKU87X5bv2X">
+                        <item id="jKU87X5bv2X" expanded="yes">
                           <values>
                             <text>
                               <p>
@@ -282,8 +282,32 @@
                               </p>
                             </text>
                           </values>
+                          <children>
+                            <item id="cq5dZ6JM2el">
+                              <values>
+                                <text>
+                                  <p>
+                                    <run>
+                                      <lit>SecuritySystem provides user information, which includes email.</lit>
+                                    </run>
+                                  </p>
+                                </text>
+                              </values>
+                            </item>
+                            <item id="f3m9Ua9h-QW">
+                              <values>
+                                <text>
+                                  <p>
+                                    <run>
+                                      <lit>would require SMTP configuration to be accurate...</lit>
+                                    </run>
+                                  </p>
+                                </text>
+                              </values>
+                            </item>
+                          </children>
                         </item>
-                        <item id="gyzuP4RpIfP">
+                        <item id="gyzuP4RpIfP" expanded="yes">
                           <values>
                             <text>
                               <p>
@@ -293,8 +317,45 @@
                               </p>
                             </text>
                           </values>
+                          <children>
+                            <item id="dz9FoMlKQGy" expanded="yes">
+                              <values>
+                                <text>
+                                  <p>
+                                    <run>
+                                      <lit>only makes sense when logging the fact of new capture sessions being added...</lit>
+                                    </run>
+                                  </p>
+                                </text>
+                              </values>
+                              <children>
+                                <item id="hI1kpLc7cQ9">
+                                  <values>
+                                    <text>
+                                      <p>
+                                        <run>
+                                          <lit>how would I represent this? probably just a CaptureSessionRefResource...</lit>
+                                        </run>
+                                      </p>
+                                    </text>
+                                  </values>
+                                </item>
+                                <item id="k_0gAQwMlxh">
+                                  <values>
+                                    <text>
+                                      <p>
+                                        <run>
+                                          <lit>Add these to the my-logs and admin/logs resources, where mode == TOC?</lit>
+                                        </run>
+                                      </p>
+                                    </text>
+                                  </values>
+                                </item>
+                              </children>
+                            </item>
+                          </children>
                         </item>
-                        <item id="p-gHxjDw57J">
+                        <item id="p-gHxjDw57J" expanded="yes">
                           <values>
                             <text>
                               <p>
@@ -304,6 +365,19 @@
                               </p>
                             </text>
                           </values>
+                          <children>
+                            <item id="bClwcsD_Tn8">
+                              <values>
+                                <text>
+                                  <p>
+                                    <run>
+                                      <lit>Need to work on a ExtJS UI for my-logs and admin/logs...?</lit>
+                                    </run>
+                                  </p>
+                                </text>
+                              </values>
+                            </item>
+                          </children>
                         </item>
                         <item id="e4cm0khFk93">
                           <values>

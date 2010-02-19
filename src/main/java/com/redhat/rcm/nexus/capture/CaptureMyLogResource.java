@@ -1,11 +1,15 @@
 package com.redhat.rcm.nexus.capture;
 
+import static com.redhat.rcm.nexus.capture.CaptureLogUtils.deleteLogs;
+import static com.redhat.rcm.nexus.capture.CaptureLogUtils.queryLogs;
 import static com.redhat.rcm.nexus.capture.model.serialize.SerializationUtils.getGson;
 import static com.redhat.rcm.nexus.capture.model.serialize.SerializationUtils.getXStream;
 import static com.redhat.rcm.nexus.capture.request.RequestUtils.mediaTypeOf;
 import static com.redhat.rcm.nexus.capture.request.RequestUtils.modeOf;
 
-import org.codehaus.plexus.component.annotations.Component;
+import javax.inject.Inject;
+import javax.inject.Named;
+
 import org.jsecurity.SecurityUtils;
 import org.jsecurity.subject.Subject;
 import org.restlet.Context;
@@ -18,20 +22,26 @@ import org.restlet.resource.StringRepresentation;
 import org.restlet.resource.Variant;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.sonatype.nexus.rest.AbstractNexusPlexusResource;
 import org.sonatype.plexus.rest.resource.PathProtectionDescriptor;
 import org.sonatype.plexus.rest.resource.PlexusResource;
 
 import com.redhat.rcm.nexus.capture.request.RequestMode;
 import com.redhat.rcm.nexus.capture.store.CaptureSessionQuery;
+import com.redhat.rcm.nexus.capture.store.CaptureStore;
 import com.redhat.rcm.nexus.capture.store.CaptureStoreException;
 
-@Component( role = PlexusResource.class, hint = "CaptureMyLogResource" )
+@Named( "captureMyLog" )
 public class CaptureMyLogResource
-    extends AbstractCaptureLogResource
+    extends AbstractNexusPlexusResource
     implements PlexusResource
 {
 
     private final Logger logger = LoggerFactory.getLogger( getClass() );
+
+    @Inject
+    @Named( "json" )
+    private CaptureStore captureStore;
 
     public CaptureMyLogResource()
     {
@@ -56,7 +66,7 @@ public class CaptureMyLogResource
     @Override
     public String getResourceUri()
     {
-        return "/capture/my/log/s{" + CaptureResourceConstants.ATTR_BUILD_TAG_REPO_ID + "}";
+        return "/capture/my/logs/{" + CaptureResourceConstants.ATTR_BUILD_TAG_REPO_ID + "}";
     }
 
     @Override
@@ -80,7 +90,7 @@ public class CaptureMyLogResource
                 {
                     final CaptureSessionQuery query = new CaptureSessionQuery().setUser( user ).setBuildTag( buildTag );
 
-                    data = queryLogs( query, request.getRootRef().toString() );
+                    data = queryLogs( captureStore, query, request.getRootRef().toString() );
                 }
                 catch ( final CaptureStoreException e )
                 {
@@ -98,7 +108,7 @@ public class CaptureMyLogResource
         {
             try
             {
-                data = getCaptureStore().readLatestLog( user, buildTag );
+                data = captureStore.readLatestLog( user, buildTag );
             }
             catch ( final CaptureStoreException e )
             {
@@ -144,7 +154,7 @@ public class CaptureMyLogResource
 
         try
         {
-            getCaptureStore().closeCurrentLog( user, buildTag, captureSource );
+            captureStore.closeCurrentLog( user, buildTag, captureSource );
         }
         catch ( final CaptureStoreException e )
         {
@@ -176,6 +186,6 @@ public class CaptureMyLogResource
         final Subject subject = SecurityUtils.getSubject();
         final String user = subject.getPrincipal().toString();
 
-        deleteLogs( user, buildTag, request );
+        deleteLogs( captureStore, user, buildTag, request );
     }
 }

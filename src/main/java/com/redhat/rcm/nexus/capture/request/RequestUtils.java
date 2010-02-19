@@ -11,7 +11,11 @@ import java.util.Date;
 import org.restlet.data.Form;
 import org.restlet.data.MediaType;
 import org.restlet.data.Request;
+import org.restlet.data.Status;
+import org.restlet.resource.ResourceException;
 import org.restlet.resource.Variant;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.redhat.rcm.nexus.capture.CaptureResourceConstants;
 
@@ -22,7 +26,7 @@ public final class RequestUtils
 
     private static final String[] URL_DATE_FORMATs = { "yyyy-MM-dd", "yyyy-MM-dd+HH-mm-ss", FULL_DATE_FORMAT };
 
-    // private static final Logger logger = LoggerFactory.getLogger( RequestUtils.class );
+    private static final Logger logger = LoggerFactory.getLogger( RequestUtils.class );
 
     private RequestUtils()
     {
@@ -61,6 +65,32 @@ public final class RequestUtils
         }
 
         return sb.length() == 0 ? null : sb.toString();
+    }
+
+    public static Date getDate( final String param, final Request request )
+        throws ResourceException
+    {
+        Date before = null;
+        try
+        {
+            final String value = query( request ).getFirstValue( param );
+            before = parseUrlDate( value );
+        }
+        catch ( final ParseException e )
+        {
+            final String message =
+                String.format( "Invalid date format in %s parameter. Error: %s\nMessage: %s", param, e.getClass()
+                                                                                                      .getName(),
+                               e.getMessage() );
+
+            logger.error( message, e );
+
+            e.printStackTrace();
+
+            throw new ResourceException( Status.CLIENT_ERROR_BAD_REQUEST, message );
+        }
+
+        return before;
     }
 
     public static String formatUrlDate( final Date date )

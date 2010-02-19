@@ -17,8 +17,9 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
 
-import org.codehaus.plexus.component.annotations.Component;
-import org.codehaus.plexus.component.annotations.Requirement;
+import javax.inject.Inject;
+import javax.inject.Named;
+
 import org.codehaus.plexus.personality.plexus.lifecycle.phase.Initializable;
 import org.codehaus.plexus.personality.plexus.lifecycle.phase.InitializationException;
 import org.codehaus.plexus.util.IOUtil;
@@ -38,7 +39,7 @@ import com.redhat.rcm.nexus.capture.model.CaptureTarget;
 import com.redhat.rcm.nexus.capture.model.serialize.SerializationConstants;
 import com.redhat.rcm.nexus.capture.store.CaptureSessionQuery.QueryMode;
 
-@Component( role = CaptureStore.class, hint = "json" )
+@Named( "json" )
 public class JsonCaptureStore
     implements CaptureStore, Initializable
 {
@@ -52,10 +53,11 @@ public class JsonCaptureStore
 
     private final Logger logger = LoggerFactory.getLogger( getClass() );
 
-    @Requirement
+    @Inject
     private ApplicationConfiguration applicationConfiguration;
 
-    @Requirement( hint = "maven2" )
+    @Inject
+    @Named( "maven2" )
     GavCalculator gavCalculator;
 
     private final Map<String, CaptureSession> sessions = new HashMap<String, CaptureSession>();
@@ -63,6 +65,11 @@ public class JsonCaptureStore
     private final Map<String, CaptureSessionCatalog> catalogs = new HashMap<String, CaptureSessionCatalog>();
 
     private File workDir;
+
+    public JsonCaptureStore()
+    {
+        System.out.println( "\n\n\n\nStarting JSON capture store!\nInstance: " + this + "\n\n\n\n" );
+    }
 
     public CaptureSession closeCurrentLog( final String user, final String buildTag, final String captureSource )
         throws CaptureStoreException
@@ -449,17 +456,26 @@ public class JsonCaptureStore
         return f;
     }
 
-    public void initialize()
+    private boolean initialized = false;
+
+    public synchronized void initialize()
         throws InitializationException
     {
-        try
+        if ( !initialized )
         {
-            readCatalogs();
-        }
-        catch ( final IOException e )
-        {
-            throw new InitializationException( String.format( "Failed to read catalogs from the filesystem: %s",
-                                                              e.getMessage() ), e );
+            try
+            {
+                readCatalogs();
+            }
+            catch ( final IOException e )
+            {
+                System.out.println( "\n\n\n\n\nFailed to read catalogs.json file!!!\n\n\n\n\n" );
+
+                throw new InitializationException( String.format( "Failed to read catalogs from the filesystem: %s",
+                                                                  e.getMessage() ), e );
+            }
+
+            initialized = true;
         }
     }
 

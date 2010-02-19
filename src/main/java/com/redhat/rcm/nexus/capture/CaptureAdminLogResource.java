@@ -1,5 +1,9 @@
 package com.redhat.rcm.nexus.capture;
 
+import static com.redhat.rcm.nexus.capture.CaptureLogUtils.deleteLogs;
+import static com.redhat.rcm.nexus.capture.CaptureLogUtils.queryLogs;
+import static com.redhat.rcm.nexus.capture.CaptureLogUtils.setBeforeDate;
+import static com.redhat.rcm.nexus.capture.CaptureLogUtils.setSinceDate;
 import static com.redhat.rcm.nexus.capture.model.serialize.SerializationUtils.getGson;
 import static com.redhat.rcm.nexus.capture.model.serialize.SerializationUtils.getXStream;
 import static com.redhat.rcm.nexus.capture.request.RequestUtils.mediaTypeOf;
@@ -9,7 +13,9 @@ import static com.redhat.rcm.nexus.capture.request.RequestUtils.query;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.codehaus.plexus.component.annotations.Component;
+import javax.inject.Inject;
+import javax.inject.Named;
+
 import org.restlet.Context;
 import org.restlet.data.Form;
 import org.restlet.data.MediaType;
@@ -21,6 +27,7 @@ import org.restlet.resource.StringRepresentation;
 import org.restlet.resource.Variant;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.sonatype.nexus.rest.AbstractNexusPlexusResource;
 import org.sonatype.plexus.rest.resource.PathProtectionDescriptor;
 import org.sonatype.plexus.rest.resource.PlexusResource;
 
@@ -28,15 +35,20 @@ import com.redhat.rcm.nexus.capture.model.CaptureSessionRef;
 import com.redhat.rcm.nexus.capture.model.render.CaptureSessionResource;
 import com.redhat.rcm.nexus.capture.request.RequestMode;
 import com.redhat.rcm.nexus.capture.store.CaptureSessionQuery;
+import com.redhat.rcm.nexus.capture.store.CaptureStore;
 import com.redhat.rcm.nexus.capture.store.CaptureStoreException;
 
-@Component( role = PlexusResource.class, hint = "CaptureAdminLogResource" )
+@Named( "captureAdminLog" )
 public class CaptureAdminLogResource
-    extends AbstractCaptureLogResource
+    extends AbstractNexusPlexusResource
     implements PlexusResource
 {
 
     private final Logger logger = LoggerFactory.getLogger( getClass() );
+
+    @Inject
+    @Named( "json" )
+    private CaptureStore captureStore;
 
     public CaptureAdminLogResource()
     {
@@ -88,7 +100,7 @@ public class CaptureAdminLogResource
                 try
                 {
 
-                    data = queryLogs( query, request.getRootRef().toString() );
+                    data = queryLogs( captureStore, query, request.getRootRef().toString() );
                 }
                 catch ( final CaptureStoreException e )
                 {
@@ -106,7 +118,7 @@ public class CaptureAdminLogResource
         {
             try
             {
-                final List<CaptureSessionRef> logs = getCaptureStore().getLogs( query );
+                final List<CaptureSessionRef> logs = captureStore.getLogs( query );
                 if ( logs != null )
                 {
                     final String appUrl = request.getRootRef().toString();
@@ -114,7 +126,7 @@ public class CaptureAdminLogResource
                     final List<CaptureSessionResource> resources = new ArrayList<CaptureSessionResource>( logs.size() );
                     for ( final CaptureSessionRef ref : logs )
                     {
-                        resources.add( new CaptureSessionResource( getCaptureStore().readLog( ref ), appUrl ) );
+                        resources.add( new CaptureSessionResource( captureStore.readLog( ref ), appUrl ) );
                     }
 
                     data = resources;
@@ -158,6 +170,6 @@ public class CaptureAdminLogResource
         final String buildTag = requestQuery.getFirstValue( CaptureResourceConstants.PARAM_BUILD_TAG );
         final String user = requestQuery.getFirstValue( CaptureResourceConstants.PARAM_USER );
 
-        deleteLogs( user, buildTag, request );
+        deleteLogs( captureStore, user, buildTag, request );
     }
 }
