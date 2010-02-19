@@ -4,18 +4,17 @@
 
   <modelVersion>4.0.0</modelVersion>
 
-  <groupId>com.redhat.rcm.nexus</groupId>
+  <parent>
+    <groupId>com.redhat.rcm.nexus</groupId>
+    <artifactId>mead-nexus</artifactId>
+    <version>1.0-SNAPSHOT</version>
+  </parent>
+  
   <artifactId>nexus-capture-ui-plugin</artifactId>
-  <version>1.0-SNAPSHOT</version>
 
   <packaging>nexus-plugin</packaging>
 
   <name>Nexus Plugin Archetype</name>
-
-  <properties>
-    <!-- Set the Nexus version here, against which you build the plugin -->
-    <nexus-version>1.5.0</nexus-version>
-  </properties>
 
   <dependencies>
 
@@ -31,30 +30,22 @@
     <dependency>
       <groupId>org.sonatype.nexus</groupId>
       <artifactId>nexus-plugin-api</artifactId>
-      <version>${nexus-version}</version>
-      <scope>provided</scope>
     </dependency>
 
     <!-- This dependency is only needed if you want to include REST Resources -->
     <dependency>
       <groupId>org.sonatype.nexus</groupId>
       <artifactId>nexus-rest-api</artifactId>
-      <version>${nexus-version}</version>
-      <scope>provided</scope>
     </dependency>
 
     <!-- Basic testing -->
     <dependency>
       <groupId>org.sonatype.nexus</groupId>
       <artifactId>nexus-plugin-test-api</artifactId>
-      <version>${nexus-version}</version>
-      <scope>test</scope>
     </dependency>
     <dependency>
       <groupId>junit</groupId>
       <artifactId>junit</artifactId>
-      <version>4.5</version>
-      <scope>test</scope>
     </dependency>
 
     <!-- #ITSet BEGINS -->
@@ -63,28 +54,10 @@
     <dependency>
       <groupId>org.sonatype.nexus</groupId>
       <artifactId>nexus-test-harness-launcher</artifactId>
-      <scope>test</scope>
-      <version>${nexus-version}</version>
     </dependency>
     <!-- #ITSet ENDS -->
 
   </dependencies>
-
-  <!-- #ITSet BEGINS -->
-  <!-- Nexus IT setup (dependencies below are needed if you have extensive ITs and you want to use Nexus Environment) -->
-  <!-- There are plugins and dependencies connected to this import, see below and above! -->
-  <dependencyManagement>
-    <dependencies>
-      <dependency>
-        <groupId>org.sonatype.nexus</groupId>
-        <artifactId>nexus-webapp-dependencies</artifactId>
-        <version>${nexus-version}</version>
-        <type>pom</type>
-        <scope>import</scope>
-      </dependency>
-    </dependencies>
-  </dependencyManagement>
-  <!-- #ITSet ENDS -->
 
   <build>
     <plugins>
@@ -93,25 +66,11 @@
       <plugin>
         <groupId>org.sonatype.plugins</groupId>
         <artifactId>app-lifecycle-maven-plugin</artifactId>
-        <version>1.0</version>
-        <extensions>true</extensions>
-        <dependencies>
-          <dependency>
-            <groupId>org.sonatype.plugins</groupId>
-            <artifactId>app-lifecycle-nexus</artifactId>
-            <version>1.0</version>
-          </dependency>
-        </dependencies>
       </plugin>
 
       <!-- Have to set source level to Java5, we use annotations -->
       <plugin>
         <artifactId>maven-compiler-plugin</artifactId>
-        <version>2.0.2</version>
-        <configuration>
-          <source>1.5</source>
-          <target>1.5</target>
-        </configuration>
       </plugin>
 
       <!-- #ITSet BEGINS -->
@@ -120,31 +79,11 @@
       <plugin>
         <groupId>org.sonatype.plugins</groupId>
         <artifactId>nexus-test-environment-maven-plugin</artifactId>
-        <version>1.3</version>
-        <executions>
-          <execution>
-            <goals>
-              <goal>setup-nexus-plugin-environment</goal>
-            </goals>
-          </execution>
-        </executions>
-        <configuration>
-          <nexusVersion>${nexus-version}</nexusVersion>
-        </configuration>
       </plugin>
 
       <plugin>
         <groupId>org.codehaus.mojo</groupId>
         <artifactId>failsafe-maven-plugin</artifactId>
-        <version>2.4.3-alpha-1</version>
-        <executions>
-          <execution>
-            <goals>
-              <goal>integration-test</goal>
-              <goal>verify</goal>
-            </goals>
-          </execution>
-        </executions>
       </plugin>
       <!-- #ITSet ENDS -->
 
