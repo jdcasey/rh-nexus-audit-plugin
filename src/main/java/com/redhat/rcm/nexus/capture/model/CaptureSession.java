@@ -112,6 +112,7 @@ public class CaptureSession
 
     public static String key( final String user, final String buildTag )
     {
+        // NOTE: CAREFUL! This can bring down the whole house if it throws FormatException or similar...
         return String.format( "%s:%s", user, buildTag );
     }
 

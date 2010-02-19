@@ -456,26 +456,24 @@ public class JsonCaptureStore
         return f;
     }
 
-    private boolean initialized = false;
-
     public synchronized void initialize()
         throws InitializationException
     {
-        if ( !initialized )
+        // FIXME: See https://issues.sonatype.org/browse/NEXUS-3308
+        try
         {
-            try
-            {
-                readCatalogs();
-            }
-            catch ( final IOException e )
-            {
-                System.out.println( "\n\n\n\n\nFailed to read catalogs.json file!!!\n\n\n\n\n" );
-
-                throw new InitializationException( String.format( "Failed to read catalogs from the filesystem: %s",
-                                                                  e.getMessage() ), e );
-            }
-
-            initialized = true;
+            readCatalogs();
+        }
+        // catch ( final IOException e )
+        // {
+        // System.out.println( "\n\n\n\n\nFailed to read catalogs.json file!!!\n\n\n\n\n" );
+        //
+        // throw new InitializationException( String.format( "Failed to read catalogs from the filesystem: %s",
+        // e.getMessage() ), e );
+        // }
+        catch ( final Exception e )
+        {
+            throw new Error( "[NEXUS-3308] FAILURE to initialize JSON capture-session store: " + e.getMessage(), e );
         }
     }
 
