@@ -18,7 +18,6 @@
   
   <modules>
     <module>nexus-capture-plugin</module>
-    <module>nexus-capture-ui-plugin</module>
   </modules>
 
   <dependencyManagement>
