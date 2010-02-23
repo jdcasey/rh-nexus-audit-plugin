@@ -28,6 +28,7 @@ import org.sonatype.nexus.rest.AbstractResourceStoreContentPlexusResource;
 import org.sonatype.plexus.rest.resource.PathProtectionDescriptor;
 import org.sonatype.plexus.rest.resource.PlexusResource;
 
+import com.redhat.rcm.nexus.capture.config.CaptureConfiguration;
 import com.redhat.rcm.nexus.capture.store.CaptureStore;
 import com.redhat.rcm.nexus.capture.store.CaptureStoreException;
 
@@ -48,6 +49,10 @@ public class CaptureResolverResource
     @Named( "json" )
     private CaptureStore captureStore;
 
+    @Inject
+    @Named( "xml" )
+    private CaptureConfiguration configuration;
+
     @Override
     public Object getPayloadInstance()
     {
@@ -58,10 +63,7 @@ public class CaptureResolverResource
     @Override
     public PathProtectionDescriptor getResourceProtection()
     {
-        // NOTE: Using this will result in 'anonymous' being the subject.
-        // return new PathProtectionDescriptor( "/capture/resolve/*/*/content/**", "authcBasic" );
-
-        return new PathProtectionDescriptor( "/capture/resolve/*/*/**",
+        return new PathProtectionDescriptor( "/capture/resolve/*/**",
                                              String.format( "authcBasic,perms[%s]",
                                                             CaptureResourceConstants.PRIV_ACCESS ) );
     }
@@ -69,8 +71,7 @@ public class CaptureResolverResource
     @Override
     public String getResourceUri()
     {
-        return "/capture/resolve/{" + CaptureResourceConstants.ATTR_BUILD_TAG_REPO_ID + "}/{"
-                        + CaptureResourceConstants.ATTR_CAPTURE_SOURCE_REPO_ID + "}";
+        return "/capture/resolve/{" + CaptureResourceConstants.ATTR_BUILD_TAG_REPO_ID + "}";
     }
 
     @Override
@@ -81,8 +82,8 @@ public class CaptureResolverResource
 
         final String buildTag =
             request.getAttributes().get( CaptureResourceConstants.ATTR_BUILD_TAG_REPO_ID ).toString();
-        final String capture =
-            request.getAttributes().get( CaptureResourceConstants.ATTR_CAPTURE_SOURCE_REPO_ID ).toString();
+
+        final String capture = configuration.getModel().getCaptureSourceRepoId();
 
         final Subject subject = SecurityUtils.getSubject();
         final String user = subject.getPrincipal().toString();

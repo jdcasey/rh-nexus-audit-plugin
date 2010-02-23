@@ -4,11 +4,11 @@ import static com.redhat.rcm.nexus.capture.CaptureLogUtils.deleteLogs;
 import static com.redhat.rcm.nexus.capture.CaptureLogUtils.queryLogs;
 import static com.redhat.rcm.nexus.capture.CaptureLogUtils.setBeforeDate;
 import static com.redhat.rcm.nexus.capture.CaptureLogUtils.setSinceDate;
-import static com.redhat.rcm.nexus.capture.model.serialize.SerializationUtils.getGson;
-import static com.redhat.rcm.nexus.capture.model.serialize.SerializationUtils.getXStreamForREST;
 import static com.redhat.rcm.nexus.capture.request.RequestUtils.mediaTypeOf;
 import static com.redhat.rcm.nexus.capture.request.RequestUtils.modeOf;
 import static com.redhat.rcm.nexus.capture.request.RequestUtils.query;
+import static com.redhat.rcm.nexus.capture.serialize.SerializationUtils.getGson;
+import static com.redhat.rcm.nexus.capture.serialize.SerializationUtils.getXStreamForREST;
 
 import java.util.ArrayList;
 import java.util.List;

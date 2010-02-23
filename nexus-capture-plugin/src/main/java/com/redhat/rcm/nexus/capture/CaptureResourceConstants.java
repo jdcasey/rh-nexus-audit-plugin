@@ -43,6 +43,8 @@ public final class CaptureResourceConstants
 
     public static final String PRIV_ADMIN = "nexus:capture-admin";
 
+    public static final String PRIV_SETTINGS = "nexus:settings";
+
     public static final String PERM_EXTERNAL_GET = PRIV_EXTERNAL_RESOLVE + ":read";
 
     private static final String SERVICE_BASEURI = "/service/local";
@@ -54,4 +56,5 @@ public final class CaptureResourceConstants
     public static final String REPOSITORY_CONTENT_URLPART = "/content";
 
     public static final String REPOSITORY_RESOURCE_BASEURI = SERVICE_BASEURI + "/repositories";
+
 }

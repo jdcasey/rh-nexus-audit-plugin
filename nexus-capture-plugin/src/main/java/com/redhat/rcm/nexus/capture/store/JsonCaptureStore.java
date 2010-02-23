@@ -1,7 +1,7 @@
 package com.redhat.rcm.nexus.capture.store;
 
 import static com.redhat.rcm.nexus.capture.model.CaptureSession.key;
-import static com.redhat.rcm.nexus.capture.model.serialize.SerializationUtils.getGson;
+import static com.redhat.rcm.nexus.capture.serialize.SerializationUtils.getGson;
 
 import java.io.File;
 import java.io.FileReader;
@@ -36,7 +36,7 @@ import com.redhat.rcm.nexus.capture.model.CaptureSession;
 import com.redhat.rcm.nexus.capture.model.CaptureSessionCatalog;
 import com.redhat.rcm.nexus.capture.model.CaptureSessionRef;
 import com.redhat.rcm.nexus.capture.model.CaptureTarget;
-import com.redhat.rcm.nexus.capture.model.serialize.SerializationConstants;
+import com.redhat.rcm.nexus.capture.serialize.SerializationConstants;
 import com.redhat.rcm.nexus.capture.store.CaptureSessionQuery.QueryMode;
 
 @Named( "json" )
@@ -291,8 +291,6 @@ public class JsonCaptureStore
         {
             writer = new FileWriter( sessionFile );
             writer.write( getGson().toJson( session ) );
-
-            logger.info( "Wrote session to: " + sessionFile.getAbsolutePath() );
         }
         catch ( final IOException e )
         {

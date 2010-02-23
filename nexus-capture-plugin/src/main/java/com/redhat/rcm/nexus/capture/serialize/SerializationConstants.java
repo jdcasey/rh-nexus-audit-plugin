@@ -1,4 +1,4 @@
-package com.redhat.rcm.nexus.capture.model.serialize;
+package com.redhat.rcm.nexus.capture.serialize;
 
 public class SerializationConstants
 {

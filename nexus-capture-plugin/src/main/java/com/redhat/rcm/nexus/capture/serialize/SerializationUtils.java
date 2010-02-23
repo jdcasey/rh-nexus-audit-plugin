@@ -1,4 +1,4 @@
-package com.redhat.rcm.nexus.capture.model.serialize;
+package com.redhat.rcm.nexus.capture.serialize;
 
 import java.io.File;
 import java.io.IOException;
@@ -26,6 +26,7 @@ import com.google.gson.JsonParseException;
 import com.google.gson.JsonSerializationContext;
 import com.google.gson.JsonSerializer;
 import com.google.gson.reflect.TypeToken;
+import com.redhat.rcm.nexus.capture.config.CaptureConfigModel;
 import com.redhat.rcm.nexus.capture.model.CaptureSession;
 import com.redhat.rcm.nexus.capture.model.CaptureSessionCatalog;
 import com.redhat.rcm.nexus.capture.model.CaptureSessionRef;
@@ -91,6 +92,15 @@ public final class SerializationUtils
         xs.processAnnotations( CaptureSessionResource.class );
         xs.processAnnotations( CaptureTargetResource.class );
         xs.processAnnotations( CaptureSessionRefResource.class );
+
+        return xs;
+    }
+
+    public static XStream getXStreamForConfig()
+    {
+        final XStream xs = createXStream();
+
+        xs.processAnnotations( CaptureConfigModel.class );
 
         return xs;
     }

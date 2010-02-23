@@ -1,4 +1,4 @@
-package com.redhat.rcm.nexus.capture;
+package com.redhat.rcm.nexus.capture.statik;
 
 import javax.inject.Named;
 

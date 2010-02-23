@@ -1,9 +1,9 @@
 package com.redhat.rcm.nexus.capture;
 
-import static com.redhat.rcm.nexus.capture.model.serialize.SerializationUtils.getGson;
-import static com.redhat.rcm.nexus.capture.model.serialize.SerializationUtils.getXStreamForREST;
 import static com.redhat.rcm.nexus.capture.request.RequestUtils.mediaTypeOf;
 import static com.redhat.rcm.nexus.capture.request.RequestUtils.parseUrlDate;
+import static com.redhat.rcm.nexus.capture.serialize.SerializationUtils.getGson;
+import static com.redhat.rcm.nexus.capture.serialize.SerializationUtils.getXStreamForREST;
 
 import java.text.ParseException;
 import java.util.Date;
