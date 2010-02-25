@@ -9,6 +9,7 @@ import org.sonatype.nexus.proxy.item.StorageItem;
 
 import com.google.gson.annotations.SerializedName;
 import com.redhat.rcm.nexus.capture.serialize.SerializationConstants;
+import com.redhat.rcm.nexus.protocol.CaptureTargetResource;
 import com.thoughtworks.xstream.annotations.XStreamAlias;
 
 @XStreamAlias( SerializationConstants.TARGET_ROOT )
@@ -93,6 +94,17 @@ public class CaptureTarget
     public String getRepositoryId()
     {
         return repositoryId;
+    }
+
+    public CaptureTargetResource asResource( final String appUrl )
+    {
+        return new CaptureTargetResource( coordinate,
+                                          path,
+                                          repositoryId,
+                                          resolutionDate,
+                                          processedRepositories,
+                                          resolved,
+                                          appUrl );
     }
 
 }

@@ -4,6 +4,7 @@ import java.util.Date;
 
 import com.google.gson.annotations.SerializedName;
 import com.redhat.rcm.nexus.capture.serialize.SerializationConstants;
+import com.redhat.rcm.nexus.protocol.CaptureSessionRefResource;
 import com.thoughtworks.xstream.annotations.XStreamAlias;
 
 @XStreamAlias( SerializationConstants.SESSION_REF_ROOT )
@@ -60,6 +61,11 @@ public class CaptureSessionRef
     public String key()
     {
         return CaptureSession.key( user, buildTag );
+    }
+
+    public CaptureSessionRefResource asResource( final String applicationUrl )
+    {
+        return new CaptureSessionRefResource( user, buildTag, date, applicationUrl );
     }
 
 }

@@ -13,10 +13,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.redhat.rcm.nexus.capture.model.CaptureSessionRef;
-import com.redhat.rcm.nexus.capture.model.render.CaptureSessionRefResource;
 import com.redhat.rcm.nexus.capture.store.CaptureSessionQuery;
 import com.redhat.rcm.nexus.capture.store.CaptureStore;
 import com.redhat.rcm.nexus.capture.store.CaptureStoreException;
+import com.redhat.rcm.nexus.protocol.CaptureSessionRefResource;
 
 public final class CaptureLogUtils
 {
@@ -85,7 +85,7 @@ public final class CaptureLogUtils
 
             for ( final CaptureSessionRef ref : logs )
             {
-                resources.add( new CaptureSessionRefResource( ref, appUrl ) );
+                resources.add( ref.asResource( appUrl ) );
             }
 
             return resources;

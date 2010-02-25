@@ -5,7 +5,7 @@ import static com.redhat.rcm.nexus.capture.CaptureLogUtils.queryLogs;
 import static com.redhat.rcm.nexus.capture.request.RequestUtils.mediaTypeOf;
 import static com.redhat.rcm.nexus.capture.request.RequestUtils.modeOf;
 import static com.redhat.rcm.nexus.capture.serialize.SerializationUtils.getGson;
-import static com.redhat.rcm.nexus.capture.serialize.SerializationUtils.getXStreamForREST;
+import static com.redhat.rcm.nexus.protocol.ProtocolUtils.getXStreamForREST;
 
 import javax.inject.Inject;
 import javax.inject.Named;
@@ -27,7 +27,6 @@ import org.sonatype.plexus.rest.resource.PathProtectionDescriptor;
 import org.sonatype.plexus.rest.resource.PlexusResource;
 
 import com.redhat.rcm.nexus.capture.model.CaptureSession;
-import com.redhat.rcm.nexus.capture.model.render.CaptureSessionResource;
 import com.redhat.rcm.nexus.capture.request.RequestMode;
 import com.redhat.rcm.nexus.capture.store.CaptureSessionQuery;
 import com.redhat.rcm.nexus.capture.store.CaptureStore;
@@ -113,7 +112,7 @@ public class CaptureMyLogResource
                 final CaptureSession session = captureStore.readLatestLog( user, buildTag );
                 if ( session != null )
                 {
-                    data = new CaptureSessionResource( session, request.getRootRef().toString() );
+                    data = session.asResource( request.getRootRef().toString() );
                 }
             }
             catch ( final CaptureStoreException e )

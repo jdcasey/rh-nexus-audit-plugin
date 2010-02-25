@@ -16,13 +16,13 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.redhat.rcm.nexus.capture.CaptureResourceConstants;
+import com.redhat.rcm.nexus.protocol.ProtocolConstants;
 
 public final class RequestUtils
 {
 
-    private static final String FULL_DATE_FORMAT = "yyyy-MM-dd+HH-mm-ssZ";
-
-    private static final String[] URL_DATE_FORMATs = { FULL_DATE_FORMAT, "yyyy-MM-dd+HH-mm-ss", "yyyy-MM-dd" };
+    private static final String[] URL_DATE_FORMATs =
+        { ProtocolConstants.FULL_DATE_FORMAT, "yyyy-MM-dd+HH-mm-ss", "yyyy-MM-dd" };
 
     private static final Logger logger = LoggerFactory.getLogger( RequestUtils.class );
 
@@ -89,11 +89,6 @@ public final class RequestUtils
         }
 
         return before;
-    }
-
-    public static String formatUrlDate( final Date date )
-    {
-        return new SimpleDateFormat( FULL_DATE_FORMAT ).format( date );
     }
 
     public static Date parseUrlDate( final String value )

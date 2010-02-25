@@ -8,7 +8,7 @@ import static com.redhat.rcm.nexus.capture.request.RequestUtils.mediaTypeOf;
 import static com.redhat.rcm.nexus.capture.request.RequestUtils.modeOf;
 import static com.redhat.rcm.nexus.capture.request.RequestUtils.query;
 import static com.redhat.rcm.nexus.capture.serialize.SerializationUtils.getGson;
-import static com.redhat.rcm.nexus.capture.serialize.SerializationUtils.getXStreamForREST;
+import static com.redhat.rcm.nexus.protocol.ProtocolUtils.getXStreamForREST;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -32,11 +32,11 @@ import org.sonatype.plexus.rest.resource.PathProtectionDescriptor;
 import org.sonatype.plexus.rest.resource.PlexusResource;
 
 import com.redhat.rcm.nexus.capture.model.CaptureSessionRef;
-import com.redhat.rcm.nexus.capture.model.render.CaptureSessionResource;
 import com.redhat.rcm.nexus.capture.request.RequestMode;
 import com.redhat.rcm.nexus.capture.store.CaptureSessionQuery;
 import com.redhat.rcm.nexus.capture.store.CaptureStore;
 import com.redhat.rcm.nexus.capture.store.CaptureStoreException;
+import com.redhat.rcm.nexus.protocol.CaptureSessionResource;
 
 @Named( "captureAdminLog" )
 public class CaptureAdminLogResource
@@ -126,7 +126,7 @@ public class CaptureAdminLogResource
                     final List<CaptureSessionResource> resources = new ArrayList<CaptureSessionResource>( logs.size() );
                     for ( final CaptureSessionRef ref : logs )
                     {
-                        resources.add( new CaptureSessionResource( captureStore.readLog( ref ), appUrl ) );
+                        resources.add( captureStore.readLog( ref ).asResource( appUrl ) );
                     }
 
                     data = resources;

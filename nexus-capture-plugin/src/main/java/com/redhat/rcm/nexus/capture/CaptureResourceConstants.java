@@ -47,14 +47,4 @@ public final class CaptureResourceConstants
 
     public static final String PERM_EXTERNAL_GET = PRIV_EXTERNAL_RESOLVE + ":read";
 
-    private static final String SERVICE_BASEURI = "/service/local";
-
-    private static final String CAPTURE_SVC_BASEURI = SERVICE_BASEURI + "/capture";
-
-    public static final String LOG_RESOURCE_BASEURI = CAPTURE_SVC_BASEURI + "/log";
-
-    public static final String REPOSITORY_CONTENT_URLPART = "/content";
-
-    public static final String REPOSITORY_RESOURCE_BASEURI = SERVICE_BASEURI + "/repositories";
-
 }

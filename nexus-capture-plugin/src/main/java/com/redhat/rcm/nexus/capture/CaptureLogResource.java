@@ -3,7 +3,7 @@ package com.redhat.rcm.nexus.capture;
 import static com.redhat.rcm.nexus.capture.request.RequestUtils.mediaTypeOf;
 import static com.redhat.rcm.nexus.capture.request.RequestUtils.parseUrlDate;
 import static com.redhat.rcm.nexus.capture.serialize.SerializationUtils.getGson;
-import static com.redhat.rcm.nexus.capture.serialize.SerializationUtils.getXStreamForREST;
+import static com.redhat.rcm.nexus.protocol.ProtocolUtils.getXStreamForREST;
 
 import java.text.ParseException;
 import java.util.Date;
@@ -27,7 +27,6 @@ import org.sonatype.plexus.rest.resource.PlexusResource;
 
 import com.redhat.rcm.nexus.capture.model.CaptureSession;
 import com.redhat.rcm.nexus.capture.model.CaptureSessionRef;
-import com.redhat.rcm.nexus.capture.model.render.CaptureSessionResource;
 import com.redhat.rcm.nexus.capture.store.CaptureStore;
 import com.redhat.rcm.nexus.capture.store.CaptureStoreException;
 
@@ -87,7 +86,7 @@ public class CaptureLogResource
             final CaptureSession session = captureStore.readLog( ref );
             if ( session != null )
             {
-                data = new CaptureSessionResource( session, request.getRootRef().toString() );
+                data = session.asResource( request.getRootRef().toString() );
             }
             else
             {

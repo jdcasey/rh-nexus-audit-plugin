@@ -8,6 +8,8 @@ import java.util.List;
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 import com.redhat.rcm.nexus.capture.serialize.SerializationConstants;
+import com.redhat.rcm.nexus.protocol.CaptureSessionResource;
+import com.redhat.rcm.nexus.protocol.CaptureTargetResource;
 import com.thoughtworks.xstream.annotations.XStreamAlias;
 import com.thoughtworks.xstream.annotations.XStreamOmitField;
 
@@ -114,6 +116,17 @@ public class CaptureSession
     {
         // NOTE: CAREFUL! This can bring down the whole house if it throws FormatException or similar...
         return String.format( "%s:%s", user, buildTag );
+    }
+
+    public CaptureSessionResource asResource( final String appUrl )
+    {
+        final List<CaptureTargetResource> resources = new ArrayList<CaptureTargetResource>( targets.size() );
+        for ( final CaptureTarget target : targets )
+        {
+            resources.add( target.asResource( appUrl ) );
+        }
+
+        return new CaptureSessionResource( user, buildTag, started, lastUpdated, resources, appUrl );
     }
 
 }

@@ -1,31 +1,29 @@
-package com.redhat.rcm.nexus.capture.model.render;
+package com.redhat.rcm.nexus.protocol;
 
-import static com.redhat.rcm.nexus.capture.model.render.CaptureSessionResource.buildResourceUri;
+import static com.redhat.rcm.nexus.protocol.CaptureSessionResource.buildResourceUri;
 
 import java.util.Date;
 
 import com.google.gson.annotations.SerializedName;
-import com.redhat.rcm.nexus.capture.model.CaptureSessionRef;
-import com.redhat.rcm.nexus.capture.serialize.SerializationConstants;
 import com.thoughtworks.xstream.annotations.XStreamAlias;
 
-@XStreamAlias( SerializationConstants.SESSION_REF_ROOT )
+@XStreamAlias( ProtocolConstants.SESSION_REF_ROOT )
 public class CaptureSessionRefResource
     implements Comparable<CaptureSessionRefResource>
 {
 
-    @SerializedName( SerializationConstants.RESOURCE_URI_FIELD )
-    @XStreamAlias( SerializationConstants.RESOURCE_URI_FIELD )
+    @SerializedName( ProtocolConstants.RESOURCE_URI_FIELD )
+    @XStreamAlias( ProtocolConstants.RESOURCE_URI_FIELD )
     private final String url;
 
     private final String user;
 
-    @SerializedName( SerializationConstants.BUILD_TAG_FIELD )
-    @XStreamAlias( SerializationConstants.BUILD_TAG_FIELD )
+    @SerializedName( ProtocolConstants.BUILD_TAG_FIELD )
+    @XStreamAlias( ProtocolConstants.BUILD_TAG_FIELD )
     private final String buildTag;
 
-    @SerializedName( SerializationConstants.DATE_FIELD )
-    @XStreamAlias( SerializationConstants.DATE_FIELD )
+    @SerializedName( ProtocolConstants.DATE_FIELD )
+    @XStreamAlias( ProtocolConstants.DATE_FIELD )
     private final Date date;
 
     // used for gson deserialization
@@ -38,12 +36,12 @@ public class CaptureSessionRefResource
         this.url = null;
     }
 
-    public CaptureSessionRefResource( final CaptureSessionRef ref, final String applicationUrl )
+    public CaptureSessionRefResource( final String user, final String buildTag, final Date date,
+                                      final String applicationUrl )
     {
-        this.user = ref.getUser();
-        this.buildTag = ref.getBuildTag();
-        this.date = ref.getDate();
-
+        this.user = user;
+        this.buildTag = buildTag;
+        this.date = date;
         this.url = buildResourceUri( applicationUrl, user, buildTag, date );
     }
 
