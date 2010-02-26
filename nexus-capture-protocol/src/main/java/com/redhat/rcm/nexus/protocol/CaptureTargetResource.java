@@ -65,7 +65,8 @@ public class CaptureTargetResource
         this.resolutionDate = resolutionDate;
         this.processedRepositories = processedRepositories;
         this.resolved = resolved;
-        this.remoteUrl = buildUri( remoteUrl, path );
+
+        this.remoteUrl = remoteUrl == null ? null : buildUri( remoteUrl, path );
 
         this.url =
             buildUri( applicationUrl, ProtocolConstants.REPOSITORY_RESOURCE_BASEURI, repositoryId,

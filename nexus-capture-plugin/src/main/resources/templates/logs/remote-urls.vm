@@ -1,2 +1,2 @@
-#foreach($target in $data.targets)$target.remoteUrl
-#end
+#foreach($target in $data.targets)#if($target.resolved)$target.remoteUrl
+#end#end

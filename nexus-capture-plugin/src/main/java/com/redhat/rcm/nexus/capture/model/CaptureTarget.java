@@ -11,7 +11,6 @@ import org.sonatype.nexus.proxy.NoSuchRepositoryException;
 import org.sonatype.nexus.proxy.item.StorageItem;
 import org.sonatype.nexus.proxy.registry.RepositoryRegistry;
 import org.sonatype.nexus.proxy.repository.ProxyRepository;
-import org.sonatype.nexus.proxy.repository.Repository;
 
 import com.google.gson.annotations.SerializedName;
 import com.redhat.rcm.nexus.protocol.CaptureTargetResource;
@@ -107,24 +106,21 @@ public class CaptureTarget
     public CaptureTargetResource asResource( final String appUrl, final RepositoryRegistry repositoryRegistry )
     {
         String remoteBase = null;
-        try
-        {
-            final ProxyRepository repository =
-                repositoryRegistry.getRepositoryWithFacet( repositoryId, ProxyRepository.class );
-
-            remoteBase = repository.getRemoteUrl();
-        }
-        catch ( final NoSuchRepositoryException e )
+        if ( resolved )
         {
             try
             {
-                final Repository repository = repositoryRegistry.getRepository( repositoryId );
-                remoteBase = repository.getLocalUrl();
+                final ProxyRepository repository =
+                    repositoryRegistry.getRepositoryWithFacet( repositoryId, ProxyRepository.class );
+
+                remoteBase = repository.getRemoteUrl();
             }
-            catch ( final NoSuchRepositoryException e2 )
+            catch ( final NoSuchRepositoryException e )
             {
-                logger.warn( String.format( "Cannot find repository for target.\nRepository ID: %s\nTarget path: %s",
-                                            repositoryId, path ) );
+                logger.warn( String.format(
+                                            "Cannot find proxy repository for target. Target may be resolved from a hosted repository."
+                                                            + "\nRepository ID: %s\nTarget path: %s", repositoryId,
+                                            path ) );
             }
         }
 

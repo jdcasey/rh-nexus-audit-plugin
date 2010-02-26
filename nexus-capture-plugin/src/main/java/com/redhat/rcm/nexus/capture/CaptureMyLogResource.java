@@ -224,8 +224,6 @@ public class CaptureMyLogResource
             throw new ResourceException( Status.SERVER_ERROR_INTERNAL, e.getMessage() );
         }
 
-        logger.info( "Returning session-ref resource:\n\n" + getXStreamForREST().toXML( resource ) );
-
         final MediaType mt = mediaTypeOf( request );
         final String result = serialize( resource, mt, request );
 
