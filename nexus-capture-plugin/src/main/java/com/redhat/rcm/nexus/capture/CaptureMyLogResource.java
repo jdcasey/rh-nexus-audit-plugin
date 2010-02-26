@@ -5,7 +5,13 @@ import static com.redhat.rcm.nexus.capture.CaptureLogUtils.queryLogs;
 import static com.redhat.rcm.nexus.capture.model.ModelSerializationUtils.getGson;
 import static com.redhat.rcm.nexus.capture.request.RequestUtils.mediaTypeOf;
 import static com.redhat.rcm.nexus.capture.request.RequestUtils.modeOf;
+import static com.redhat.rcm.nexus.capture.request.RequestUtils.query;
 import static com.redhat.rcm.nexus.util.ProtocolUtils.getXStreamForREST;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 import javax.inject.Inject;
 import javax.inject.Named;
@@ -13,6 +19,7 @@ import javax.inject.Named;
 import org.jsecurity.SecurityUtils;
 import org.jsecurity.subject.Subject;
 import org.restlet.Context;
+import org.restlet.data.Form;
 import org.restlet.data.MediaType;
 import org.restlet.data.Request;
 import org.restlet.data.Response;
@@ -31,6 +38,9 @@ import com.redhat.rcm.nexus.capture.request.RequestMode;
 import com.redhat.rcm.nexus.capture.store.CaptureSessionQuery;
 import com.redhat.rcm.nexus.capture.store.CaptureStore;
 import com.redhat.rcm.nexus.capture.store.CaptureStoreException;
+import com.redhat.rcm.nexus.capture.template.TemplateConstants;
+import com.redhat.rcm.nexus.capture.template.TemplateException;
+import com.redhat.rcm.nexus.capture.template.TemplateFormatter;
 import com.redhat.rcm.nexus.protocol.CaptureSessionRefResource;
 import com.redhat.rcm.nexus.protocol.ProtocolConstants;
 
@@ -45,6 +55,10 @@ public class CaptureMyLogResource
     @Inject
     @Named( "json" )
     private CaptureStore captureStore;
+
+    @Inject
+    @Named( "velocity" )
+    private TemplateFormatter templateFormatter;
 
     public CaptureMyLogResource()
     {
@@ -128,12 +142,12 @@ public class CaptureMyLogResource
         }
 
         final MediaType mt = mediaTypeOf( request, variant );
-        final String result = serialize( data, mt );
+        final String result = serialize( data, mt, request );
 
         return new StringRepresentation( result, mt );
     }
 
-    private String serialize( final Object data, final MediaType mt )
+    private String serialize( final Object data, final MediaType mt, final Request request )
         throws ResourceException
     {
         String result = null;
@@ -144,6 +158,23 @@ public class CaptureMyLogResource
         else if ( mt == MediaType.APPLICATION_JSON )
         {
             result = getGson().toJson( data );
+        }
+        else if ( mt == MediaType.TEXT_PLAIN )
+        {
+            final Map<String, Object> templateContext = new HashMap<String, Object>();
+            templateContext.put( "data", data );
+
+            final Form query = query( request );
+            final String template = query.getFirstValue( CaptureResourceConstants.PARAM_TEMPLATE );
+
+            try
+            {
+                result = templateFormatter.format( TemplateConstants.LOG_TEMPLATE_BASEPATH, template, templateContext );
+            }
+            catch ( final TemplateException e )
+            {
+                throw new ResourceException( Status.SERVER_ERROR_INTERNAL, e.getMessage(), e );
+            }
         }
         else
         {
@@ -181,7 +212,7 @@ public class CaptureMyLogResource
         logger.info( "Returning session-ref resource:\n\n" + getXStreamForREST().toXML( resource ) );
 
         final MediaType mt = mediaTypeOf( request );
-        final String result = serialize( resource, mt );
+        final String result = serialize( resource, mt, request );
 
         return new StringRepresentation( result, mt );
     }
@@ -197,5 +228,17 @@ public class CaptureMyLogResource
         final String user = subject.getPrincipal().toString();
 
         deleteLogs( captureStore, user, buildTag, request );
+    }
+
+    @Override
+    public List<Variant> getVariants()
+    {
+        final List<Variant> variants = new ArrayList<Variant>();
+
+        variants.add( new Variant( MediaType.APPLICATION_XML ) );
+        variants.add( new Variant( MediaType.APPLICATION_JSON ) );
+        variants.add( new Variant( MediaType.TEXT_PLAIN ) );
+
+        return variants;
     }
 }
