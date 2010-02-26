@@ -75,7 +75,7 @@ public class JsonCaptureStore
         throws CaptureStoreException
     {
         final CaptureSession session = sessions.remove( key( user, buildTag ) );
-        return session.ref();
+        return session == null ? null : session.ref();
     }
 
     public void deleteLogs( final CaptureSessionQuery query )
