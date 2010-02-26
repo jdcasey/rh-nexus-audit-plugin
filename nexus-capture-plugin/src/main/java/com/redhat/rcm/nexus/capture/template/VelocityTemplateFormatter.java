@@ -161,61 +161,68 @@ public class VelocityTemplateFormatter
     private String readTemplate( final String templatePath )
         throws TemplateException
     {
-        final File templateFile = new File( templatesDir, templatePath );
-
         String template = null;
-        if ( templateFile.exists() && templateFile.isFile() )
-        {
-            try
-            {
-                template = fileRead( templateFile );
-            }
-            catch ( final IOException e )
-            {
-                throw new TemplateException( "Failed to read Velocity template from: %s\nReason: %s",
-                                             e,
-                                             templateFile.getAbsolutePath(),
-                                             e.getMessage() );
-            }
-        }
 
-        final List<ClassLoader> cloaders = new ArrayList<ClassLoader>();
-        if ( LOCAL_LOADER != null )
+        if ( templatesDir != null )
         {
-            cloaders.add( LOCAL_LOADER );
-        }
-        cloaders.add( Thread.currentThread().getContextClassLoader() );
+            final File templateFile = new File( templatesDir, templatePath );
 
-        for ( final ClassLoader cloader : cloaders )
-        {
-            final URL resource = cloader.getResource( templatePath );
-            if ( resource != null )
+            if ( templateFile.exists() && templateFile.isFile() )
             {
-                final StringWriter sw = new StringWriter();
-                InputStream stream = null;
                 try
                 {
-                    stream = resource.openStream();
-                    copy( stream, sw );
-
-                    template = sw.toString();
+                    template = fileRead( templateFile );
                 }
                 catch ( final IOException e )
                 {
                     throw new TemplateException( "Failed to read Velocity template from: %s\nReason: %s",
                                                  e,
-                                                 resource.toExternalForm(),
+                                                 templateFile.getAbsolutePath(),
                                                  e.getMessage() );
                 }
-                finally
-                {
-                    close( stream );
-                }
             }
+        }
 
-            if ( template != null )
+        if ( template == null )
+        {
+            final List<ClassLoader> cloaders = new ArrayList<ClassLoader>();
+            if ( LOCAL_LOADER != null )
             {
-                break;
+                cloaders.add( LOCAL_LOADER );
+            }
+            cloaders.add( Thread.currentThread().getContextClassLoader() );
+
+            for ( final ClassLoader cloader : cloaders )
+            {
+                final URL resource = cloader.getResource( templatePath );
+                if ( resource != null )
+                {
+                    final StringWriter sw = new StringWriter();
+                    InputStream stream = null;
+                    try
+                    {
+                        stream = resource.openStream();
+                        copy( stream, sw );
+
+                        template = sw.toString();
+                    }
+                    catch ( final IOException e )
+                    {
+                        throw new TemplateException( "Failed to read Velocity template from: %s\nReason: %s",
+                                                     e,
+                                                     resource.toExternalForm(),
+                                                     e.getMessage() );
+                    }
+                    finally
+                    {
+                        close( stream );
+                    }
+                }
+
+                if ( template != null )
+                {
+                    break;
+                }
             }
         }
 
@@ -226,14 +233,17 @@ public class VelocityTemplateFormatter
     public void initialize()
         throws InitializationException
     {
-        templatesDir = joinFile( configuration.getConfigurationDirectory(), "capture" );
-        try
+        if ( configuration != null )
         {
-            final File d = templatesDir.getCanonicalFile();
-            templatesDir = d;
-        }
-        catch ( final IOException e )
-        {
+            templatesDir = joinFile( configuration.getConfigurationDirectory(), "capture" );
+            try
+            {
+                final File d = templatesDir.getCanonicalFile();
+                templatesDir = d;
+            }
+            catch ( final IOException e )
+            {
+            }
         }
     }
 }
