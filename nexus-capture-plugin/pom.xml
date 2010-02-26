@@ -76,10 +76,6 @@
     <!-- #ITSet ENDS -->
 
     <dependency>
-    	<groupId>com.redhat.devel</groupId>
-    	<artifactId>pp</artifactId>
-    </dependency>
-    <dependency>
     	<groupId>com.redhat.rcm.nexus</groupId>
     	<artifactId>nexus-capture-protocol</artifactId>
     	<version>${project.version}</version>
