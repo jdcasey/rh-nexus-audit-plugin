@@ -7,6 +7,7 @@ import static com.redhat.rcm.nexus.capture.request.RequestUtils.mediaTypeOf;
 import static com.redhat.rcm.nexus.capture.request.RequestUtils.modeOf;
 import static com.redhat.rcm.nexus.capture.request.RequestUtils.query;
 import static com.redhat.rcm.nexus.util.ProtocolUtils.getXStreamForREST;
+import static org.codehaus.plexus.util.StringUtils.isEmpty;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -208,7 +209,12 @@ public class CaptureMyLogResource
 
             if ( session == null )
             {
-                session = captureStore.readLatestLog( user, buildTag );
+                final Form query = query( request );
+                final String strict = query.getFirstValue( CaptureResourceConstants.PARAM_STRICT );
+                if ( isEmpty( strict ) || Boolean.FALSE.toString().equals( strict.toLowerCase() ) )
+                {
+                    session = captureStore.readLatestLog( user, buildTag );
+                }
             }
 
             resource =

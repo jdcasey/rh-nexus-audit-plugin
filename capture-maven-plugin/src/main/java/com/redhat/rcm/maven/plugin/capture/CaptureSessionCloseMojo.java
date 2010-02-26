@@ -1,10 +1,7 @@
 package com.redhat.rcm.maven.plugin.capture;
 
-import static com.redhat.rcm.nexus.util.ProtocolUtils.getGson;
-
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.io.StringReader;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Arrays;
@@ -37,7 +34,6 @@ import org.codehaus.plexus.components.interactivity.Prompter;
 import org.codehaus.plexus.components.interactivity.PrompterException;
 import org.codehaus.plexus.util.IOUtil;
 
-import com.redhat.rcm.nexus.protocol.CaptureSessionRefResource;
 import com.redhat.rcm.nexus.protocol.ProtocolConstants;
 
 /**
@@ -89,6 +85,11 @@ public class CaptureSessionCloseMojo
      */
     private Prompter prompter;
 
+    /**
+     * @parameter default-value="maven-close-session"
+     */
+    private String template;
+
     @Override
     public void execute()
         throws MojoExecutionException,
@@ -131,6 +132,15 @@ public class CaptureSessionCloseMojo
                 }
 
                 logUrl = verifyAndCorrectInfo( authenticationInfo, proxy, logUrl );
+            }
+
+            final StringBuilder query = new StringBuilder();
+            query.append( "?strict=true&template=" ).append( template );
+
+            final String queryString = query.toString();
+            if ( !logUrl.endsWith( queryString ) )
+            {
+                logUrl += queryString;
             }
 
             closeSession( logUrl, authenticationInfo, proxy );
@@ -186,7 +196,7 @@ public class CaptureSessionCloseMojo
         }
 
         final HttpPost method = new HttpPost( url );
-        method.addHeader( "Accept", "application/json" );
+        method.addHeader( "Accept", "text/plain" );
         // try
         // {
         // method.setEntity( new StringEntity( "foo" ) );
@@ -196,42 +206,30 @@ public class CaptureSessionCloseMojo
         // throw new MojoExecutionException( "Failed to set dummy request body: " + e.getMessage(), e );
         // }
 
-        CaptureSessionResponse sessionResponse;
+        StatusLine status = null;
         try
         {
-            sessionResponse = client.execute( method, new ResponseHandler<CaptureSessionResponse>()
+            status = client.execute( method, new ResponseHandler<StatusLine>()
             {
                 @Override
-                public CaptureSessionResponse handleResponse( final HttpResponse response )
+                public StatusLine handleResponse( final HttpResponse response )
                     throws ClientProtocolException,
                         IOException
                 {
                     final StatusLine status = response.getStatusLine();
-                    CaptureSessionRefResource resource = null;
-
-                    if ( status.getStatusCode() < 200 || status.getStatusCode() > 201 )
-                    {
-                        getLog().error( "HTTP Request failed! Status line: " + status );
-                    }
-                    else
+                    if ( status.getStatusCode() > 199 && status.getStatusCode() < 300 )
                     {
                         getLog().debug( "HTTP response status: " + status );
 
                         final ByteArrayOutputStream baos = new ByteArrayOutputStream();
                         IOUtil.copy( response.getEntity().getContent(), baos );
 
-                        if ( getLog().isDebugEnabled() )
-                        {
-                            getLog().debug( "capture-session response:\n\n" + new String( baos.toByteArray() ) );
-                        }
+                        getLog().info( String.valueOf( baos.toByteArray() ) );
 
-                        resource =
-                            getGson().fromJson( new StringReader( new String( baos.toByteArray() ) ),
-                                                CaptureSessionRefResource.class );
+                        return null;
                     }
 
-                    getLog().debug( "Returning response with status: " + status + "\nand resource: " + resource );
-                    return new CaptureSessionResponse( resource, status );
+                    return status;
                 }
             } );
         }
@@ -250,15 +248,11 @@ public class CaptureSessionCloseMojo
                                               e );
         }
 
-        if ( sessionResponse != null && sessionResponse.isSuccessful() )
+        if ( status != null )
         {
-            getLog().info( String.format( "Closed capture session: %s", sessionResponse.getSessionRef().getUrl() ) );
-        }
-        else
-        {
-            getLog().warn(
-                           String.format( "Capture session could not be closed for: %s\nHTTP Response: %s", url,
-                                          sessionResponse.getStatus().toString() ) );
+            throw new MojoExecutionException( String.format(
+                                                             "\n\n\nFailed to close capture session.\nStatus: %s\n\n\n",
+                                                             status ) );
         }
     }
 
