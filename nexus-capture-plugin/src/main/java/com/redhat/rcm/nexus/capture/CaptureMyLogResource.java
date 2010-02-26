@@ -200,18 +200,19 @@ public class CaptureMyLogResource
         try
         {
             final CaptureSessionRef ref = captureStore.closeCurrentLog( user, buildTag );
+            CaptureSession session = null;
             if ( ref != null )
             {
-                CaptureSession session = captureStore.readLog( ref );
-                if ( session == null )
-                {
-                    session = captureStore.readLatestLog( user, buildTag );
-                }
-
-                resource =
-                    session == null ? null : session.asResource( request.getRootRef().toString(),
-                                                                 getRepositoryRegistry() );
+                session = captureStore.readLog( ref );
             }
+
+            if ( session == null )
+            {
+                session = captureStore.readLatestLog( user, buildTag );
+            }
+
+            resource =
+                session == null ? null : session.asResource( request.getRootRef().toString(), getRepositoryRegistry() );
         }
         catch ( final CaptureStoreException e )
         {
