@@ -34,6 +34,7 @@ import org.sonatype.plexus.rest.resource.PathProtectionDescriptor;
 import org.sonatype.plexus.rest.resource.PlexusResource;
 
 import com.redhat.rcm.nexus.capture.model.CaptureSession;
+import com.redhat.rcm.nexus.capture.model.CaptureSessionRef;
 import com.redhat.rcm.nexus.capture.request.RequestMode;
 import com.redhat.rcm.nexus.capture.store.CaptureSessionQuery;
 import com.redhat.rcm.nexus.capture.store.CaptureStore;
@@ -197,7 +198,8 @@ public class CaptureMyLogResource
         CaptureSessionRefResource resource = null;
         try
         {
-            resource = captureStore.closeCurrentLog( user, buildTag ).asResource( request.getRootRef().toString() );
+            final CaptureSessionRef ref = captureStore.closeCurrentLog( user, buildTag );
+            resource = ref == null ? null : ref.asResource( request.getRootRef().toString() );
         }
         catch ( final CaptureStoreException e )
         {

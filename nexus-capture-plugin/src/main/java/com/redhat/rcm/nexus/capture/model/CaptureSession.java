@@ -131,7 +131,10 @@ public class CaptureSession
         final List<CaptureTargetResource> resources = new ArrayList<CaptureTargetResource>( targets.size() );
         for ( final CaptureTarget target : targets )
         {
-            resources.add( target.asResource( appUrl, repositoryRegistry ) );
+            if ( target != null )
+            {
+                resources.add( target.asResource( appUrl, repositoryRegistry ) );
+            }
         }
 
         return new CaptureSessionResource( user, buildTag, started, lastUpdated, resources, appUrl );

@@ -31,6 +31,7 @@ import org.sonatype.nexus.rest.AbstractNexusPlexusResource;
 import org.sonatype.plexus.rest.resource.PathProtectionDescriptor;
 import org.sonatype.plexus.rest.resource.PlexusResource;
 
+import com.redhat.rcm.nexus.capture.model.CaptureSession;
 import com.redhat.rcm.nexus.capture.model.CaptureSessionRef;
 import com.redhat.rcm.nexus.capture.request.RequestMode;
 import com.redhat.rcm.nexus.capture.store.CaptureSessionQuery;
@@ -127,7 +128,11 @@ public class CaptureAdminLogResource
                     final List<CaptureSessionResource> resources = new ArrayList<CaptureSessionResource>( logs.size() );
                     for ( final CaptureSessionRef ref : logs )
                     {
-                        resources.add( captureStore.readLog( ref ).asResource( appUrl, getRepositoryRegistry() ) );
+                        final CaptureSession session = captureStore.readLog( ref );
+                        if ( session != null )
+                        {
+                            resources.add( session.asResource( appUrl, getRepositoryRegistry() ) );
+                        }
                     }
 
                     data = resources;

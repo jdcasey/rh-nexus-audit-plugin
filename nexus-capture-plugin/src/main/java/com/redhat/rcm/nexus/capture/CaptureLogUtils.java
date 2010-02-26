@@ -85,7 +85,10 @@ public final class CaptureLogUtils
 
             for ( final CaptureSessionRef ref : logs )
             {
-                resources.add( ref.asResource( appUrl ) );
+                if ( ref != null )
+                {
+                    resources.add( ref.asResource( appUrl ) );
+                }
             }
 
             return resources;
