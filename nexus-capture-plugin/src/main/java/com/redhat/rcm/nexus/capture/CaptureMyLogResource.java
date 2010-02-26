@@ -43,6 +43,7 @@ import com.redhat.rcm.nexus.capture.template.TemplateConstants;
 import com.redhat.rcm.nexus.capture.template.TemplateException;
 import com.redhat.rcm.nexus.capture.template.TemplateFormatter;
 import com.redhat.rcm.nexus.protocol.CaptureSessionRefResource;
+import com.redhat.rcm.nexus.protocol.CaptureSessionResource;
 import com.redhat.rcm.nexus.protocol.ProtocolConstants;
 
 @Named( "captureMyLog" )
@@ -195,11 +196,22 @@ public class CaptureMyLogResource
         final Subject subject = SecurityUtils.getSubject();
         final String user = subject.getPrincipal().toString();
 
-        CaptureSessionRefResource resource = null;
+        CaptureSessionResource resource = null;
         try
         {
             final CaptureSessionRef ref = captureStore.closeCurrentLog( user, buildTag );
-            resource = ref == null ? null : ref.asResource( request.getRootRef().toString() );
+            if ( ref != null )
+            {
+                CaptureSession session = captureStore.readLog( ref );
+                if ( session == null )
+                {
+                    session = captureStore.readLatestLog( user, buildTag );
+                }
+
+                resource =
+                    session == null ? null : session.asResource( request.getRootRef().toString(),
+                                                                 getRepositoryRegistry() );
+            }
         }
         catch ( final CaptureStoreException e )
         {
