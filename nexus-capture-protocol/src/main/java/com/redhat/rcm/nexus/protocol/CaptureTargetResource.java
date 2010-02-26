@@ -1,6 +1,6 @@
 package com.redhat.rcm.nexus.protocol;
 
-import static com.redhat.rcm.nexus.protocol.ProtocolUtils.buildUri;
+import static com.redhat.rcm.nexus.util.PathUtils.buildUri;
 
 import java.util.Date;
 import java.util.List;
@@ -18,9 +18,13 @@ public class CaptureTargetResource
     @XStreamAlias( ProtocolConstants.RESOURCE_URI_FIELD )
     private final String url;
 
+    @SerializedName( ProtocolConstants.REMOTE_URL_FIELD )
+    @XStreamAlias( ProtocolConstants.REMOTE_URL_FIELD )
+    private final String remoteUrl;
+
     private final String path;
 
-    private boolean resolved = false;
+    private final boolean resolved;
 
     @SerializedName( ProtocolConstants.RESOLVED_REPO_FIELD )
     @XStreamAlias( ProtocolConstants.RESOLVED_REPO_FIELD )
@@ -28,7 +32,7 @@ public class CaptureTargetResource
 
     @SerializedName( ProtocolConstants.RESOLVED_ON_FIELD )
     @XStreamAlias( ProtocolConstants.RESOLVED_ON_FIELD )
-    private Date resolutionDate;
+    private final Date resolutionDate;
 
     private final Gav coordinate;
 
@@ -46,11 +50,13 @@ public class CaptureTargetResource
         this.resolved = false;
         this.repositoryId = null;
         this.url = null;
+        this.resolutionDate = null;
+        this.remoteUrl = null;
     }
 
     public CaptureTargetResource( final Gav coordinate, final String path, final String repositoryId,
                                   final Date resolutionDate, final List<String> processedRepositories,
-                                  final boolean resolved, final String applicationUrl )
+                                  final boolean resolved, final String applicationUrl, final String remoteUrl )
     {
 
         this.coordinate = coordinate;
@@ -59,6 +65,7 @@ public class CaptureTargetResource
         this.resolutionDate = resolutionDate;
         this.processedRepositories = processedRepositories;
         this.resolved = resolved;
+        this.remoteUrl = buildUri( remoteUrl, path );
 
         this.url =
             buildUri( applicationUrl, ProtocolConstants.REPOSITORY_RESOURCE_BASEURI, repositoryId,
@@ -98,6 +105,11 @@ public class CaptureTargetResource
     public String getUrl()
     {
         return url;
+    }
+
+    public String getRemoteUrl()
+    {
+        return remoteUrl;
     }
 
 }

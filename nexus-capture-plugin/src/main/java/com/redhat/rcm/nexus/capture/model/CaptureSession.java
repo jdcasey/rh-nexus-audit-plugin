@@ -1,19 +1,23 @@
 package com.redhat.rcm.nexus.capture.model;
 
+import static com.redhat.rcm.nexus.capture.model.ModelSerializationUtils.normalizeDate;
+
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
+import org.sonatype.nexus.proxy.registry.RepositoryRegistry;
+
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
-import com.redhat.rcm.nexus.capture.serialize.SerializationConstants;
 import com.redhat.rcm.nexus.protocol.CaptureSessionResource;
 import com.redhat.rcm.nexus.protocol.CaptureTargetResource;
+import com.redhat.rcm.nexus.protocol.ProtocolConstants;
 import com.thoughtworks.xstream.annotations.XStreamAlias;
 import com.thoughtworks.xstream.annotations.XStreamOmitField;
 
-@XStreamAlias( SerializationConstants.SESSION_ROOT )
+@XStreamAlias( ProtocolConstants.SESSION_ROOT )
 public class CaptureSession
 {
 
@@ -23,21 +27,21 @@ public class CaptureSession
 
     private final String user;
 
-    @SerializedName( SerializationConstants.BUILD_TAG_FIELD )
-    @XStreamAlias( SerializationConstants.BUILD_TAG_FIELD )
+    @SerializedName( ProtocolConstants.BUILD_TAG_FIELD )
+    @XStreamAlias( ProtocolConstants.BUILD_TAG_FIELD )
     private final String buildTag;
 
-    @SerializedName( SerializationConstants.CAPTURE_SOURCE_FIELD )
-    @XStreamAlias( SerializationConstants.CAPTURE_SOURCE_FIELD )
+    @SerializedName( ProtocolConstants.CAPTURE_SOURCE_FIELD )
+    @XStreamAlias( ProtocolConstants.CAPTURE_SOURCE_FIELD )
     private final String captureSource;
 
-    @SerializedName( SerializationConstants.START_DATE_FIELD )
-    @XStreamAlias( SerializationConstants.START_DATE_FIELD )
-    private final Date started = new Date();
+    @SerializedName( ProtocolConstants.START_DATE_FIELD )
+    @XStreamAlias( ProtocolConstants.START_DATE_FIELD )
+    private final Date started;
 
-    @SerializedName( SerializationConstants.LAST_UPDATE_FIELD )
-    @XStreamAlias( SerializationConstants.LAST_UPDATE_FIELD )
-    private Date lastUpdated = started;
+    @SerializedName( ProtocolConstants.LAST_UPDATE_FIELD )
+    @XStreamAlias( ProtocolConstants.LAST_UPDATE_FIELD )
+    private Date lastUpdated;
 
     private final List<CaptureTarget> targets;
 
@@ -49,6 +53,8 @@ public class CaptureSession
         this.buildTag = null;
         this.captureSource = null;
         this.targets = new ArrayList<CaptureTarget>();
+        this.started = null;
+        this.lastUpdated = null;
     }
 
     public CaptureSession( final String user, final String buildTag, final String captureSource )
@@ -57,6 +63,8 @@ public class CaptureSession
         this.buildTag = buildTag;
         this.captureSource = captureSource;
         this.targets = new ArrayList<CaptureTarget>();
+        this.started = normalizeDate( new Date() );
+        this.lastUpdated = started;
     }
 
     public CaptureSession add( final CaptureTarget record )
@@ -118,15 +126,20 @@ public class CaptureSession
         return String.format( "%s:%s", user, buildTag );
     }
 
-    public CaptureSessionResource asResource( final String appUrl )
+    public CaptureSessionResource asResource( final String appUrl, final RepositoryRegistry repositoryRegistry )
     {
         final List<CaptureTargetResource> resources = new ArrayList<CaptureTargetResource>( targets.size() );
         for ( final CaptureTarget target : targets )
         {
-            resources.add( target.asResource( appUrl ) );
+            resources.add( target.asResource( appUrl, repositoryRegistry ) );
         }
 
         return new CaptureSessionResource( user, buildTag, started, lastUpdated, resources, appUrl );
+    }
+
+    public CaptureSessionRef ref()
+    {
+        return new CaptureSessionRef( user, buildTag, started );
     }
 
 }

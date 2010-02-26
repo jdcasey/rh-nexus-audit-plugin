@@ -9,21 +9,21 @@ import java.util.TreeMap;
 import org.slf4j.LoggerFactory;
 
 import com.google.gson.annotations.SerializedName;
-import com.redhat.rcm.nexus.capture.serialize.SerializationConstants;
+import com.redhat.rcm.nexus.protocol.ProtocolConstants;
 import com.thoughtworks.xstream.annotations.XStreamAlias;
 
-@XStreamAlias( SerializationConstants.CATALOG_ROOT )
+@XStreamAlias( ProtocolConstants.CATALOG_ROOT )
 public final class CaptureSessionCatalog
 {
 
-    @SerializedName( SerializationConstants.BUILD_TAG_FIELD )
-    @XStreamAlias( SerializationConstants.BUILD_TAG_FIELD )
+    @SerializedName( ProtocolConstants.BUILD_TAG_FIELD )
+    @XStreamAlias( ProtocolConstants.BUILD_TAG_FIELD )
     private String buildTag;
 
     private String user;
 
-    @SerializedName( SerializationConstants.CAPTURE_SOURCE_FIELD )
-    @XStreamAlias( SerializationConstants.CAPTURE_SOURCE_FIELD )
+    @SerializedName( ProtocolConstants.CAPTURE_SOURCE_FIELD )
+    @XStreamAlias( ProtocolConstants.CAPTURE_SOURCE_FIELD )
     private String captureSource;
 
     private final TreeMap<Date, File> sessions = new TreeMap<Date, File>();

@@ -27,7 +27,6 @@ public class CaptureSessionRefResource
     private final Date date;
 
     // used for gson deserialization
-    @SuppressWarnings( "unused" )
     private CaptureSessionRefResource()
     {
         this.user = null;
@@ -68,6 +67,11 @@ public class CaptureSessionRefResource
     public int compareTo( final CaptureSessionRefResource ref )
     {
         return date.compareTo( ref.date );
+    }
+
+    public static CaptureSessionRefResource payloadPrototype()
+    {
+        return new CaptureSessionRefResource();
     }
 
 }

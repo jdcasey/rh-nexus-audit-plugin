@@ -1,26 +1,40 @@
-package com.redhat.rcm.nexus.capture.serialize;
+package com.redhat.rcm.nexus.capture.model;
+
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 
 import com.google.gson.Gson;
 import com.redhat.rcm.nexus.capture.config.CaptureConfigModel;
-import com.redhat.rcm.nexus.capture.model.CaptureSession;
-import com.redhat.rcm.nexus.capture.model.CaptureSessionCatalog;
-import com.redhat.rcm.nexus.capture.model.CaptureSessionRef;
-import com.redhat.rcm.nexus.capture.model.CaptureTarget;
-import com.redhat.rcm.nexus.protocol.ProtocolUtils;
+import com.redhat.rcm.nexus.util.ProtocolUtils;
 import com.thoughtworks.xstream.XStream;
 
-public final class SerializationUtils
+public final class ModelSerializationUtils
 {
 
     private static final String DATE_FORMAT = "yyyy-MM-dd HH:mm:ss Z";
 
-    private SerializationUtils()
+    private ModelSerializationUtils()
     {
     }
 
     public static Gson getGson()
     {
         return ProtocolUtils.getGson();
+    }
+
+    public static Date normalizeDate( final Date d )
+    {
+        final SimpleDateFormat fmt = new SimpleDateFormat( DATE_FORMAT );
+        try
+        {
+            return fmt.parse( fmt.format( d ) );
+        }
+        catch ( final ParseException e )
+        {
+            throw new IllegalStateException( String.format( "Format-Parse round trip for java.util.Date failed."
+                            + "\nFormat: %s\nDate: %s\nReason: %s", DATE_FORMAT, d, e.getMessage() ), e );
+        }
     }
 
     public static XStream getXStreamForStore()

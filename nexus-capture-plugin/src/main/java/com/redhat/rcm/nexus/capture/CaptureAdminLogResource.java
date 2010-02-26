@@ -4,11 +4,11 @@ import static com.redhat.rcm.nexus.capture.CaptureLogUtils.deleteLogs;
 import static com.redhat.rcm.nexus.capture.CaptureLogUtils.queryLogs;
 import static com.redhat.rcm.nexus.capture.CaptureLogUtils.setBeforeDate;
 import static com.redhat.rcm.nexus.capture.CaptureLogUtils.setSinceDate;
+import static com.redhat.rcm.nexus.capture.model.ModelSerializationUtils.getGson;
 import static com.redhat.rcm.nexus.capture.request.RequestUtils.mediaTypeOf;
 import static com.redhat.rcm.nexus.capture.request.RequestUtils.modeOf;
 import static com.redhat.rcm.nexus.capture.request.RequestUtils.query;
-import static com.redhat.rcm.nexus.capture.serialize.SerializationUtils.getGson;
-import static com.redhat.rcm.nexus.protocol.ProtocolUtils.getXStreamForREST;
+import static com.redhat.rcm.nexus.util.ProtocolUtils.getXStreamForREST;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -37,6 +37,7 @@ import com.redhat.rcm.nexus.capture.store.CaptureSessionQuery;
 import com.redhat.rcm.nexus.capture.store.CaptureStore;
 import com.redhat.rcm.nexus.capture.store.CaptureStoreException;
 import com.redhat.rcm.nexus.protocol.CaptureSessionResource;
+import com.redhat.rcm.nexus.protocol.ProtocolConstants;
 
 @Named( "captureAdminLog" )
 public class CaptureAdminLogResource
@@ -65,7 +66,7 @@ public class CaptureAdminLogResource
     @Override
     public PathProtectionDescriptor getResourceProtection()
     {
-        return new PathProtectionDescriptor( "/capture/admin/logs",
+        return new PathProtectionDescriptor( ProtocolConstants.ADMIN_LOGS_RESOURCE_FRAGMENT,
                                              String.format( "authcBasic,perms[%s]",
                                                             CaptureResourceConstants.PRIV_LOG_ACCESS ) );
     }
@@ -73,7 +74,7 @@ public class CaptureAdminLogResource
     @Override
     public String getResourceUri()
     {
-        return "/capture/admin/logs";
+        return ProtocolConstants.ADMIN_LOGS_RESOURCE_FRAGMENT;
     }
 
     @Override
@@ -126,7 +127,7 @@ public class CaptureAdminLogResource
                     final List<CaptureSessionResource> resources = new ArrayList<CaptureSessionResource>( logs.size() );
                     for ( final CaptureSessionRef ref : logs )
                     {
-                        resources.add( captureStore.readLog( ref ).asResource( appUrl ) );
+                        resources.add( captureStore.readLog( ref ).asResource( appUrl, getRepositoryRegistry() ) );
                     }
 
                     data = resources;

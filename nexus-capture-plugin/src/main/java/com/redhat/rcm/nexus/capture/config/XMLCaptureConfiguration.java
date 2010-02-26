@@ -1,6 +1,6 @@
 package com.redhat.rcm.nexus.capture.config;
 
-import static com.redhat.rcm.nexus.capture.serialize.SerializationUtils.getXStreamForConfig;
+import static com.redhat.rcm.nexus.capture.model.ModelSerializationUtils.getXStreamForConfig;
 import static org.codehaus.plexus.util.IOUtil.close;
 
 import java.io.File;

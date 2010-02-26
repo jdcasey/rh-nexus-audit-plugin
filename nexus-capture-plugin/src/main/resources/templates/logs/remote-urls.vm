@@ -1,0 +1,2 @@
+#foreach($target in $data.targets)$target.remoteUrl
+#end

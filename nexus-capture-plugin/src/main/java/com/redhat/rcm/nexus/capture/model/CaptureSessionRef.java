@@ -3,23 +3,23 @@ package com.redhat.rcm.nexus.capture.model;
 import java.util.Date;
 
 import com.google.gson.annotations.SerializedName;
-import com.redhat.rcm.nexus.capture.serialize.SerializationConstants;
 import com.redhat.rcm.nexus.protocol.CaptureSessionRefResource;
+import com.redhat.rcm.nexus.protocol.ProtocolConstants;
 import com.thoughtworks.xstream.annotations.XStreamAlias;
 
-@XStreamAlias( SerializationConstants.SESSION_REF_ROOT )
+@XStreamAlias( ProtocolConstants.SESSION_REF_ROOT )
 public class CaptureSessionRef
     implements Comparable<CaptureSessionRef>
 {
 
     private final String user;
 
-    @SerializedName( SerializationConstants.BUILD_TAG_FIELD )
-    @XStreamAlias( SerializationConstants.BUILD_TAG_FIELD )
+    @SerializedName( ProtocolConstants.BUILD_TAG_FIELD )
+    @XStreamAlias( ProtocolConstants.BUILD_TAG_FIELD )
     private final String buildTag;
 
-    @SerializedName( SerializationConstants.DATE_FIELD )
-    @XStreamAlias( SerializationConstants.DATE_FIELD )
+    @SerializedName( ProtocolConstants.DATE_FIELD )
+    @XStreamAlias( ProtocolConstants.DATE_FIELD )
     private final Date date;
 
     // used for gson deserialization

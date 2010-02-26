@@ -2,10 +2,10 @@ package com.redhat.rcm.nexus.capture;
 
 import static com.redhat.rcm.nexus.capture.CaptureLogUtils.deleteLogs;
 import static com.redhat.rcm.nexus.capture.CaptureLogUtils.queryLogs;
+import static com.redhat.rcm.nexus.capture.model.ModelSerializationUtils.getGson;
 import static com.redhat.rcm.nexus.capture.request.RequestUtils.mediaTypeOf;
 import static com.redhat.rcm.nexus.capture.request.RequestUtils.modeOf;
-import static com.redhat.rcm.nexus.capture.serialize.SerializationUtils.getGson;
-import static com.redhat.rcm.nexus.protocol.ProtocolUtils.getXStreamForREST;
+import static com.redhat.rcm.nexus.util.ProtocolUtils.getXStreamForREST;
 
 import javax.inject.Inject;
 import javax.inject.Named;
@@ -31,6 +31,8 @@ import com.redhat.rcm.nexus.capture.request.RequestMode;
 import com.redhat.rcm.nexus.capture.store.CaptureSessionQuery;
 import com.redhat.rcm.nexus.capture.store.CaptureStore;
 import com.redhat.rcm.nexus.capture.store.CaptureStoreException;
+import com.redhat.rcm.nexus.protocol.CaptureSessionRefResource;
+import com.redhat.rcm.nexus.protocol.ProtocolConstants;
 
 @Named( "captureMyLog" )
 public class CaptureMyLogResource
@@ -52,14 +54,13 @@ public class CaptureMyLogResource
     @Override
     public Object getPayloadInstance()
     {
-        // if you allow PUT or POST you would need to return your object.
-        return null;
+        return CaptureSessionRefResource.payloadPrototype();
     }
 
     @Override
     public PathProtectionDescriptor getResourceProtection()
     {
-        return new PathProtectionDescriptor( "/capture/my/logs/*",
+        return new PathProtectionDescriptor( ProtocolConstants.MY_LOGS_RESOURCE_FRAGMENT + "/*",
                                              String.format( "authcBasic,perms[%s]",
                                                             CaptureResourceConstants.PRIV_LOG_ACCESS ) );
     }
@@ -67,7 +68,8 @@ public class CaptureMyLogResource
     @Override
     public String getResourceUri()
     {
-        return "/capture/my/logs/{" + CaptureResourceConstants.ATTR_BUILD_TAG_REPO_ID + "}";
+        return ProtocolConstants.MY_LOGS_RESOURCE_FRAGMENT + "/{" + CaptureResourceConstants.ATTR_BUILD_TAG_REPO_ID
+                        + "}";
     }
 
     @Override
@@ -112,7 +114,7 @@ public class CaptureMyLogResource
                 final CaptureSession session = captureStore.readLatestLog( user, buildTag );
                 if ( session != null )
                 {
-                    data = session.asResource( request.getRootRef().toString() );
+                    data = session.asResource( request.getRootRef().toString(), getRepositoryRegistry() );
                 }
             }
             catch ( final CaptureStoreException e )
@@ -125,9 +127,16 @@ public class CaptureMyLogResource
             }
         }
 
-        String result = null;
-
         final MediaType mt = mediaTypeOf( request, variant );
+        final String result = serialize( data, mt );
+
+        return new StringRepresentation( result, mt );
+    }
+
+    private String serialize( final Object data, final MediaType mt )
+        throws ResourceException
+    {
+        String result = null;
         if ( mt == MediaType.APPLICATION_XML )
         {
             result = getXStreamForREST().toXML( data );
@@ -141,7 +150,7 @@ public class CaptureMyLogResource
             throw new ResourceException( Status.CLIENT_ERROR_NOT_ACCEPTABLE );
         }
 
-        return new StringRepresentation( result, mt );
+        return result;
     }
 
     @Override
@@ -151,15 +160,13 @@ public class CaptureMyLogResource
         final String buildTag =
             request.getAttributes().get( CaptureResourceConstants.ATTR_BUILD_TAG_REPO_ID ).toString();
 
-        final String captureSource =
-            request.getAttributes().get( CaptureResourceConstants.ATTR_CAPTURE_SOURCE_REPO_ID ).toString();
-
         final Subject subject = SecurityUtils.getSubject();
         final String user = subject.getPrincipal().toString();
 
+        CaptureSessionRefResource resource = null;
         try
         {
-            captureStore.closeCurrentLog( user, buildTag, captureSource );
+            resource = captureStore.closeCurrentLog( user, buildTag ).asResource( request.getRootRef().toString() );
         }
         catch ( final CaptureStoreException e )
         {
@@ -171,14 +178,12 @@ public class CaptureMyLogResource
             throw new ResourceException( Status.SERVER_ERROR_INTERNAL, e.getMessage() );
         }
 
-        return null;
-    }
+        logger.info( "Returning session-ref resource:\n\n" + getXStreamForREST().toXML( resource ) );
 
-    @Override
-    public Object put( final Context context, final Request request, final Response response, final Object payload )
-        throws ResourceException
-    {
-        return post( context, request, response, payload );
+        final MediaType mt = mediaTypeOf( request );
+        final String result = serialize( resource, mt );
+
+        return new StringRepresentation( result, mt );
     }
 
     @Override

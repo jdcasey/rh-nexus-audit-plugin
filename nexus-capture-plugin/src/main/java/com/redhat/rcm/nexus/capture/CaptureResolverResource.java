@@ -31,6 +31,7 @@ import org.sonatype.plexus.rest.resource.PlexusResource;
 import com.redhat.rcm.nexus.capture.config.CaptureConfiguration;
 import com.redhat.rcm.nexus.capture.store.CaptureStore;
 import com.redhat.rcm.nexus.capture.store.CaptureStoreException;
+import com.redhat.rcm.nexus.protocol.ProtocolConstants;
 
 /**
  * Capture resource, which will try to resolve first from a build-tag repository (first part of URL after /capture/),
@@ -63,7 +64,7 @@ public class CaptureResolverResource
     @Override
     public PathProtectionDescriptor getResourceProtection()
     {
-        return new PathProtectionDescriptor( "/capture/resolve/*/**",
+        return new PathProtectionDescriptor( ProtocolConstants.RESOLVE_RESOURCE_FRAGMENT + "/*/**",
                                              String.format( "authcBasic,perms[%s]",
                                                             CaptureResourceConstants.PRIV_ACCESS ) );
     }
@@ -71,7 +72,8 @@ public class CaptureResolverResource
     @Override
     public String getResourceUri()
     {
-        return "/capture/resolve/{" + CaptureResourceConstants.ATTR_BUILD_TAG_REPO_ID + "}";
+        return ProtocolConstants.RESOLVE_RESOURCE_FRAGMENT + "/{" + CaptureResourceConstants.ATTR_BUILD_TAG_REPO_ID
+                        + "}";
     }
 
     @Override

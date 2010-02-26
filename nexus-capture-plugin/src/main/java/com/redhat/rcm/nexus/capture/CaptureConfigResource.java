@@ -1,6 +1,6 @@
 package com.redhat.rcm.nexus.capture;
 
-import static com.redhat.rcm.nexus.capture.serialize.SerializationUtils.getXStreamForConfig;
+import static com.redhat.rcm.nexus.capture.model.ModelSerializationUtils.getXStreamForConfig;
 
 import javax.inject.Inject;
 import javax.inject.Named;
@@ -20,6 +20,7 @@ import org.sonatype.plexus.rest.resource.PlexusResource;
 import com.redhat.rcm.nexus.capture.config.CaptureConfigDTO;
 import com.redhat.rcm.nexus.capture.config.CaptureConfiguration;
 import com.redhat.rcm.nexus.capture.config.InvalidConfigurationException;
+import com.redhat.rcm.nexus.protocol.ProtocolConstants;
 
 @Named( "captureConfig" )
 public class CaptureConfigResource
@@ -47,7 +48,7 @@ public class CaptureConfigResource
     @Override
     public PathProtectionDescriptor getResourceProtection()
     {
-        return new PathProtectionDescriptor( "/capture/admin/config",
+        return new PathProtectionDescriptor( ProtocolConstants.ADMIN_CONFIG_RESOURCE_FRAGMENT,
                                              String.format( "authcBasic,perms[%s]",
                                                             CaptureResourceConstants.PRIV_SETTINGS ) );
     }
@@ -55,7 +56,7 @@ public class CaptureConfigResource
     @Override
     public String getResourceUri()
     {
-        return "/capture/admin/config";
+        return ProtocolConstants.ADMIN_CONFIG_RESOURCE_FRAGMENT;
     }
 
     @Override

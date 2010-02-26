@@ -23,16 +23,20 @@ public enum OutputFormat
         return mt;
     }
 
-    public static OutputFormat find( String fmt )
+    public static OutputFormat find( final String fmt )
     {
         if ( fmt != null )
         {
-            fmt = fmt.toUpperCase();
-            for ( final OutputFormat format : values() )
+            final MediaType mt = MediaType.valueOf( fmt );
+
+            if ( mt != null )
             {
-                if ( format.toString().equals( fmt ) )
+                for ( final OutputFormat format : values() )
                 {
-                    return format;
+                    if ( format.mediaType().equals( mt ) )
+                    {
+                        return format;
+                    }
                 }
             }
         }

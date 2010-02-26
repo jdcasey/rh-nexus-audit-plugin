@@ -1,6 +1,4 @@
-package com.redhat.rcm.nexus.protocol;
-
-import static org.codehaus.plexus.util.StringUtils.isNotEmpty;
+package com.redhat.rcm.nexus.util;
 
 import java.io.File;
 import java.io.IOException;
@@ -28,6 +26,10 @@ import com.google.gson.JsonParseException;
 import com.google.gson.JsonSerializationContext;
 import com.google.gson.JsonSerializer;
 import com.google.gson.reflect.TypeToken;
+import com.redhat.rcm.nexus.protocol.CaptureSessionRefResource;
+import com.redhat.rcm.nexus.protocol.CaptureSessionResource;
+import com.redhat.rcm.nexus.protocol.CaptureTargetResource;
+import com.redhat.rcm.nexus.protocol.ProtocolConstants;
 import com.thoughtworks.xstream.XStream;
 import com.thoughtworks.xstream.converters.Converter;
 import com.thoughtworks.xstream.converters.MarshallingContext;
@@ -46,41 +48,6 @@ public final class ProtocolUtils
 
     private ProtocolUtils()
     {
-    }
-
-    public static String buildUri( final String applicationUrl, final String... parts )
-    {
-        final StringBuilder sb = new StringBuilder();
-        if ( isNotEmpty( applicationUrl ) )
-        {
-            if ( applicationUrl.endsWith( "/" ) )
-            {
-                sb.append( applicationUrl.substring( 0, applicationUrl.length() - 1 ) );
-            }
-            else
-            {
-                sb.append( applicationUrl );
-            }
-        }
-        else
-        {
-            sb.append( '/' );
-        }
-
-        for ( final String part : parts )
-        {
-            if ( isNotEmpty( part ) )
-            {
-                if ( sb.charAt( sb.length() - 1 ) != '/' && part.charAt( 0 ) != '/' )
-                {
-                    sb.append( '/' );
-                }
-
-                sb.append( part );
-            }
-        }
-
-        return sb.length() == 0 ? null : sb.toString();
     }
 
     public static String formatUrlDate( final Date date )

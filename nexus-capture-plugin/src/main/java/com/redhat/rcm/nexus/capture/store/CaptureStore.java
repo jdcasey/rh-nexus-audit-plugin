@@ -15,7 +15,7 @@ import com.redhat.rcm.nexus.capture.model.CaptureSessionRef;
 public interface CaptureStore
 {
 
-    CaptureSession closeCurrentLog( String user, String buildTag, String captureSource )
+    CaptureSessionRef closeCurrentLog( String user, String buildTag )
         throws CaptureStoreException;
 
     void deleteLogs( CaptureSessionQuery query )

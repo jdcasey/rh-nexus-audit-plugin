@@ -4,34 +4,42 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.sonatype.nexus.artifact.Gav;
+import org.sonatype.nexus.proxy.NoSuchRepositoryException;
 import org.sonatype.nexus.proxy.item.StorageItem;
+import org.sonatype.nexus.proxy.registry.RepositoryRegistry;
+import org.sonatype.nexus.proxy.repository.ProxyRepository;
+import org.sonatype.nexus.proxy.repository.Repository;
 
 import com.google.gson.annotations.SerializedName;
-import com.redhat.rcm.nexus.capture.serialize.SerializationConstants;
 import com.redhat.rcm.nexus.protocol.CaptureTargetResource;
+import com.redhat.rcm.nexus.protocol.ProtocolConstants;
 import com.thoughtworks.xstream.annotations.XStreamAlias;
 
-@XStreamAlias( SerializationConstants.TARGET_ROOT )
+@XStreamAlias( ProtocolConstants.TARGET_ROOT )
 public class CaptureTarget
 {
+
+    private transient final Logger logger = LoggerFactory.getLogger( getClass() );
 
     private final String path;
 
     private boolean resolved = false;
 
-    @SerializedName( SerializationConstants.RESOLVED_REPO_FIELD )
-    @XStreamAlias( SerializationConstants.RESOLVED_REPO_FIELD )
+    @SerializedName( ProtocolConstants.RESOLVED_REPO_FIELD )
+    @XStreamAlias( ProtocolConstants.RESOLVED_REPO_FIELD )
     private final String repositoryId;
 
-    @SerializedName( SerializationConstants.RESOLVED_ON_FIELD )
-    @XStreamAlias( SerializationConstants.RESOLVED_ON_FIELD )
+    @SerializedName( ProtocolConstants.RESOLVED_ON_FIELD )
+    @XStreamAlias( ProtocolConstants.RESOLVED_ON_FIELD )
     private Date resolutionDate;
 
     private final Gav coordinate;
 
-    @SerializedName( SerializationConstants.CHECKED_REPOS_FIELD )
-    @XStreamAlias( SerializationConstants.CHECKED_REPOS_FIELD )
+    @SerializedName( ProtocolConstants.CHECKED_REPOS_FIELD )
+    @XStreamAlias( ProtocolConstants.CHECKED_REPOS_FIELD )
     private final List<String> processedRepositories;
 
     // Used for Gson deserialization.
@@ -96,15 +104,38 @@ public class CaptureTarget
         return repositoryId;
     }
 
-    public CaptureTargetResource asResource( final String appUrl )
+    public CaptureTargetResource asResource( final String appUrl, final RepositoryRegistry repositoryRegistry )
     {
+        String remoteBase = null;
+        try
+        {
+            final ProxyRepository repository =
+                repositoryRegistry.getRepositoryWithFacet( repositoryId, ProxyRepository.class );
+
+            remoteBase = repository.getRemoteUrl();
+        }
+        catch ( final NoSuchRepositoryException e )
+        {
+            try
+            {
+                final Repository repository = repositoryRegistry.getRepository( repositoryId );
+                remoteBase = repository.getLocalUrl();
+            }
+            catch ( final NoSuchRepositoryException e2 )
+            {
+                logger.warn( String.format( "Cannot find repository for target.\nRepository ID: %s\nTarget path: %s",
+                                            repositoryId, path ) );
+            }
+        }
+
         return new CaptureTargetResource( coordinate,
                                           path,
                                           repositoryId,
                                           resolutionDate,
                                           processedRepositories,
                                           resolved,
-                                          appUrl );
+                                          appUrl,
+                                          remoteBase );
     }
 
 }

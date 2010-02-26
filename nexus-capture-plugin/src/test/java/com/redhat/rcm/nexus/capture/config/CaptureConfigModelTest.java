@@ -1,7 +1,7 @@
 package com.redhat.rcm.nexus.capture.config;
 
-import static com.redhat.rcm.nexus.capture.serialize.SerializationUtils.getGson;
-import static com.redhat.rcm.nexus.capture.serialize.SerializationUtils.getXStreamForConfig;
+import static com.redhat.rcm.nexus.capture.model.ModelSerializationUtils.getGson;
+import static com.redhat.rcm.nexus.capture.model.ModelSerializationUtils.getXStreamForConfig;
 import static junit.framework.Assert.assertEquals;
 
 import org.junit.Test;

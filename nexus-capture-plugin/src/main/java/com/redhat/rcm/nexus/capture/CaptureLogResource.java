@@ -1,17 +1,23 @@
 package com.redhat.rcm.nexus.capture;
 
+import static com.redhat.rcm.nexus.capture.model.ModelSerializationUtils.getGson;
 import static com.redhat.rcm.nexus.capture.request.RequestUtils.mediaTypeOf;
 import static com.redhat.rcm.nexus.capture.request.RequestUtils.parseUrlDate;
-import static com.redhat.rcm.nexus.capture.serialize.SerializationUtils.getGson;
-import static com.redhat.rcm.nexus.protocol.ProtocolUtils.getXStreamForREST;
+import static com.redhat.rcm.nexus.capture.request.RequestUtils.query;
+import static com.redhat.rcm.nexus.util.ProtocolUtils.getXStreamForREST;
 
 import java.text.ParseException;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 import javax.inject.Inject;
 import javax.inject.Named;
 
 import org.restlet.Context;
+import org.restlet.data.Form;
 import org.restlet.data.MediaType;
 import org.restlet.data.Request;
 import org.restlet.data.Response;
@@ -29,6 +35,10 @@ import com.redhat.rcm.nexus.capture.model.CaptureSession;
 import com.redhat.rcm.nexus.capture.model.CaptureSessionRef;
 import com.redhat.rcm.nexus.capture.store.CaptureStore;
 import com.redhat.rcm.nexus.capture.store.CaptureStoreException;
+import com.redhat.rcm.nexus.capture.template.TemplateConstants;
+import com.redhat.rcm.nexus.capture.template.TemplateException;
+import com.redhat.rcm.nexus.capture.template.TemplateFormatter;
+import com.redhat.rcm.nexus.protocol.ProtocolConstants;
 
 @Named( "captureLog" )
 public class CaptureLogResource
@@ -42,6 +52,10 @@ public class CaptureLogResource
     @Named( "json" )
     private CaptureStore captureStore;
 
+    @Inject
+    @Named( "velocity" )
+    private TemplateFormatter templateFormatter;
+
     @Override
     public Object getPayloadInstance()
     {
@@ -52,7 +66,7 @@ public class CaptureLogResource
     @Override
     public PathProtectionDescriptor getResourceProtection()
     {
-        return new PathProtectionDescriptor( "/capture/log/*/*/*",
+        return new PathProtectionDescriptor( ProtocolConstants.LOG_RESOURCE_FRAGMENT + "/*/*/*",
                                              String.format( "authcBasic,perms[%s]",
                                                             CaptureResourceConstants.PRIV_LOG_ACCESS ) );
     }
@@ -60,7 +74,7 @@ public class CaptureLogResource
     @Override
     public String getResourceUri()
     {
-        return "/capture/log/{" + CaptureResourceConstants.ATTR_USER + "}/{"
+        return ProtocolConstants.LOG_RESOURCE_FRAGMENT + "/{" + CaptureResourceConstants.ATTR_USER + "}/{"
                         + CaptureResourceConstants.ATTR_BUILD_TAG_REPO_ID + "}/{" + CaptureResourceConstants.ATTR_DATE
                         + "}";
     }
@@ -86,7 +100,7 @@ public class CaptureLogResource
             final CaptureSession session = captureStore.readLog( ref );
             if ( session != null )
             {
-                data = session.asResource( request.getRootRef().toString() );
+                data = session.asResource( request.getRootRef().toString(), getRepositoryRegistry() );
             }
             else
             {
@@ -127,12 +141,41 @@ public class CaptureLogResource
         {
             result = getGson().toJson( data );
         }
+        else if ( mt == MediaType.TEXT_PLAIN )
+        {
+            final Map<String, Object> templateContext = new HashMap<String, Object>();
+            templateContext.put( "data", data );
+
+            final Form query = query( request );
+            final String template = query.getFirstValue( CaptureResourceConstants.PARAM_TEMPLATE );
+
+            try
+            {
+                result = templateFormatter.format( TemplateConstants.LOG_TEMPLATE_BASEPATH, template, templateContext );
+            }
+            catch ( final TemplateException e )
+            {
+                throw new ResourceException( Status.SERVER_ERROR_INTERNAL, e.getMessage(), e );
+            }
+        }
         else
         {
             throw new ResourceException( Status.CLIENT_ERROR_NOT_ACCEPTABLE );
         }
 
         return new StringRepresentation( result, mt );
+    }
+
+    @Override
+    public List<Variant> getVariants()
+    {
+        final List<Variant> variants = new ArrayList<Variant>();
+
+        variants.add( new Variant( MediaType.APPLICATION_XML ) );
+        variants.add( new Variant( MediaType.APPLICATION_JSON ) );
+        variants.add( new Variant( MediaType.TEXT_PLAIN ) );
+
+        return variants;
     }
 
 }

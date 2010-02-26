@@ -1,20 +1,23 @@
 package com.redhat.rcm.maven.plugin.capture;
 
-import static com.redhat.rcm.nexus.protocol.ProtocolUtils.getGson;
+import static com.redhat.rcm.nexus.util.ProtocolUtils.getGson;
 
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.io.InputStreamReader;
+import java.io.StringReader;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.Arrays;
 import java.util.List;
 
 import org.apache.http.HttpHost;
 import org.apache.http.HttpResponse;
+import org.apache.http.StatusLine;
 import org.apache.http.auth.AuthScope;
 import org.apache.http.auth.UsernamePasswordCredentials;
 import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.ResponseHandler;
-import org.apache.http.client.methods.HttpPut;
+import org.apache.http.client.methods.HttpPost;
 import org.apache.http.conn.params.ConnRoutePNames;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.maven.artifact.manager.WagonManager;
@@ -23,20 +26,30 @@ import org.apache.maven.plugin.Mojo;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
 import org.apache.maven.plugin.logging.Log;
+import org.apache.maven.project.DefaultProjectBuilderConfiguration;
 import org.apache.maven.project.MavenProject;
+import org.apache.maven.project.MavenProjectBuilder;
+import org.apache.maven.project.ProjectBuildingException;
+import org.apache.maven.settings.Settings;
 import org.apache.maven.wagon.authentication.AuthenticationInfo;
 import org.apache.maven.wagon.proxy.ProxyInfo;
+import org.codehaus.plexus.components.interactivity.Prompter;
+import org.codehaus.plexus.components.interactivity.PrompterException;
+import org.codehaus.plexus.util.IOUtil;
 
 import com.redhat.rcm.nexus.protocol.CaptureSessionRefResource;
+import com.redhat.rcm.nexus.protocol.ProtocolConstants;
 
 /**
  * @goal close-session
- * @author jdcasey
- * 
+ * @requiresProject false
  */
 public class CaptureSessionCloseMojo
     implements Mojo
 {
+
+    private static final List<String> YN_VALUES =
+        Arrays.asList( new String[] { Boolean.TRUE.toString(), Boolean.FALSE.toString() } );
 
     private Log log;
 
@@ -48,6 +61,13 @@ public class CaptureSessionCloseMojo
     private List<MavenProject> allProjects;
 
     /**
+     * @parameter default-value="${settings}"
+     * @required
+     * @readonly
+     */
+    private Settings settings;
+
+    /**
      * @parameter default-value="${project}"
      * @required
      * @readonly
@@ -57,95 +77,63 @@ public class CaptureSessionCloseMojo
     /**
      * @component
      */
+    private MavenProjectBuilder projectBuilder;
+
+    /**
+     * @component
+     */
     private WagonManager wagonManager;
+
+    /**
+     * @component
+     */
+    private Prompter prompter;
 
     @Override
     public void execute()
         throws MojoExecutionException,
             MojoFailureException
     {
-        if ( allProjects.size() == 1 || project == allProjects.get( allProjects.size() - 1 ) )
+        if ( allProjects == null || allProjects.size() < 2
+                        || ( project != null && project == allProjects.get( allProjects.size() - 1 ) ) )
         {
+            verifyProjectIsPresent();
+
             final ArtifactRepository mirrorRepository =
                 wagonManager.getMirrorRepository( (ArtifactRepository) project.getRemoteArtifactRepositories().get( 0 ) );
 
-            URL url;
-            try
+            AuthenticationInfo authenticationInfo = wagonManager.getAuthenticationInfo( mirrorRepository.getId() );
+            ProxyInfo proxy = wagonManager.getProxy( mirrorRepository.getProtocol() );
+            String logUrl = buildMyLogUrl( mirrorRepository.getUrl() );
+
+            if ( settings.isInteractiveMode() )
             {
-                url = new URL( mirrorRepository.getUrl() );
-            }
-            catch ( final MalformedURLException e )
-            {
-                throw new MojoExecutionException( String.format( "Invalid mirror URL: %s\n%s",
-                                                                 mirrorRepository.getUrl(), e.getMessage() ), e );
-            }
+                // defensive copies, in case we change it below...
+                final AuthenticationInfo a = new AuthenticationInfo();
+                a.setPassword( authenticationInfo.getPassword() );
+                a.setUserName( authenticationInfo.getUserName() );
 
-            final AuthenticationInfo authenticationInfo = wagonManager.getAuthenticationInfo( mirrorRepository.getId() );
-            final ProxyInfo proxy = wagonManager.getProxy( url.getProtocol() );
+                authenticationInfo = a;
 
-            final DefaultHttpClient client = new DefaultHttpClient();
-
-            if ( proxy != null
-                            && ( proxy.getNonProxyHosts() == null || proxy.getNonProxyHosts().indexOf( url.getHost() ) < 0 ) )
-            {
-                final HttpHost proxyHost = new HttpHost( proxy.getHost(), proxy.getPort() );
-
-                client.getParams().setParameter( ConnRoutePNames.DEFAULT_PROXY, proxyHost );
-
-                if ( proxy.getUserName() != null )
+                if ( proxy != null )
                 {
-                    client.getCredentialsProvider()
-                          .setCredentials( new AuthScope( proxy.getHost(), proxy.getPort() ),
-                                           new UsernamePasswordCredentials( proxy.getUserName(), proxy.getPassword() ) );
+                    final ProxyInfo p = new ProxyInfo();
+                    p.setHost( proxy.getHost() );
+                    p.setNonProxyHosts( proxy.getNonProxyHosts() );
+                    p.setNtlmDomain( proxy.getNtlmDomain() );
+                    p.setNtlmHost( proxy.getNtlmHost() );
+                    p.setPassword( proxy.getPassword() );
+                    p.setPort( proxy.getPort() );
+                    p.setType( proxy.getType() );
+                    p.setUserName( proxy.getUserName() );
+
+                    proxy = p;
                 }
+
+                logUrl = verifyAndCorrectInfo( authenticationInfo, proxy, logUrl );
             }
 
-            if ( authenticationInfo != null && authenticationInfo.getUserName() != null )
-            {
-                client.getCredentialsProvider()
-                      .setCredentials(
-                                       new AuthScope( url.getHost(), url.getPort() ),
-                                       new UsernamePasswordCredentials( authenticationInfo.getUserName(),
-                                                                        authenticationInfo.getPassword() ) );
-            }
-
-            // FIXME: This is the WRONG URL!!! Need the /my/logs/ url...
-            final HttpPut put = new HttpPut( mirrorRepository.getUrl() );
-            put.addHeader( "Accept", "application/json" );
-
-            CaptureSessionRefResource sessionRef;
-            try
-            {
-                sessionRef = client.execute( put, new ResponseHandler<CaptureSessionRefResource>()
-                {
-                    @Override
-                    public CaptureSessionRefResource handleResponse( final HttpResponse response )
-                        throws ClientProtocolException,
-                            IOException
-                    {
-                        return getGson().fromJson( new InputStreamReader( response.getEntity().getContent() ),
-                                                   CaptureSessionRefResource.class );
-                    }
-                } );
-            }
-            catch ( final ClientProtocolException e )
-            {
-                throw new MojoExecutionException( String.format(
-                                                                 "Failed to close capture session for user: %s\nat URL: %s\nReason: %s",
-                                                                 authenticationInfo.getUserName(),
-                                                                 mirrorRepository.getUrl(), e.getMessage() ),
-                                                  e );
-            }
-            catch ( final IOException e )
-            {
-                throw new MojoExecutionException( String.format(
-                                                                 "Failed to close capture session for user: %s\nat URL: %s\nReason: %s",
-                                                                 authenticationInfo.getUserName(),
-                                                                 mirrorRepository.getUrl(), e.getMessage() ),
-                                                  e );
-            }
-
-            getLog().info( String.format( "Closed capture session: %s", sessionRef.getUrl() ) );
+            closeSession( logUrl, authenticationInfo, proxy );
         }
         else
         {
@@ -155,6 +143,250 @@ public class CaptureSessionCloseMojo
                                            + "Currently processing project %d out of %d", ( idx + 1 ),
                                           allProjects.size() ) );
         }
+    }
+
+    private void closeSession( final String url, final AuthenticationInfo authenticationInfo, final ProxyInfo proxy )
+        throws MojoExecutionException
+    {
+        URL urlObject;
+        try
+        {
+            urlObject = new URL( url );
+        }
+        catch ( final MalformedURLException e )
+        {
+            throw new MojoExecutionException( String.format( "Invalid mirror URL: %s\n%s", url, e.getMessage() ), e );
+        }
+
+        final DefaultHttpClient client = new DefaultHttpClient();
+
+        if ( proxy != null
+                        && ( proxy.getNonProxyHosts() == null || proxy.getNonProxyHosts().indexOf( urlObject.getHost() ) < 0 ) )
+        {
+            final HttpHost proxyHost = new HttpHost( proxy.getHost(), proxy.getPort() );
+
+            client.getParams().setParameter( ConnRoutePNames.DEFAULT_PROXY, proxyHost );
+
+            if ( proxy.getUserName() != null )
+            {
+                client.getCredentialsProvider().setCredentials(
+                                                                new AuthScope( proxy.getHost(), proxy.getPort() ),
+                                                                new UsernamePasswordCredentials( proxy.getUserName(),
+                                                                                                 proxy.getPassword() ) );
+            }
+        }
+
+        if ( authenticationInfo != null && authenticationInfo.getUserName() != null )
+        {
+            client.getCredentialsProvider()
+                  .setCredentials(
+                                   new AuthScope( urlObject.getHost(), urlObject.getPort() ),
+                                   new UsernamePasswordCredentials( authenticationInfo.getUserName(),
+                                                                    authenticationInfo.getPassword() ) );
+        }
+
+        final HttpPost method = new HttpPost( url );
+        method.addHeader( "Accept", "application/json" );
+        // try
+        // {
+        // method.setEntity( new StringEntity( "foo" ) );
+        // }
+        // catch ( final UnsupportedEncodingException e )
+        // {
+        // throw new MojoExecutionException( "Failed to set dummy request body: " + e.getMessage(), e );
+        // }
+
+        CaptureSessionResponse sessionResponse;
+        try
+        {
+            sessionResponse = client.execute( method, new ResponseHandler<CaptureSessionResponse>()
+            {
+                @Override
+                public CaptureSessionResponse handleResponse( final HttpResponse response )
+                    throws ClientProtocolException,
+                        IOException
+                {
+                    final StatusLine status = response.getStatusLine();
+                    CaptureSessionRefResource resource = null;
+
+                    if ( status.getStatusCode() < 200 || status.getStatusCode() > 201 )
+                    {
+                        getLog().error( "HTTP Request failed! Status line: " + status );
+                    }
+                    else
+                    {
+                        getLog().debug( "HTTP response status: " + status );
+
+                        final ByteArrayOutputStream baos = new ByteArrayOutputStream();
+                        IOUtil.copy( response.getEntity().getContent(), baos );
+
+                        if ( getLog().isDebugEnabled() )
+                        {
+                            getLog().debug( "capture-session response:\n\n" + new String( baos.toByteArray() ) );
+                        }
+
+                        resource =
+                            getGson().fromJson( new StringReader( new String( baos.toByteArray() ) ),
+                                                CaptureSessionRefResource.class );
+                    }
+
+                    getLog().debug( "Returning response with status: " + status + "\nand resource: " + resource );
+                    return new CaptureSessionResponse( resource, status );
+                }
+            } );
+        }
+        catch ( final ClientProtocolException e )
+        {
+            throw new MojoExecutionException( String.format(
+                                                             "Failed to close capture session for user: %s\nat URL: %s\nReason: %s",
+                                                             authenticationInfo.getUserName(), url, e.getMessage() ),
+                                              e );
+        }
+        catch ( final IOException e )
+        {
+            throw new MojoExecutionException( String.format(
+                                                             "Failed to close capture session for user: %s\nat URL: %s\nReason: %s",
+                                                             authenticationInfo.getUserName(), url, e.getMessage() ),
+                                              e );
+        }
+
+        if ( sessionResponse != null && sessionResponse.isSuccessful() )
+        {
+            getLog().info( String.format( "Closed capture session: %s", sessionResponse.getSessionRef().getUrl() ) );
+        }
+        else
+        {
+            getLog().warn(
+                           String.format( "Capture session could not be closed for: %s\nHTTP Response: %s", url,
+                                          sessionResponse.getStatus().toString() ) );
+        }
+    }
+
+    private void verifyProjectIsPresent()
+        throws MojoExecutionException
+    {
+        if ( project == null )
+        {
+            try
+            {
+                project = projectBuilder.buildStandaloneSuperProject( new DefaultProjectBuilderConfiguration() );
+            }
+            catch ( final ProjectBuildingException e )
+            {
+                throw new MojoExecutionException( "Error retrieving built-in super-project to determine mirror URL: "
+                                + e.getMessage(), e );
+            }
+        }
+    }
+
+    private String verifyAndCorrectInfo( final AuthenticationInfo authInfo, final ProxyInfo proxy, final String logUrl )
+        throws MojoExecutionException
+    {
+        final StringBuilder sb = new StringBuilder();
+        String url = logUrl;
+
+        sb.append( "\n\n\n\nDetected the following Nexus connection settings:" );
+        sb.append( "\n\nLogs URL: " ).append( url );
+
+        sb.append( "\n\nAuthentication Info:" );
+        sb.append( "\n============================================" );
+        sb.append( "\nUser: " ).append( authInfo.getUserName() == null ? "Not Provided" : authInfo.getUserName() );
+        sb.append( "\nPassword: " ).append( authInfo.getPassword() == null ? "Not Provided" : "**********" );
+
+        if ( proxy != null )
+        {
+            sb.append( "\n\nProxy Info:" );
+            sb.append( "\n============================================" );
+            sb.append( "\nProxy Protocol: " ).append( proxy.getNonProxyHosts() );
+            sb.append( "\nProxy Host/Port: " ).append( proxy.getHost() ).append( '/' ).append( proxy.getPort() );
+            sb.append( "\nProxy User: " ).append( proxy.getUserName() == null ? "Not Provided" : proxy.getUserName() );
+            sb.append( "\nProxy Password: " ).append( proxy.getPassword() == null ? "Not Provided" : "**********" );
+            sb.append( "\nNon-Proxy Hosts: " ).append( proxy.getNonProxyHosts() );
+        }
+
+        getLog().info( sb.toString() );
+
+        try
+        {
+            final boolean correct =
+                Boolean.parseBoolean( prompter.prompt( "Are these settings correct?", YN_VALUES,
+                                                       Boolean.TRUE.toString() ) );
+
+            if ( !correct )
+            {
+                while ( true )
+                {
+                    final String u = prompter.prompt( "Logs URL:", url );
+                    try
+                    {
+                        new URL( u );
+                        url = u;
+                        break;
+                    }
+                    catch ( final MalformedURLException e )
+                    {
+                        getLog().error( "Invalid URL: " + u );
+                    }
+                }
+
+                authInfo.setUserName( prompter.prompt( "Nexus Username:", authInfo.getUserName() ) );
+                authInfo.setUserName( prompter.prompt( "Nexus Password:" ) );
+
+                if ( proxy != null )
+                {
+                    proxy.setHost( prompter.prompt( "Proxy Host:", proxy.getHost() ) );
+
+                    while ( true )
+                    {
+                        final String i = prompter.prompt( "Proxy Port:", Integer.toString( proxy.getPort() ) );
+                        try
+                        {
+                            final int port = Integer.parseInt( i );
+                            proxy.setPort( port );
+                            break;
+                        }
+                        catch ( final NumberFormatException e )
+                        {
+                            getLog().error( "Invalid port number: " + i );
+                        }
+                    }
+
+                    proxy.setType( prompter.prompt( "Proxy Protocol:", proxy.getType() ) );
+                    proxy.setNonProxyHosts( prompter.prompt( "Non-Proxy Hosts:", proxy.getNonProxyHosts() ) );
+                    // proxy.setNtlmDomain( prompter.prompt( "NTLM Domain:", proxy.getNtlmDomain() ) );
+                    // proxy.setNtlmHost( prompter.prompt( "NTLM Host:", proxy.getNtlmHost() ) );
+                    proxy.setUserName( prompter.prompt( "Proxy User:", proxy.getUserName() ) );
+                    proxy.setPassword( prompter.prompt( "Proxy Password:" ) );
+                }
+            }
+        }
+        catch ( final PrompterException e )
+        {
+            throw new MojoExecutionException( "Prompting for user input has failed. Reason: " + e.getMessage(), e );
+        }
+
+        return url;
+    }
+
+    private String buildMyLogUrl( final String resolveUrl )
+        throws MojoExecutionException
+    {
+        final StringBuilder sb = new StringBuilder();
+
+        final String resourceFragment = ProtocolConstants.RESOLVE_RESOURCE_BASEURI;
+        final int idx = resolveUrl.indexOf( resourceFragment );
+        if ( idx < 1 )
+        {
+            throw new MojoExecutionException( String.format( "Mirror URL is not a capture URL: '%s'", resolveUrl ) );
+        }
+        else
+        {
+            sb.append( resolveUrl.substring( 0, idx ) );
+            sb.append( ProtocolConstants.MY_LOGS_RESOURCE_BASEURI );
+            sb.append( resolveUrl.substring( idx + resourceFragment.length() ) );
+        }
+
+        return sb.toString();
     }
 
     @Override

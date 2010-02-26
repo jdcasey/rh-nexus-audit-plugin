@@ -1,7 +1,7 @@
 package com.redhat.rcm.nexus.capture.serialize;
 
-import static com.redhat.rcm.nexus.capture.serialize.SerializationUtils.getGson;
-import static com.redhat.rcm.nexus.capture.serialize.SerializationUtils.getXStreamForStore;
+import static com.redhat.rcm.nexus.capture.model.ModelSerializationUtils.getGson;
+import static com.redhat.rcm.nexus.capture.model.ModelSerializationUtils.getXStreamForStore;
 import static org.easymock.EasyMock.createMock;
 import static org.easymock.EasyMock.expect;
 import static org.easymock.EasyMock.replay;

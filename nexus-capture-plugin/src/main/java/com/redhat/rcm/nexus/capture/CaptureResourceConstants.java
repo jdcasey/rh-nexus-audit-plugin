@@ -27,6 +27,8 @@ public final class CaptureResourceConstants
 
     public static final String PARAM_BUILD_TAG = ID_BUILD_TAG;
 
+    public static final String PARAM_TEMPLATE = "template";
+
     public static final String ATTR_CAPTURE_SOURCE_REPO_ID = ID_CAPTURE_SOURCE;
 
     public static final String ATTR_BUILD_TAG_REPO_ID = ID_BUILD_TAG;

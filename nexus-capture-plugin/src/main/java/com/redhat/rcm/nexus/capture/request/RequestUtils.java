@@ -30,41 +30,6 @@ public final class RequestUtils
     {
     }
 
-    public static String buildUri( final String applicationUrl, final String... parts )
-    {
-        final StringBuilder sb = new StringBuilder();
-        if ( isNotEmpty( applicationUrl ) )
-        {
-            if ( applicationUrl.endsWith( "/" ) )
-            {
-                sb.append( applicationUrl.substring( 0, applicationUrl.length() - 1 ) );
-            }
-            else
-            {
-                sb.append( applicationUrl );
-            }
-        }
-        else
-        {
-            sb.append( '/' );
-        }
-
-        for ( final String part : parts )
-        {
-            if ( isNotEmpty( part ) )
-            {
-                if ( sb.charAt( sb.length() - 1 ) != '/' && part.charAt( 0 ) != '/' )
-                {
-                    sb.append( '/' );
-                }
-
-                sb.append( part );
-            }
-        }
-
-        return sb.length() == 0 ? null : sb.toString();
-    }
-
     public static Date getDate( final String param, final Request request )
         throws ResourceException
     {
@@ -124,17 +89,56 @@ public final class RequestUtils
         return d;
     }
 
+    /**
+     * Order of precedence: <br/>
+     * <ol>
+     * <li>MediaType that corresponds to 'format' query parameter</li>
+     * <li>Variant MediaType passed in by Restlet/Nexus</li>
+     * <li>MediaType that corresponds to Accept: header</li>
+     * </ol>
+     */
+    public static MediaType mediaTypeOf( final Request request )
+    {
+        return mediaTypeOf( request, null );
+    }
+
+    /**
+     * Order of precedence: <br/>
+     * <ol>
+     * <li>MediaType that corresponds to 'format' query parameter</li>
+     * <li>Variant MediaType passed in by Restlet/Nexus</li>
+     * <li>MediaType that corresponds to Accept: header</li>
+     * </ol>
+     */
     public static MediaType mediaTypeOf( final Request request, final Variant variant )
     {
+        MediaType mt = null;
+
         final Form query = query( request );
-        MediaType mt = variant == null ? null : variant.getMediaType();
 
-        final String fmt = query.getFirstValue( CaptureResourceConstants.PARAM_FORMAT );
+        String fmt = query.getFirstValue( CaptureResourceConstants.PARAM_FORMAT );
+        OutputFormat format = OutputFormat.find( fmt );
 
-        final OutputFormat format = OutputFormat.find( fmt );
         if ( format != null )
         {
             mt = format.mediaType();
+        }
+
+        if ( mt == null && variant != null )
+        {
+            mt = variant.getMediaType();
+        }
+
+        if ( mt == null )
+        {
+            final Form headers = headers( request );
+            fmt = headers.getFirstValue( "Accept" );
+            format = OutputFormat.find( fmt );
+
+            if ( mt == null && format != null )
+            {
+                mt = format.mediaType();
+            }
         }
 
         return mt;

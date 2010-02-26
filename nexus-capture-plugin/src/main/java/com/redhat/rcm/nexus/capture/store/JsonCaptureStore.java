@@ -1,7 +1,8 @@
 package com.redhat.rcm.nexus.capture.store;
 
 import static com.redhat.rcm.nexus.capture.model.CaptureSession.key;
-import static com.redhat.rcm.nexus.capture.serialize.SerializationUtils.getGson;
+import static com.redhat.rcm.nexus.capture.model.ModelSerializationUtils.getGson;
+import static com.redhat.rcm.nexus.util.PathUtils.joinFile;
 
 import java.io.File;
 import java.io.FileReader;
@@ -36,7 +37,6 @@ import com.redhat.rcm.nexus.capture.model.CaptureSession;
 import com.redhat.rcm.nexus.capture.model.CaptureSessionCatalog;
 import com.redhat.rcm.nexus.capture.model.CaptureSessionRef;
 import com.redhat.rcm.nexus.capture.model.CaptureTarget;
-import com.redhat.rcm.nexus.capture.serialize.SerializationConstants;
 import com.redhat.rcm.nexus.capture.store.CaptureSessionQuery.QueryMode;
 
 @Named( "json" )
@@ -44,7 +44,7 @@ public class JsonCaptureStore
     implements CaptureStore, Initializable
 {
 
-    private static final char PS = File.separatorChar;
+    private static final String CATALOG_FILENAME = "catalog.json";
 
     private static final TypeToken<Set<CaptureSessionCatalog>> CATALOG_SET_TYPE_TOKEN =
         new TypeToken<Set<CaptureSessionCatalog>>()
@@ -71,11 +71,11 @@ public class JsonCaptureStore
         System.out.println( "\n\n\n\nStarting JSON capture store!\nInstance: " + this + "\n\n\n\n" );
     }
 
-    public CaptureSession closeCurrentLog( final String user, final String buildTag, final String captureSource )
+    public CaptureSessionRef closeCurrentLog( final String user, final String buildTag )
         throws CaptureStoreException
     {
         final CaptureSession session = sessions.remove( key( user, buildTag ) );
-        return session;
+        return session.ref();
     }
 
     public void deleteLogs( final CaptureSessionQuery query )
@@ -330,7 +330,7 @@ public class JsonCaptureStore
     private void readCatalogs()
         throws IOException
     {
-        final File catalogFile = new File( workDir(), SerializationConstants.CATALOG_FILENAME );
+        final File catalogFile = new File( workDir(), CATALOG_FILENAME );
         if ( catalogFile.exists() && catalogFile.length() > 0 )
         {
             FileReader reader = null;
@@ -359,7 +359,7 @@ public class JsonCaptureStore
     private void writeCatalogs()
         throws CaptureStoreException
     {
-        final File catalogFile = new File( workDir(), SerializationConstants.CATALOG_FILENAME );
+        final File catalogFile = new File( workDir(), CATALOG_FILENAME );
         catalogFile.getParentFile().mkdirs();
 
         FileWriter writer = null;
@@ -391,7 +391,7 @@ public class JsonCaptureStore
                 String.format( "%1$s-%3$s-%2$tY-%2$tm-%2$td_%2$tH-%2$tM-%2$tS%2$tz.json", session.getBuildTag(),
                                session.getStartDate(), session.getCaptureSource() );
 
-            sessionFile = join( workDir(), session.getUser(), filename );
+            sessionFile = joinFile( workDir(), session.getUser(), filename );
 
             session.setFile( sessionFile );
         }
@@ -413,46 +413,10 @@ public class JsonCaptureStore
                 dir = applicationConfiguration.getWorkingDirectory().getAbsoluteFile();
             }
 
-            workDir = join( dir, "capture-sessions" );
+            workDir = joinFile( dir, "capture-sessions" );
         }
 
         return workDir;
-    }
-
-    private File join( final File dir, final String... parts )
-    {
-        logger.info( "Creating file path, starting with directory: " + dir );
-
-        final StringBuilder builder = new StringBuilder();
-        for ( final String part : parts )
-        {
-            logger.info( "Adding path part: " + part );
-            if ( builder.length() > 0 )
-            {
-                if ( part.length() > 0 && part.charAt( 0 ) != PS )
-                {
-                    builder.append( PS );
-                }
-
-                builder.append( part );
-            }
-            else if ( part.length() > 0 && part.charAt( 0 ) == PS )
-            {
-                builder.append( part.substring( 1 ) );
-            }
-            else
-            {
-                builder.append( part );
-            }
-
-            logger.info( "So far: '" + builder.toString() + "'" );
-        }
-
-        final File f = new File( dir, builder.toString() );
-
-        logger.info( "Returning file: '" + f + "'" );
-
-        return f;
     }
 
     public synchronized void initialize()

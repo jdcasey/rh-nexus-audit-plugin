@@ -1,7 +1,7 @@
 package com.redhat.rcm.nexus.protocol;
 
-import static com.redhat.rcm.nexus.protocol.ProtocolUtils.buildUri;
-import static com.redhat.rcm.nexus.protocol.ProtocolUtils.formatUrlDate;
+import static com.redhat.rcm.nexus.util.PathUtils.buildUri;
+import static com.redhat.rcm.nexus.util.ProtocolUtils.formatUrlDate;
 
 import java.util.Date;
 import java.util.List;
@@ -91,7 +91,8 @@ public class CaptureSessionResource
     static String buildResourceUri( final String applicationUrl, final String user, final String buildTag,
                                     final Date date )
     {
-        return buildUri( applicationUrl, ProtocolConstants.LOG_RESOURCE_BASEURI, user, buildTag, formatUrlDate( date ) );
+        return applicationUrl == null ? null : buildUri( applicationUrl, ProtocolConstants.LOG_RESOURCE_BASEURI, user,
+                                                         buildTag, formatUrlDate( date ) );
 
     }
 
