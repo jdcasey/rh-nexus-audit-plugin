@@ -1,0 +1,7 @@
+#if($data)Owner: $data.owner
+Added: $data.dateAdded
+Repository-Id: $data.repositoryId
+Repository-Path: $data.referencedPath
+Resource-URL: $data.url
+Target-URL: $data.targetUrl
+#end

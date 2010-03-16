@@ -10,12 +10,11 @@
     <version>1.0-SNAPSHOT</version>
   </parent>
   
-  <artifactId>nexus-capture-plugin</artifactId>
-  <name>Capture Plugin</name>
+  <artifactId>nexus-audit-plugin</artifactId>
 
   <packaging>nexus-plugin</packaging>
-  
-  <description>Nexus plugin used to capture the list of external artifacts used in a given build</description>
+
+  <name>Nexus Audit Plugin</name>
 
   <dependencies>
     <dependency>
@@ -26,7 +25,7 @@
       <groupId>com.thoughtworks.xstream</groupId>
       <artifactId>xstream</artifactId>
     </dependency>
-
+    
     <!--
       Note: there are two sets of dependencies here, the basic (minimal dependencies needed to build Nexus plugins), and the
       ITset, that is needed if you want to write IT tests using real Nexus environment to test your plugins. If you are using
@@ -53,10 +52,6 @@
       <artifactId>nexus-plugin-test-api</artifactId>
     </dependency>
     <dependency>
-  	  <groupId>org.easymock</groupId>
-  	  <artifactId>easymock</artifactId>
-  	</dependency>
-    <dependency>
       <groupId>junit</groupId>
       <artifactId>junit</artifactId>
     </dependency>
@@ -71,13 +66,8 @@
     <!-- #ITSet ENDS -->
 
     <dependency>
-    	<groupId>${project.groupId}</groupId>
-    	<artifactId>nexus-capture-protocol</artifactId>
-    	<version>${project.version}</version>
-    </dependency>
-    <dependency>
         <groupId>${project.groupId}</groupId>
-    	<artifactId>nexus-web-common</artifactId>
+        <artifactId>nexus-web-common</artifactId>
         <version>${project.version}</version>
     </dependency>
   </dependencies>
@@ -90,46 +80,6 @@
         <groupId>org.sonatype.plugins</groupId>
         <artifactId>app-lifecycle-maven-plugin</artifactId>
       </plugin>
-      
-			<plugin>
-				<groupId>net.sf.alchim</groupId>
-				<artifactId>yuicompressor-maven-plugin</artifactId>
-				<executions>
-					<execution>
-						<goals>
-							<goal>compress</goal>
-						</goals>
-						<configuration>
-							<aggregations>
-								<aggregation>
-									<output>${project.build.directory}/classes/static/js/nexus-capture-plugin-all.js</output>
-									<includes>
-										<include>${project.build.directory}/classes/static/js/repoServer/repoServer.CaptureConfigPanel.js</include>
-									</includes>
-								</aggregation>
-							</aggregations>
-						</configuration>
-					</execution>
-				</executions>
-				<configuration>
-					<nosuffix>true</nosuffix>
-					<nomunge>true</nomunge>
-					<jswarn>false</jswarn>
-					<aggregations>
-						<aggregation>
-							<!-- insert new line after each concatenation (default: false) -->
-							<insertNewLine>true</insertNewLine>
-						</aggregation>
-					</aggregations>
-				</configuration>
-				<dependencies>
-					<dependency>
-						<groupId>org.codehaus.plexus</groupId>
-						<artifactId>plexus-utils</artifactId>
-						<version>1.1</version>
-					</dependency>
-				</dependencies>
-			</plugin>
 
       <!-- #ITSet BEGINS -->
       <!-- Nexus IT setup (dependencies below are needed if you have extensive ITs and you want to use Nexus Environment) -->
