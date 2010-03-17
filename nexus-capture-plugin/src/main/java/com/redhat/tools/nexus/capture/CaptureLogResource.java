@@ -20,6 +20,7 @@ import com.redhat.tools.nexus.capture.model.CaptureSession;
 import com.redhat.tools.nexus.capture.model.CaptureSessionRef;
 import com.redhat.tools.nexus.capture.store.CaptureStore;
 import com.redhat.tools.nexus.capture.store.CaptureStoreException;
+import com.redhat.tools.nexus.guice.PluginPrivateInjection;
 import com.redhat.tools.nexus.protocol.ProtocolConstants;
 import com.redhat.tools.nexus.response.WebResponseSerializer;
 import com.redhat.tools.nexus.response.template.TemplateFormatter;
@@ -46,9 +47,14 @@ public class CaptureLogResource
     @Named( "json" )
     private CaptureStore captureStore;
 
-    @Inject
-    @Named( "capture" )
+    @com.google.inject.Inject
+    @com.google.inject.name.Named( "capture" )
     private WebResponseSerializer responseSerializer;
+
+    public CaptureLogResource()
+    {
+        PluginPrivateInjection.getInjector().injectMembers( this );
+    }
 
     @Override
     public Object getPayloadInstance()

@@ -26,24 +26,18 @@ import org.sonatype.nexus.proxy.maven.MavenRepository;
 import org.sonatype.nexus.proxy.registry.RepositoryRegistry;
 import org.sonatype.nexus.proxy.repository.Repository;
 
+import com.google.inject.Inject;
 import com.redhat.tools.nexus.audit.model.AuditInfo;
-
-import javax.inject.Inject;
-import javax.inject.Named;
 
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 
-/**
- * 
- */
 public abstract class AbstractAuditStore
     implements AuditStore
 {
 
     @Inject
-    @Named( "protected" )
     private RepositoryRegistry repoRegistry;
 
     protected RepositoryRegistry getRepositoryRegistry()

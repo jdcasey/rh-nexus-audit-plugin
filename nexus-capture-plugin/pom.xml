@@ -76,9 +76,17 @@
     	<version>${project.version}</version>
     </dependency>
     <dependency>
-        <groupId>${project.groupId}</groupId>
-    	<artifactId>nexus-web-common</artifactId>
-        <version>${project.version}</version>
+      <groupId>${project.groupId}</groupId>
+  	  <artifactId>nexus-rh-commons</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>com.google.inject</groupId>
+      <artifactId>guice</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>aopalliance</groupId>
+      <artifactId>aopalliance</artifactId>
     </dependency>
   </dependencies>
 
@@ -131,10 +139,15 @@
 				</dependencies>
 			</plugin>
 
+      <!-- <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-shade-plugin</artifactId>
+      </plugin> -->
+      
       <!-- #ITSet BEGINS -->
       <!-- Nexus IT setup (dependencies below are needed if you have extensive ITs and you want to use Nexus Environment) -->
       <!-- There are dependencies connected to this set of plugin, see above! -->
-      <plugin>
+      <!-- <plugin>
         <groupId>org.sonatype.plugins</groupId>
         <artifactId>nexus-test-environment-maven-plugin</artifactId>
       </plugin>
@@ -142,7 +155,7 @@
       <plugin>
         <groupId>org.codehaus.mojo</groupId>
         <artifactId>failsafe-maven-plugin</artifactId>
-      </plugin>
+      </plugin> -->
       <!-- #ITSet ENDS -->
 
     </plugins>

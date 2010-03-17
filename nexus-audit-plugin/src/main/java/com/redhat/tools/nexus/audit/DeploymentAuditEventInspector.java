@@ -2,32 +2,40 @@ package com.redhat.tools.nexus.audit;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.sonatype.nexus.configuration.application.ApplicationConfiguration;
 import org.sonatype.nexus.proxy.access.AccessManager;
-import org.sonatype.nexus.proxy.events.AbstractEventInspector;
 import org.sonatype.nexus.proxy.events.EventInspector;
 import org.sonatype.nexus.proxy.events.NexusStartedEvent;
 import org.sonatype.nexus.proxy.events.RepositoryItemEventStore;
 import org.sonatype.nexus.proxy.item.StorageItem;
+import org.sonatype.nexus.proxy.registry.RepositoryRegistry;
 import org.sonatype.plexus.appevents.Event;
 
+import com.google.inject.Inject;
+import com.google.inject.name.Named;
 import com.redhat.tools.nexus.audit.model.AuditInfo;
 import com.redhat.tools.nexus.audit.serial.store.AuditStore;
 import com.redhat.tools.nexus.audit.serial.store.AuditStoreException;
-
-import javax.inject.Inject;
-import javax.inject.Named;
+import com.redhat.tools.nexus.nx.AbstractCommonsEventInspector;
 
 import java.util.Date;
 
-@Named( "deploymentAuditInspector" )
+@javax.inject.Named( "deploymentAuditInspector" )
 public class DeploymentAuditEventInspector
-    extends AbstractEventInspector
+    extends AbstractCommonsEventInspector
     implements EventInspector
 {
 
     private static final Logger logger = LoggerFactory.getLogger( DeploymentAuditEventInspector.class );
 
     private boolean startLogging;
+
+    @javax.inject.Inject
+    @javax.inject.Named( "protected" )
+    private RepositoryRegistry protectedRegistry;
+
+    @javax.inject.Inject
+    private ApplicationConfiguration applicationConfiguration;
 
     @Inject
     @Named( AuditConstants.PREFERRED_STORE )
@@ -79,5 +87,17 @@ public class DeploymentAuditEventInspector
 
             logger.info( "Result: " + result );
         }
+    }
+
+    @Override
+    public ApplicationConfiguration getApplicationConfiguration()
+    {
+        return applicationConfiguration;
+    }
+
+    @Override
+    public RepositoryRegistry getRepoRegistry()
+    {
+        return protectedRegistry;
     }
 }
