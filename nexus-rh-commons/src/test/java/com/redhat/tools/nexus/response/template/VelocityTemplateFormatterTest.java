@@ -1,19 +1,9 @@
 package com.redhat.tools.nexus.response.template;
 
-import static org.easymock.EasyMock.createMock;
-import static org.easymock.EasyMock.expect;
-import static org.easymock.EasyMock.replay;
-import static org.easymock.EasyMock.verify;
 import static org.junit.Assert.assertEquals;
 
 import org.apache.velocity.app.VelocityEngine;
 import org.junit.Test;
-import org.sonatype.nexus.configuration.application.ApplicationConfiguration;
-
-import com.google.inject.Inject;
-import com.google.inject.name.Named;
-import com.redhat.tools.nexus.guice.NexusCommonsConfiguration;
-import com.redhat.tools.nexus.guice.PluginPrivateInjection;
 
 import edu.emory.mathcs.backport.java.util.Collections;
 
@@ -26,31 +16,6 @@ import java.util.Map;
 
 public class VelocityTemplateFormatterTest
 {
-
-    // target for injection.
-    @Inject
-    @Named( "velocity" )
-    private TemplateFormatter injectedFormatter;
-
-    @Test
-    public void format_injected()
-        throws MalformedURLException, TemplateException
-    {
-        final ApplicationConfiguration config = createMock( ApplicationConfiguration.class );
-        expect( config.getConfigurationDirectory() ).andReturn( null ).anyTimes();
-
-        final NexusCommonsConfiguration nxConfig =
-            new NexusCommonsConfiguration().withApplicationConfiguration( config );
-
-        replay( config );
-
-        PluginPrivateInjection.initialize( nxConfig );
-        PluginPrivateInjection.getInjector().injectMembers( this );
-
-        assertFormatting( injectedFormatter );
-
-        verify( config );
-    }
 
     @Test
     public void format_directConstruction()

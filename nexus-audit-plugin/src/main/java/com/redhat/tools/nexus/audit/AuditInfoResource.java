@@ -28,26 +28,24 @@ import org.restlet.resource.ResourceException;
 import org.restlet.resource.Variant;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.sonatype.nexus.configuration.application.ApplicationConfiguration;
-import org.sonatype.nexus.proxy.registry.RepositoryRegistry;
+import org.sonatype.nexus.rest.AbstractNexusPlexusResource;
 import org.sonatype.plexus.rest.resource.PathProtectionDescriptor;
 import org.sonatype.plexus.rest.resource.PlexusResource;
 
-import com.google.inject.Inject;
-import com.google.inject.name.Named;
 import com.redhat.tools.nexus.audit.model.AuditInfo;
 import com.redhat.tools.nexus.audit.serial.store.AuditStore;
 import com.redhat.tools.nexus.audit.serial.store.AuditStoreException;
-import com.redhat.tools.nexus.guice.PluginPrivateInjection;
-import com.redhat.tools.nexus.nx.AbstractNonResolverResource;
 import com.redhat.tools.nexus.response.WebResponseSerializer;
+
+import javax.inject.Inject;
+import javax.inject.Named;
 
 import java.util.ArrayList;
 import java.util.List;
 
-@javax.inject.Named( "auditInfoResource" )
+@Named( "auditInfoResource" )
 public class AuditInfoResource
-    extends AbstractNonResolverResource
+    extends AbstractNexusPlexusResource
     implements PlexusResource
 {
 
@@ -56,13 +54,6 @@ public class AuditInfoResource
     private static final String AUDIT_TEMPLATE_BASEPATH = "audit/log";
 
     private static final Logger logger = LoggerFactory.getLogger( AuditInfoResource.class );
-
-    @javax.inject.Inject
-    private ApplicationConfiguration applicationConfiguration;
-
-    @javax.inject.Inject
-    @javax.inject.Named( "protected" )
-    private RepositoryRegistry repositoryRegistry;
 
     @Inject
     @Named( AuditConstants.PREFERRED_STORE )
@@ -95,8 +86,6 @@ public class AuditInfoResource
     public Object get( final Context context, final Request request, final Response response, final Variant variant )
         throws ResourceException
     {
-        init();
-
         final Object rid = request.getAttributes().get( REPO_ID );
         logger.info( String.format( "%s attribute value: %s", REPO_ID, rid ) );
 
@@ -123,7 +112,7 @@ public class AuditInfoResource
             final AuditInfo auditInfo = store.getAuditInformation( path, repoId );
             if ( auditInfo != null )
             {
-                data = auditInfo.asResource( request.getRootRef().toString(), getRepoRegistry() );
+                data = auditInfo.asResource( request.getRootRef().toString(), getRepositoryRegistry() );
             }
         }
         catch ( final AuditStoreException e )
@@ -143,14 +132,6 @@ public class AuditInfoResource
         return responseSerializer.serialize( data, mt, request, AUDIT_TEMPLATE_BASEPATH );
     }
 
-    private void init()
-    {
-        if ( responseSerializer == null )
-        {
-            PluginPrivateInjection.getInjector().injectMembers( this );
-        }
-    }
-
     @Override
     public List<Variant> getVariants()
     {
@@ -161,17 +142,5 @@ public class AuditInfoResource
         variants.add( new Variant( MediaType.TEXT_PLAIN ) );
 
         return variants;
-    }
-
-    @Override
-    public ApplicationConfiguration getApplicationConfiguration()
-    {
-        return applicationConfiguration;
-    }
-
-    @Override
-    public RepositoryRegistry getRepoRegistry()
-    {
-        return repositoryRegistry;
     }
 }

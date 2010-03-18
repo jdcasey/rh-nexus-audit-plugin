@@ -1,0 +1,110 @@
+<!--
+ * Sonatype Application Build Lifecycle
+ * Copyright (C) 2009 Sonatype, Inc.                                                                                                                          
+ * 
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * 
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ * 
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see http://www.gnu.org/licenses/.
+ -->
+<component-set>
+  <components>
+    <component>
+      <role>org.apache.maven.lifecycle.mapping.LifecycleMapping</role>
+      <role-hint>nexus-plugin</role-hint>
+      <implementation>org.apache.maven.lifecycle.mapping.DefaultLifecycleMapping</implementation>
+      <description>
+           Variant of abstract-plugin lifecycle mapping, from app-lifecycle-base project:
+           Subversion URL: http://svn.sonatype.org/plugins/tags/app-lifecycle-1.1/app-lifecycle-base/src/main/resources/META-INF/plexus/components.xml
+           Subversion Revision: 438
+      </description>
+      <configuration>
+        <lifecycles>
+          <lifecycle>
+            <id>default</id>
+            <phases>
+            <!-- Lifecycle phases available in Maven 2.2.1:
+            
+              <phase>validate</phase>
+              <phase>initialize</phase>
+              <phase>generate-sources</phase>
+              <phase>process-sources</phase>
+              <phase>generate-resources</phase>
+              <phase>process-resources</phase>
+              <phase>compile</phase>
+              <phase>process-classes</phase>
+              <phase>generate-test-sources</phase>
+              <phase>process-test-sources</phase>
+              <phase>generate-test-resources</phase>
+              <phase>process-test-resources</phase>
+              <phase>test-compile</phase>
+              <phase>process-test-classes</phase>
+              <phase>test</phase>
+              <phase>prepare-package</phase>
+              <phase>package</phase>
+              <phase>pre-integration-test</phase>
+              <phase>integration-test</phase>
+              <phase>post-integration-test</phase>
+              <phase>verify</phase>
+              <phase>install</phase>
+              <phase>deploy</phase>
+             -->
+            
+              <!-- Sonatype app-specific steps: 
+               |
+               |     1. inject the app-plugin ArtifactHandler into the project's artifact instance
+               |     2. verify that all app dependencies in this project have their scope set to 'provided'
+               -->
+              <initialize>
+                com.redhat.tools.nexus.maven:nexus-rh-maven-plugin:${project.version}:inject-artifact-handler,
+                com.redhat.tools.nexus.maven:nexus-rh-maven-plugin:${project.version}:check-dependencies
+              </initialize>
+              
+              <process-resources>org.apache.maven.plugins:maven-resources-plugin:resources</process-resources>
+              <compile>org.apache.maven.plugins:maven-compiler-plugin:compile</compile>
+              
+              <!-- Sonatype app-specific step: generate the plugin descriptor. -->
+              <process-classes>com.redhat.tools.nexus.maven:nexus-rh-maven-plugin:${project.version}:generate-metadata</process-classes>
+              
+              <process-test-resources>org.apache.maven.plugins:maven-resources-plugin:testResources</process-test-resources>
+              <test-compile>org.apache.maven.plugins:maven-compiler-plugin:testCompile</test-compile>
+              <test>org.apache.maven.plugins:maven-surefire-plugin:test</test>
+
+              <!-- Sonatype app-specific step inside: create a bundle for dropping into an existing application instance -->
+              <!-- NOTE: Requires Maven 2.2.1+ -->
+              <prepare-package>org.apache.maven.plugins:maven-jar-plugin:jar</prepare-package>
+              <package>com.redhat.tools.nexus.maven:nexus-rh-maven-plugin:${project.version}:create-bundle</package>
+              
+              <install>org.apache.maven.plugins:maven-install-plugin:install</install>
+              <deploy>org.apache.maven.plugins:maven-deploy-plugin:deploy</deploy>
+            </phases>
+          </lifecycle>
+        </lifecycles>
+      </configuration>
+    </component>
+    <component>
+      <role>org.apache.maven.artifact.handler.ArtifactHandler</role>
+      <role-hint>nexus-plugin</role-hint>
+      <implementation>org.apache.maven.artifact.handler.DefaultArtifactHandler</implementation>
+      <description>
+        Provides a custom artifact handler to map the 'nexus-plugin' dependency type and POM packaging
+        to the 'jar' file extension in the Maven repository.
+      </description>
+      <configuration>
+        <type>nexus-plugin</type>
+        <extension>jar</extension>
+        <language>java</language>
+        <!-- <classifier>bundle</classifier> -->
+        <addedToClasspath>true</addedToClasspath>
+      </configuration>
+    </component>
+  </components>
+</component-set>

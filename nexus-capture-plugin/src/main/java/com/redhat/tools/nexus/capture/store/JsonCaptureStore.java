@@ -4,7 +4,6 @@ import static com.redhat.tools.nexus.capture.model.CaptureSession.key;
 import static com.redhat.tools.nexus.capture.model.ModelSerializationUtils.getGson;
 import static com.redhat.tools.nexus.request.PathUtils.joinFile;
 
-import org.codehaus.plexus.personality.plexus.lifecycle.phase.Initializable;
 import org.codehaus.plexus.personality.plexus.lifecycle.phase.InitializationException;
 import org.codehaus.plexus.util.IOUtil;
 import org.slf4j.Logger;
@@ -41,7 +40,7 @@ import java.util.TreeMap;
 
 @Named( "json" )
 public class JsonCaptureStore
-    implements CaptureStore, Initializable
+    implements CaptureStore
 {
 
     private static final String CATALOG_FILENAME = "catalog.json";

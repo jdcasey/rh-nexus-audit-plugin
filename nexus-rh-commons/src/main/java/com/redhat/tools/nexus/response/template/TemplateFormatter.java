@@ -1,9 +1,12 @@
 package com.redhat.tools.nexus.response.template;
 
+import org.sonatype.plugin.Managed;
+
 import javax.inject.Singleton;
 
 import java.util.Map;
 
+@Managed
 @Singleton
 public interface TemplateFormatter
 {

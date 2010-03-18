@@ -1,14 +1,14 @@
 package com.redhat.tools.nexus.capture.store;
 
-import java.util.List;
-
-import javax.inject.Singleton;
-
 import org.sonatype.nexus.proxy.item.StorageItem;
 import org.sonatype.plugin.Managed;
 
 import com.redhat.tools.nexus.capture.model.CaptureSession;
 import com.redhat.tools.nexus.capture.model.CaptureSessionRef;
+
+import javax.inject.Singleton;
+
+import java.util.List;
 
 @Managed
 @Singleton

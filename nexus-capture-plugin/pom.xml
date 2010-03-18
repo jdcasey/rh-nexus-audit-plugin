@@ -19,10 +19,6 @@
 
   <dependencies>
     <dependency>
-      <groupId>com.google.code.gson</groupId>
-      <artifactId>gson</artifactId>
-    </dependency>
-    <dependency>
       <groupId>com.thoughtworks.xstream</groupId>
       <artifactId>xstream</artifactId>
     </dependency>
@@ -81,12 +77,8 @@
       <version>${project.version}</version>
     </dependency>
     <dependency>
-      <groupId>com.google.inject</groupId>
-      <artifactId>guice</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>aopalliance</groupId>
-      <artifactId>aopalliance</artifactId>
+    	<groupId>com.google.code.gson</groupId>
+    	<artifactId>gson</artifactId>
     </dependency>
   </dependencies>
 
@@ -95,8 +87,12 @@
 
       <!-- Needed for custom packaging -->
       <plugin>
-        <groupId>org.sonatype.plugins</groupId>
-        <artifactId>app-lifecycle-maven-plugin</artifactId>
+        <groupId>com.redhat.tools.nexus.maven</groupId>
+        <artifactId>nexus-rh-maven-plugin</artifactId>
+      </plugin>
+      
+      <plugin>
+        <artifactId>maven-shade-plugin</artifactId>
       </plugin>
       
 			<plugin>

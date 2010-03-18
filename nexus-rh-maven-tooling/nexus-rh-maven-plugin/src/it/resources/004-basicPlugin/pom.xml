@@ -1,0 +1,85 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+
+  <parent>
+    <groupId>org.sonatype.plugins.it.applifecycle</groupId>
+    <artifactId>it-parent</artifactId>
+    <version>${project.version}</version>
+  </parent>
+  
+	<artifactId>004-basicPlugin</artifactId>
+	<version>0.0.1-SNAPSHOT</version>
+
+	<name>Test Plugin: One</name>
+	<description>Test Plugin: Description
+  on multiple lines even.</description>
+
+	<packaging>it-plugin</packaging>
+
+	<dependencies>
+		<dependency>
+      <groupId>org.sonatype.nexus</groupId>
+      <artifactId>nexus-plugin-api</artifactId>
+      <version>1.4.0-SNAPSHOT</version>
+      <scope>provided</scope>
+		</dependency>
+		
+		<dependency>
+      <groupId>org.sonatype.plugin</groupId>
+      <artifactId>plugin-host-api</artifactId>
+      <version>1.0.1</version>
+      <scope>provided</scope>
+		</dependency>
+
+		<dependency>
+			<groupId>org.slf4j</groupId>
+			<artifactId>slf4j-simple</artifactId>
+			<version>1.5.3</version>
+			<scope>test</scope>
+		</dependency>
+
+		<dependency>
+			<groupId>org.codehaus.groovy</groupId>
+			<artifactId>groovy</artifactId>
+			<version>1.5.6</version>
+			<scope>provided</scope>
+		</dependency>
+
+	</dependencies>
+
+	<build>
+		<plugins>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-compiler-plugin</artifactId>
+				<configuration>
+					<source>1.5</source>
+					<target>1.5</target>
+				</configuration>
+			</plugin>
+
+			<plugin>
+				<groupId>org.sonatype.plugins</groupId>
+				<artifactId>app-lifecycle-maven-plugin</artifactId>
+				<version>${project.version}</version>
+
+				<extensions>true</extensions>
+
+				<dependencies>
+					<dependency>
+						<groupId>org.sonatype.plugins.it.applifecycle</groupId>
+						<artifactId>app-lifecycle-it</artifactId>
+						<version>${project.version}</version>
+					</dependency>
+				</dependencies>
+
+				<configuration>
+					<pluginDependencies>
+						<pluginDependency>org.codehaus.groovy:groovy:1.5.6</pluginDependency>
+					</pluginDependencies>
+				</configuration>
+			</plugin>
+		</plugins>
+	</build>
+</project>

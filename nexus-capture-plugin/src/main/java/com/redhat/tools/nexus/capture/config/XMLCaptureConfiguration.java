@@ -3,19 +3,6 @@ package com.redhat.tools.nexus.capture.config;
 import static com.redhat.tools.nexus.capture.model.ModelSerializationUtils.getXStreamForConfig;
 import static org.codehaus.plexus.util.IOUtil.close;
 
-import java.io.File;
-import java.io.FileReader;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.List;
-
-import javax.inject.Inject;
-import javax.inject.Named;
-
-import org.codehaus.plexus.personality.plexus.lifecycle.phase.Initializable;
-import org.codehaus.plexus.personality.plexus.lifecycle.phase.InitializationException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.sonatype.nexus.configuration.application.ApplicationConfiguration;
@@ -24,11 +11,21 @@ import org.sonatype.nexus.proxy.registry.RepositoryRegistry;
 import org.sonatype.nexus.proxy.repository.GroupRepository;
 import org.sonatype.nexus.proxy.repository.Repository;
 
-import edu.emory.mathcs.backport.java.util.Collections;
+import javax.inject.Inject;
+import javax.inject.Named;
+
+import java.io.File;
+import java.io.FileReader;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.List;
 
 @Named( "xml" )
 public class XMLCaptureConfiguration
-    implements CaptureConfiguration, Initializable
+    implements CaptureConfiguration
 {
 
     private static final String CONFIG_FILE = "capture.xml";
@@ -39,7 +36,6 @@ public class XMLCaptureConfiguration
     private ApplicationConfiguration appConfig;
 
     @Inject
-    @Named( "default" )
     private RepositoryRegistry unprotectedRepositoryRegistry;
 
     private CaptureConfigModel configModel;
@@ -47,6 +43,8 @@ public class XMLCaptureConfiguration
     @Override
     public CaptureConfigModel getModel()
     {
+        initialize();
+
         return configModel;
     }
 
@@ -54,6 +52,8 @@ public class XMLCaptureConfiguration
     public void save()
         throws InvalidConfigurationException
     {
+        initialize();
+
         if ( configModel == null || !configModel.isValid() )
         {
             logger.warn( "Capture configuration is empty, and will NOT be saved." );
@@ -72,9 +72,7 @@ public class XMLCaptureConfiguration
         catch ( final IOException e )
         {
             throw new InvalidConfigurationException( "Failed to write capture configuration to file: %s\nReason: %s",
-                                                     e,
-                                                     configFile,
-                                                     e.getMessage() );
+                                                     e, configFile, e.getMessage() );
         }
         finally
         {
@@ -86,19 +84,24 @@ public class XMLCaptureConfiguration
     public void updateModel( final CaptureConfigModel model )
         throws InvalidConfigurationException
     {
+        initialize();
+
         if ( model == null || !model.isValid() )
         {
             throw new InvalidConfigurationException( "Capture configuration is missing or invalid." );
         }
 
-        this.configModel = model;
+        configModel = model;
         save();
     }
 
-    @Override
-    public void initialize()
-        throws InitializationException
+    private void initialize()
     {
+        if ( configModel != null )
+        {
+            return;
+        }
+
         final File configFile = new File( appConfig.getConfigurationDirectory(), CONFIG_FILE );
 
         if ( configFile.isFile() && configFile.canRead() )

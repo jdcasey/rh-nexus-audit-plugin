@@ -18,7 +18,6 @@ import org.restlet.resource.ResourceException;
 import org.restlet.resource.Variant;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.sonatype.nexus.rest.AbstractNexusPlexusResource;
 import org.sonatype.plexus.rest.resource.PathProtectionDescriptor;
 import org.sonatype.plexus.rest.resource.PlexusResource;
 
@@ -27,7 +26,6 @@ import com.redhat.tools.nexus.capture.model.CaptureSessionRef;
 import com.redhat.tools.nexus.capture.store.CaptureSessionQuery;
 import com.redhat.tools.nexus.capture.store.CaptureStore;
 import com.redhat.tools.nexus.capture.store.CaptureStoreException;
-import com.redhat.tools.nexus.guice.PluginPrivateInjection;
 import com.redhat.tools.nexus.protocol.CaptureSessionResource;
 import com.redhat.tools.nexus.protocol.ProtocolConstants;
 import com.redhat.tools.nexus.request.RequestMode;
@@ -41,7 +39,7 @@ import java.util.List;
 
 @Named( "captureAdminLog" )
 public class CaptureAdminLogResource
-    extends AbstractNexusPlexusResource
+    extends AbstractNonResolverCaptureResource
     implements PlexusResource
 {
 
@@ -53,14 +51,13 @@ public class CaptureAdminLogResource
     @Named( "json" )
     private CaptureStore captureStore;
 
-    @com.google.inject.Inject
-    @com.google.inject.name.Named( "capture" )
+    @Inject
+    @Named( "capture" )
     private WebResponseSerializer responseSerializer;
 
     public CaptureAdminLogResource()
     {
         setModifiable( true );
-        PluginPrivateInjection.getInjector().injectMembers( this );
     }
 
     @Override

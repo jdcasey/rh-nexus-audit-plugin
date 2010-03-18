@@ -22,6 +22,9 @@ import com.redhat.tools.nexus.response.AbstractWebResponseSerializer;
 import com.redhat.tools.nexus.response.WebResponseSerializer;
 import com.thoughtworks.xstream.XStream;
 
+import javax.inject.Named;
+
+@Named( "audit" )
 public class AuditResponseSerializer
     extends AbstractWebResponseSerializer
     implements WebResponseSerializer

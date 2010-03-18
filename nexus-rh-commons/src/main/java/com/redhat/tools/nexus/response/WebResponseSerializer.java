@@ -21,7 +21,12 @@ import org.restlet.data.MediaType;
 import org.restlet.data.Request;
 import org.restlet.resource.Representation;
 import org.restlet.resource.ResourceException;
+import org.sonatype.plugin.Managed;
 
+import javax.inject.Singleton;
+
+@Managed
+@Singleton
 public interface WebResponseSerializer
 {
 

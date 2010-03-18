@@ -1,10 +1,5 @@
 package com.redhat.tools.nexus.capture;
 
-import java.io.IOException;
-
-import javax.inject.Inject;
-import javax.inject.Named;
-
 import org.jsecurity.SecurityUtils;
 import org.jsecurity.authz.AuthorizationException;
 import org.jsecurity.subject.Subject;
@@ -32,6 +27,11 @@ import com.redhat.tools.nexus.capture.config.CaptureConfiguration;
 import com.redhat.tools.nexus.capture.store.CaptureStore;
 import com.redhat.tools.nexus.capture.store.CaptureStoreException;
 import com.redhat.tools.nexus.protocol.ProtocolConstants;
+
+import javax.inject.Inject;
+import javax.inject.Named;
+
+import java.io.IOException;
 
 /**
  * Capture resource, which will try to resolve first from a build-tag repository (first part of URL after /capture/),
@@ -73,7 +73,7 @@ public class CaptureResolverResource
     public String getResourceUri()
     {
         return ProtocolConstants.RESOLVE_RESOURCE_FRAGMENT + "/{" + CaptureResourceConstants.ATTR_BUILD_TAG_REPO_ID
-                        + "}";
+            + "}";
     }
 
     @Override
@@ -137,7 +137,7 @@ public class CaptureResolverResource
                         if ( logger.isDebugEnabled() )
                         {
                             logger.debug( "User: '" + user
-                                            + "' does not have permission to resolve dependencies from capture source." );
+                                + "' does not have permission to resolve dependencies from capture source." );
                         }
 
                         // NOTE: Not recording this...
@@ -160,13 +160,8 @@ public class CaptureResolverResource
     private Object resolveExternal( final String user, final String buildTag, final String capture,
                                     final Context context, final Request request, final Response response,
                                     final Variant variant, final ResourceStoreRequest req )
-        throws CaptureStoreException,
-            AccessDeniedException,
-            IOException,
-            NoSuchResourceStoreException,
-            ItemNotFoundException,
-            ResourceException,
-            IllegalOperationException
+        throws CaptureStoreException, AccessDeniedException, IOException, NoSuchResourceStoreException,
+        ItemNotFoundException, ResourceException, IllegalOperationException
     {
         final Subject subject = SecurityUtils.getSubject();
 
@@ -213,13 +208,8 @@ public class CaptureResolverResource
 
     private Object handleNotFound( final ItemNotFoundException e, final Context context, final Request request,
                                    final Response response, final Variant variant, final ResourceStoreRequest req )
-        throws AccessDeniedException,
-            StorageException,
-            IOException,
-            NoSuchResourceStoreException,
-            IllegalOperationException,
-            ItemNotFoundException,
-            ResourceException
+        throws AccessDeniedException, StorageException, IOException, NoSuchResourceStoreException,
+        IllegalOperationException, ItemNotFoundException, ResourceException
     {
         if ( isDescribe( request ) )
         {
@@ -234,8 +224,7 @@ public class CaptureResolverResource
     // NOTE: Not Used. We're overriding the method that requires this.
     @Override
     protected ResourceStore getResourceStore( final Request request )
-        throws NoSuchResourceStoreException,
-            ResourceException
+        throws NoSuchResourceStoreException, ResourceException
     {
         return null;
     }

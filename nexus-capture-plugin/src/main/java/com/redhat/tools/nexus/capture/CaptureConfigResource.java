@@ -2,9 +2,6 @@ package com.redhat.tools.nexus.capture;
 
 import static com.redhat.tools.nexus.capture.model.ModelSerializationUtils.getXStreamForConfig;
 
-import javax.inject.Inject;
-import javax.inject.Named;
-
 import org.restlet.Context;
 import org.restlet.data.Request;
 import org.restlet.data.Response;
@@ -13,7 +10,6 @@ import org.restlet.resource.ResourceException;
 import org.restlet.resource.Variant;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.sonatype.nexus.rest.AbstractNexusPlexusResource;
 import org.sonatype.plexus.rest.resource.PathProtectionDescriptor;
 import org.sonatype.plexus.rest.resource.PlexusResource;
 
@@ -22,9 +18,12 @@ import com.redhat.tools.nexus.capture.config.CaptureConfiguration;
 import com.redhat.tools.nexus.capture.config.InvalidConfigurationException;
 import com.redhat.tools.nexus.protocol.ProtocolConstants;
 
+import javax.inject.Inject;
+import javax.inject.Named;
+
 @Named( "captureConfig" )
 public class CaptureConfigResource
-    extends AbstractNexusPlexusResource
+    extends AbstractNonResolverCaptureResource
     implements PlexusResource
 {
 

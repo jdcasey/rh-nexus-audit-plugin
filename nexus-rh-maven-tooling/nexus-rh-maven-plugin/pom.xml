@@ -1,0 +1,254 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+* Red Hat Nexus Build Lifecycle
+* Copyright (C) 2010 Red Hat, Inc.                                                                                                                      
+ * 
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * 
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ * 
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see http://www.gnu.org/licenses/.
+ -->
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+  <parent>
+    <groupId>com.redhat.tools.nexus.maven</groupId>
+    <artifactId>nexus-rh-maven-tooling</artifactId>
+    <version>1.0-SNAPSHOT</version>
+  </parent>
+  
+  <artifactId>nexus-rh-maven-plugin</artifactId>
+  <packaging>maven-plugin</packaging>
+  
+  <name>Red Hat Nexus Lifecycle Maven Plugin</name>
+  
+  <dependencies>
+    <dependency>
+      <groupId>org.apache.maven</groupId>
+      <artifactId>maven-plugin-api</artifactId>
+      <version>2.1.0</version>
+    </dependency>
+    <dependency>
+	   	<groupId>org.apache.maven.plugins</groupId>
+	   	<artifactId>maven-assembly-plugin</artifactId>
+	   	<version>2.2-beta-4</version>
+	   	<type>maven-plugin</type>
+    </dependency>
+    <dependency>
+      <groupId>org.codehaus.plexus</groupId>
+      <artifactId>plexus-utils</artifactId>
+      <version>1.5.15</version>
+    </dependency>
+    <dependency>
+      <groupId>org.sonatype.plugin</groupId>
+      <artifactId>plugin-api</artifactId>
+      <version>1.0.2</version>
+    </dependency>
+    <dependency>
+      <groupId>org.sonatype.plugin</groupId>
+      <artifactId>plugin-host-api</artifactId>
+      <version>1.0.2</version>
+    </dependency>
+    <dependency>
+      <groupId>org.sonatype.plugin</groupId>
+      <artifactId>plugin-model-api</artifactId>
+      <version>1.0.2</version>
+    </dependency>
+    <dependency>
+      <groupId>org.sonatype.plugin</groupId>
+      <artifactId>plugin-gleaner</artifactId>
+      <version>1.0.2</version>
+    </dependency>
+    <dependency>
+      <groupId>junit</groupId>
+      <artifactId>junit</artifactId>
+      <version>4.5</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.maven.shared</groupId>
+      <artifactId>maven-verifier</artifactId>
+      <version>1.2</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+    	<groupId>org.jdom</groupId>
+    	<artifactId>jdom</artifactId>
+    	<version>1.1</version>
+    	<scope>compile</scope>
+    </dependency>
+    <dependency>
+    	<groupId>org.jdom</groupId>
+    	<artifactId>jaxen-core</artifactId>
+    	<version>1.0-FCS</version>
+    	<type>jar</type>
+    	<scope>compile</scope>
+    </dependency>
+    <dependency>
+    	<groupId>org.jdom</groupId>
+    	<artifactId>jaxen-jdom</artifactId>
+    	<version>1.0-FCS</version>
+    	<type>jar</type>
+    	<scope>compile</scope>
+    </dependency>
+    <dependency>
+    	<groupId>org.jdom</groupId>
+    	<artifactId>saxpath</artifactId>
+    	<version>1.0-FCS</version>
+    	<type>jar</type>
+    	<scope>compile</scope>
+    </dependency>
+    <dependency>
+    	<groupId>org.codehaus.groovy</groupId>
+    	<artifactId>groovy</artifactId>
+    	<version>1.6.0</version>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.maven.scm</groupId>
+      <artifactId>maven-scm-api</artifactId>
+      <version>${maven.scm.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.maven.scm</groupId>
+      <artifactId>maven-scm-manager-plexus</artifactId>
+      <version>${maven.scm.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.maven.scm</groupId>
+      <artifactId>maven-scm-provider-svnexe</artifactId>
+      <version>${maven.scm.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.maven.scm</groupId>
+      <artifactId>maven-scm-provider-svn-commons</artifactId>
+      <version>${maven.scm.version}</version>
+    </dependency>    
+  </dependencies>
+  
+  <reporting>
+    <plugins>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-plugin-plugin</artifactId>
+        <version>2.4.2</version>
+      </plugin>
+    </plugins>
+  </reporting>
+  
+  <build>
+    <pluginManagement>
+      <plugins>
+        <plugin>
+          <artifactId>maven-surefire-plugin</artifactId>
+          <version>2.4.3</version>
+          <executions>
+            <execution>
+              <id>default-test</id>
+              <configuration>
+                <excludes>
+                  <exclude>**/IT*</exclude>
+                  <exclude>**/util/*</exclude>
+                  <exclude>**/bootstrap/**/*</exclude>
+                  <exclude>**/00*/**/*</exclude>
+                </excludes>
+              </configuration>
+            </execution>
+          </executions>
+        </plugin>
+      </plugins>
+    </pluginManagement>
+  </build>
+  
+  <profiles>
+    <profile>
+      <id>run-its</id>
+      <properties>
+        <remoteRepository>${project.build.directory}/remote-repo</remoteRepository>
+      </properties>
+      <build>
+        <testResources>
+          <testResource>
+            <directory>src/it/resources</directory>
+            <filtering>true</filtering>
+            <includes>
+              <include>**/pom.xml</include>
+            </includes>
+          </testResource>
+          <testResource>
+            <directory>src/it/resources</directory>
+            <filtering>false</filtering>
+            <excludes>
+              <exclude>**/pom.xml</exclude>
+            </excludes>
+          </testResource>
+        </testResources>
+        
+        <pluginManagement>
+          <plugins>
+            <plugin>
+              <artifactId>maven-surefire-plugin</artifactId>
+              <executions>
+                <execution>
+                  <id>integration-tests</id>
+                  <phase>integration-test</phase>
+                  <goals>
+                    <goal>test</goal>
+                  </goals>
+                  <configuration>
+      	            <includes>
+      	              <include>**/IT*</include>
+      	            </includes>
+                    <excludes>
+                      <exclude>**/bootstrap/**/*</exclude>
+                      <exclude>**/00*/**/*</exclude>
+                    </excludes>
+                    <systemProperties>
+                      <property>
+                        <name>maven.repo.local</name>
+                        <value>${project.build.directory}/it-repo</value>
+                      </property>
+                    </systemProperties>
+      	          </configuration>
+      	        </execution>
+      	      </executions>
+  	        </plugin>
+  	      </plugins>
+  	    </pluginManagement>
+  	    
+  	    <plugins>
+          <plugin>
+            <artifactId>maven-invoker-plugin</artifactId>
+            <version>1.4</version>
+            <executions>
+              <execution>
+                <id>install-descriptor</id>
+                <phase>pre-integration-test</phase>
+                <goals>
+                  <goal>install</goal>
+                </goals>
+                <configuration>
+                  <localRepositoryPath>${project.build.directory}/it-repo</localRepositoryPath>
+                </configuration>
+              </execution>
+            </executions>
+          </plugin>
+  	    </plugins>
+      </build>
+    </profile>
+  </profiles>
+  
+  <distributionManagement>
+    <site>
+      <id>sonatype.org-sites</id>
+      <url>${pluginsSiteBaseUrl}/${project.parent.artifactId}/${project.artifactId}</url>
+    </site>
+  </distributionManagement>
+  
+</project>

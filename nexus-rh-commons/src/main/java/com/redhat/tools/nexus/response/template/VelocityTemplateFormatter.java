@@ -11,12 +11,13 @@ import org.apache.velocity.app.VelocityEngine;
 import org.apache.velocity.exception.MethodInvocationException;
 import org.apache.velocity.exception.ParseErrorException;
 import org.apache.velocity.exception.ResourceNotFoundException;
+import org.codehaus.plexus.velocity.VelocityComponent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.sonatype.nexus.configuration.application.ApplicationConfiguration;
 
-import com.google.inject.Inject;
-import com.google.inject.name.Named;
+import javax.inject.Inject;
+import javax.inject.Named;
 
 import java.io.File;
 import java.io.IOException;
@@ -30,6 +31,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+@Named( "velocity" )
 public class VelocityTemplateFormatter
     implements TemplateFormatter
 {
@@ -80,7 +82,8 @@ public class VelocityTemplateFormatter
     private ApplicationConfiguration configuration;
 
     @Inject
-    @Named( "templates" )
+    private VelocityComponent velocityComponent;
+
     private VelocityEngine velocity;
 
     private File templatesDir;
@@ -100,7 +103,7 @@ public class VelocityTemplateFormatter
     public String format( final String templateBasepath, String templateName, final Map<String, Object> context )
         throws TemplateException
     {
-        initTemplatesDir();
+        init();
 
         if ( templateName == null )
         {
@@ -154,8 +157,13 @@ public class VelocityTemplateFormatter
         return writer.toString();
     }
 
-    private synchronized void initTemplatesDir()
+    private synchronized void init()
     {
+        if ( velocity == null && velocityComponent != null )
+        {
+            velocity = velocityComponent.getEngine();
+        }
+
         if ( templatesDir == null && configuration != null )
         {
             templatesDir = joinFile( configuration.getConfigurationDirectory(), "capture" );

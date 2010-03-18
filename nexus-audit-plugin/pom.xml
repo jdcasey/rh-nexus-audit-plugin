@@ -70,14 +70,6 @@
       <artifactId>nexus-rh-commons</artifactId>
       <version>${project.version}</version>
     </dependency>
-    <dependency>
-      <groupId>com.google.inject</groupId>
-      <artifactId>guice</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>aopalliance</groupId>
-      <artifactId>aopalliance</artifactId>
-    </dependency>
   </dependencies>
 
   <build>
@@ -85,8 +77,12 @@
 
       <!-- Needed for custom packaging -->
       <plugin>
-        <groupId>org.sonatype.plugins</groupId>
-        <artifactId>app-lifecycle-maven-plugin</artifactId>
+        <groupId>com.redhat.tools.nexus.maven</groupId>
+        <artifactId>nexus-rh-maven-plugin</artifactId>
+      </plugin>
+      
+      <plugin>
+        <artifactId>maven-shade-plugin</artifactId>
       </plugin>
 
       <!-- <plugin>
