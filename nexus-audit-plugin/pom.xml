@@ -85,11 +85,23 @@
         <artifactId>maven-shade-plugin</artifactId>
       </plugin>
 
-      <!-- <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-shade-plugin</artifactId>
-      </plugin> -->
-      
+      <plugin>
+        <groupId>net.sf.alchim</groupId>
+        <artifactId>yuicompressor-maven-plugin</artifactId>
+        <configuration>
+  				<aggregations>
+  					<aggregation>
+  						<output>${project.build.directory}/classes/static/js/nexus-audit-plugin-all.js</output>
+  						<includes>
+  							<include>${project.build.directory}/classes/static/js/repoServer/repoServer.ArtifactAuditPanel.js</include>
+  						</includes>
+  						<!-- insert new line after each concatenation (default: false) -->
+  						<insertNewLine>true</insertNewLine>
+  					</aggregation>
+  				</aggregations>
+        </configuration>
+      </plugin>
+			
       <!-- #ITSet BEGINS -->
       <!-- Nexus IT setup (dependencies below are needed if you have extensive ITs and you want to use Nexus Environment) -->
       <!-- There are dependencies connected to this set of plugin, see above! -->

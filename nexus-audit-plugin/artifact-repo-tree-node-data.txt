@@ -1,0 +1,16 @@
+groupId = org.apache.maven.plugins
+artifactId = maven-compiler-plugin
+version = 2.1
+repoId = central-direct
+resourceURI = http://localhost:8081/nexus/service/local/repositories/central-direct/content/org/apache/maven/plugins/maven-compiler-plugin/2.1/maven-compiler-plugin-2.1.jar
+contextId = central-direct (Remote)
+classifier = 
+packaging = maven-plugin
+extension = jar
+pomLink = http://localhost:8081/nexus/service/local/artifact/maven/redirect?r=central-direct&g=org.apache.maven.plugins&a=maven-compiler-plugin&v=2.1&e=pom
+artifactLink = http://localhost:8081/nexus/service/local/artifact/maven/redirect?r=central-direct&g=org.apache.maven.plugins&a=maven-compiler-plugin&v=2.1&e=jar
+xml = <dependency>
+  <groupId>org.apache.maven.plugins</groupId>
+  <artifactId>maven-compiler-plugin</artifactId>
+  <version>2.1</version>
+</dependency>

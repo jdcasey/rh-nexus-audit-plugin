@@ -32,6 +32,21 @@ public final class RequestUtils
     {
     }
 
+    public static String requestAttribute( final String param, final Request request )
+        throws ResourceException
+    {
+        final Object val = request.getAttributes().get( param );
+        logger.info( String.format( "%s attribute value: %s", param, val ) );
+
+        final String value = val == null ? null : val.toString();
+        if ( value == null || value.trim().length() < 1 )
+        {
+            throw new ResourceException( Status.CLIENT_ERROR_BAD_REQUEST, "Request path attribute not found: " + param );
+        }
+
+        return value;
+    }
+
     public static Date getDate( final String param, final Request request )
         throws ResourceException
     {

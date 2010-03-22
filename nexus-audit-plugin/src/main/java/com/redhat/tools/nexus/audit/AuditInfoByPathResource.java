@@ -18,6 +18,7 @@
 package com.redhat.tools.nexus.audit;
 
 import static com.redhat.tools.nexus.request.RequestUtils.mediaTypeOf;
+import static com.redhat.tools.nexus.request.RequestUtils.requestAttribute;
 
 import org.restlet.Context;
 import org.restlet.data.MediaType;
@@ -43,17 +44,13 @@ import javax.inject.Named;
 import java.util.ArrayList;
 import java.util.List;
 
-@Named( "auditInfoResource" )
-public class AuditInfoResource
+@Named( "auditInfoByPathResource" )
+public class AuditInfoByPathResource
     extends AbstractNexusPlexusResource
     implements PlexusResource
 {
 
-    public static final String REPO_ID = "repositoryId";
-
-    private static final String AUDIT_TEMPLATE_BASEPATH = "audit/log";
-
-    private static final Logger logger = LoggerFactory.getLogger( AuditInfoResource.class );
+    private static final Logger logger = LoggerFactory.getLogger( AuditInfoByPathResource.class );
 
     @Inject
     @Named( AuditConstants.PREFERRED_STORE )
@@ -73,28 +70,20 @@ public class AuditInfoResource
     public PathProtectionDescriptor getResourceProtection()
     {
         //        return new PathProtectionDescriptor( "/rh-audit/log/*/**", "authcBasic,perms[nexus:rh-audit-log]" );
-        return new PathProtectionDescriptor( "/audit/log/*/**", "authcBasic" );
+        return new PathProtectionDescriptor( "/audit/log/*/path/**", "authcBasic" );
     }
 
     @Override
     public String getResourceUri()
     {
-        return "/audit/log/{" + REPO_ID + "}";
+        return "/audit/log/{" + AuditConstants.REPO_ID + "}/path";
     }
 
     @Override
     public Object get( final Context context, final Request request, final Response response, final Variant variant )
         throws ResourceException
     {
-        final Object rid = request.getAttributes().get( REPO_ID );
-        logger.info( String.format( "%s attribute value: %s", REPO_ID, rid ) );
-
-        final String repoId = rid == null ? null : rid.toString();
-        if ( repoId == null || repoId.trim().length() < 1 )
-        {
-            throw new ResourceException( Status.CLIENT_ERROR_BAD_REQUEST,
-                                         "You must include a repository-id and target-path to retrieve its audit log." );
-        }
+        final String repoId = requestAttribute( AuditConstants.REPO_ID, request );
 
         final String path = request.getResourceRef().getRemainingPart();
 
@@ -129,7 +118,7 @@ public class AuditInfoResource
 
         logger.info( String.format( "Responding with: %s", data ) );
         final MediaType mt = mediaTypeOf( request, variant );
-        return responseSerializer.serialize( data, mt, request, AUDIT_TEMPLATE_BASEPATH );
+        return responseSerializer.serialize( data, mt, request, AuditConstants.AUDIT_TEMPLATE_BASEPATH );
     }
 
     @Override

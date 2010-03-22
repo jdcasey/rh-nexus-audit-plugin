@@ -213,6 +213,30 @@
         </plugin>
         <!-- #ITSet ENDS -->
 
+  			<plugin>
+  				<groupId>net.sf.alchim</groupId>
+  				<artifactId>yuicompressor-maven-plugin</artifactId>
+  				<version>0.7.1</version>
+  				<executions>
+  					<execution>
+  						<goals>
+  							<goal>compress</goal>
+  						</goals>
+  						<configuration>
+      					<nosuffix>true</nosuffix>
+      					<nomunge>true</nomunge>
+      					<jswarn>false</jswarn>
+  						</configuration>
+  					</execution>
+  				</executions>
+  				<dependencies>
+  					<dependency>
+  						<groupId>org.codehaus.plexus</groupId>
+  						<artifactId>plexus-utils</artifactId>
+  						<version>1.1</version>
+  					</dependency>
+  				</dependencies>
+  			</plugin>
       </plugins>
     </pluginManagement>
     

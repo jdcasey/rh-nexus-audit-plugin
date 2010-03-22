@@ -22,6 +22,20 @@ public final class AuditConstants
 
     public static final String PREFERRED_STORE = "json";
 
+    public static final String REPO_ID = "repositoryId";
+
+    public static final String GROUP_ID = "groupId";
+
+    public static final String ARTIFACT_ID = "artifactId";
+
+    public static final String VERSION = "version";
+
+    public static final String PARAM_CLASSIFIER = "c";
+
+    public static final String PARAM_EXTENSION = "t";
+
+    public static final String AUDIT_TEMPLATE_BASEPATH = "audit/log";
+
     private AuditConstants()
     {
     }

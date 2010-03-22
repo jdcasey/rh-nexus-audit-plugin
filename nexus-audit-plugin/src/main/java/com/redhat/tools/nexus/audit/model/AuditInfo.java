@@ -24,7 +24,7 @@ import org.sonatype.nexus.proxy.registry.RepositoryRegistry;
 import org.sonatype.nexus.proxy.repository.ProxyRepository;
 
 import com.google.gson.annotations.SerializedName;
-import com.redhat.tools.nexus.audit.protocol.AuditInfoDTO;
+import com.redhat.tools.nexus.audit.protocol.AuditInfoResponse;
 import com.redhat.tools.nexus.audit.serial.SerialConstants;
 import com.thoughtworks.xstream.annotations.XStreamAlias;
 
@@ -90,7 +90,7 @@ public class AuditInfo
         return repositoryId;
     }
 
-    public AuditInfoDTO asResource( final String appUrl, final RepositoryRegistry repositoryRegistry )
+    public AuditInfoResponse asResource( final String appUrl, final RepositoryRegistry repositoryRegistry )
     {
         String remoteBase = null;
         try
@@ -107,7 +107,7 @@ public class AuditInfo
                                             + "\nRepository ID: %s\nTarget path: %s", repositoryId, referencedPath ) );
         }
 
-        return new AuditInfoDTO( owner, dateAdded, referencedPath, repositoryId, appUrl, remoteBase );
+        return new AuditInfoResponse( this, appUrl, remoteBase );
     }
 
 }
