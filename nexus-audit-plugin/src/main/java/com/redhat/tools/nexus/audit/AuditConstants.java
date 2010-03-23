@@ -36,6 +36,10 @@ public final class AuditConstants
 
     public static final String AUDIT_TEMPLATE_BASEPATH = "audit/log";
 
+    public static final String PARAM_QUIET = "q";
+
+    public static final String PRIV_AUDIT_ACCESS = "nexus:audit-access";
+
     private AuditConstants()
     {
     }

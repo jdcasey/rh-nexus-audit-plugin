@@ -1,0 +1,74 @@
+<?xml version="1.0"?>
+<security>
+  <version>2.0.3</version>
+  <roles>
+    <role>
+      <id>anonymous</id>
+      <roles>
+        <role>audit-user</role>
+      </roles>
+    </role>
+    <role>
+      <id>repo-all-read</id>
+      <roles>
+        <role>audit-user</role>
+      </roles>
+    </role>
+    <role>
+        <id>anonymous-no-audit</id>
+        <name>Nexus Anonymous Role, No Audit</name>
+        <description>Anonymous role for Nexus WITHOUT access to audit logs.</description>
+        <sessionTimeout>60</sessionTimeout>
+        <privileges>
+            <privilege>1</privilege>
+            <privilege>54</privilege>
+            <privilege>57</privilege>
+            <privilege>58</privilege>
+            <privilege>70</privilege>
+            <privilege>74</privilege>
+        </privileges>
+        <roles>
+            <role>ui-repo-browser</role>
+            <role>ui-search</role>
+        </roles>
+    </role>
+    <role>
+      <id>repo-all-read-no-audit</id>
+      <name>Repo: All Repositories, No Audit (Read)</name>
+      <description>Gives access to read ALL content of ALL repositories in Nexus WITHOUT access to audit logs.</description>
+      <sessionTimeout>60</sessionTimeout>
+      <privileges>
+          <privilege>T1</privilege>
+          <privilege>T2</privilege>
+          <privilege>repository-all</privilege>
+      </privileges>
+    </role>
+    <role>
+      <id>audit-user</id>
+      <name>Audit User</name>
+      <description>Allow access to audit logs</description>
+      <sessionTimeout>5</sessionTimeout>
+      <privileges>
+        <privilege>audit-access</privilege>
+      </privileges>
+    </role>
+  </roles>
+  <privileges>
+    <privilege>
+      <id>audit-access</id>
+      <type>method</type>
+      <name>Audit Logs: access</name>
+      <description>Access to audit logs for artifacts.</description>
+      <properties>
+        <property>
+          <key>method</key>
+          <value>read</value>
+        </property>
+        <property>
+          <key>permission</key>
+          <value>nexus:audit-access</value>
+        </property>
+      </properties>
+    </privilege>
+  </privileges>
+</security>

@@ -1,12 +1,12 @@
-package com.redhat.tools.nexus.capture.statik;
+package com.redhat.tools.nexus.audit.statik;
 
 import org.sonatype.security.realms.tools.AbstractStaticSecurityResource;
 import org.sonatype.security.realms.tools.StaticSecurityResource;
 
 import javax.inject.Named;
 
-@Named( "captureSecurity" )
-public class CaptureStaticSecurityResource
+@Named( "auditSecurity" )
+public class AuditStaticSecurityResource
     extends AbstractStaticSecurityResource
     implements StaticSecurityResource
 {
@@ -14,7 +14,7 @@ public class CaptureStaticSecurityResource
     @Override
     protected String getResourcePath()
     {
-        return "/META-INF/nexus/capture-security.xml";
+        return "/META-INF/nexus/audit-security.xml";
     }
 
 }

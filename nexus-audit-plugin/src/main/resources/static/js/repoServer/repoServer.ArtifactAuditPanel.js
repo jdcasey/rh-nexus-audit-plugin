@@ -16,14 +16,13 @@ Sonatype.repoServer.ArtifactAuditPanel = function( config ) {
   var defaultConfig = {
     halfSize: false
   };
+  
   Ext.apply( this, config, defaultConfig );
   
   this.sp = Sonatype.lib.Permissions;
   
   this.linkDivId = Ext.id();
   this.linkLabelId = Ext.id();
-  
-//  alert( this.linkDivId );
   
   var items = [];
         
@@ -32,7 +31,7 @@ Sonatype.repoServer.ArtifactAuditPanel = function( config ) {
       xtype: 'panel',
       layout: 'form',
       anchor: Sonatype.view.FIELD_OFFSET + ' -10',
-      labelWidth: 70,
+      labelWidth: 90,
       items: [
         { 
           xtype: 'textfield',
@@ -44,7 +43,7 @@ Sonatype.repoServer.ArtifactAuditPanel = function( config ) {
         },
         {
           xtype: 'textfield',
-          fieldLabel: 'Date Uploaded',
+          fieldLabel: 'Added On',
           name: 'captured-on',
           anchor: Sonatype.view.FIELD_OFFSET_WITH_SCROLL,
           allowBlank: true,
@@ -58,7 +57,7 @@ Sonatype.repoServer.ArtifactAuditPanel = function( config ) {
       xtype: 'panel',
         layout: 'form',
         anchor: Sonatype.view.FIELD_OFFSET + ' -10',
-        labelWidth: 70,
+        labelWidth: 90,
         items: [
           { 
             xtype: 'textfield',
@@ -70,7 +69,7 @@ Sonatype.repoServer.ArtifactAuditPanel = function( config ) {
           },
           {
             xtype: 'textfield',
-            fieldLabel: 'Date Uploaded',
+            fieldLabel: 'Added On',
             name: 'captured-on',
             anchor: Sonatype.view.FIELD_OFFSET_WITH_SCROLL,
             allowBlank: true,
@@ -80,7 +79,8 @@ Sonatype.repoServer.ArtifactAuditPanel = function( config ) {
     });
   }
   
-  this.formPanel = new Ext.form.FormPanel( {
+  this.formPanel = new Ext.form.FormPanel(
+  {
     autoScroll: true,
     border: false,
     frame: true,
@@ -89,7 +89,8 @@ Sonatype.repoServer.ArtifactAuditPanel = function( config ) {
     items: items
   } );
 
-  Sonatype.repoServer.ArtifactAuditPanel.superclass.constructor.call( this, {
+  Sonatype.repoServer.ArtifactAuditPanel.superclass.constructor.call( this, 
+  {
     title: 'Audit Information',
     layout: 'fit',
     collapsible: false,
@@ -104,98 +105,57 @@ Sonatype.repoServer.ArtifactAuditPanel = function( config ) {
   } );
 };
 
-Ext.extend( Sonatype.repoServer.ArtifactAuditPanel, Ext.Panel, {
-//  formatDownloadLink: function( data ) {
-//  	var pomLink = data.pomLink;
-//  	var artifactLink = data.artifactLink;
-//  
-//  	var links = [];
-//  	if ( pomLink ) {
-//  		links.push( this.makeDownloadLink( pomLink, 'pom' ) );
-//  	}
-//  	if ( artifactLink ) {
-//  		links.push( this.makeDownloadLink( artifactLink, 'artifact' ) );
-//  	}
-//  	return links.join(', ');
-//  },
-//  
-//  makeDownloadLink: function( url, title ) {
-//    return String.format( '<a target="_blank" href="{0}">{1}</a>', url, title );
-//  },
-
-  printAll: function( obj ) {
-	    var str = '';
-	    for (var memb in obj)
-	    str += memb + ' = ' + obj[memb] + '\n';
-
-	    alert( str );
-  },
-	
-  showArtifact: function( data ) {
-	this.printAll( data );
-	
-	var serviceUrl = Sonatype.config.servicePath + '/audit/log/' + data.repoId + '/gav/' + data.groupId + '/' + data.artifactId + '/' + data.version;
-	var query = '';
-	if ( data.extension != null )
+Ext.extend( Sonatype.repoServer.ArtifactAuditPanel, Ext.Panel, 
+{
+  showArtifact: function( data )
+  {
+	if ( data.repoId != null && data.groupId != null && data.artifactId != null && data.version != null )
 	{
-		query += 't=' + data.extension;
-	}
-	
-	if ( query.length > 0 )
-	{
-		query += '&';
-	}
-	
-	if ( data.classifier != null )
-	{
-		query += 'c=' + data.classifier;
-	}
-	
-	if ( query.length > 0 )
-	{
+		var serviceUrl = Sonatype.config.servicePath + '/audit/log/' 
+		    + data.repoId 
+		    + '/gav/' 
+		    + data.groupId 
+		    + '/' 
+		    + data.artifactId 
+		    + '/' 
+		    + data.version;
+		
+		var query = '';
+		if ( data.extension != null && data.extension != 'jar' )
+		{
+			query += 't=' + data.extension;
+		}
+		
+		if ( data.classifier != null && data.classifier.length > 0 )
+		{
+			if ( query.length > 0 )
+			{
+				query += '&';
+			}
+			
+			query += 'c=' + data.classifier;
+		}
+		
+		if ( query.length > 0 )
+		{
+			query += '&';
+		}
+		
+		// fail over to 'unknown' information.
+		query += 'q=true';
+		
 		serviceUrl += '?' + query;
+		
+	    this.formPanel.getForm().doAction( 'sonatypeLoad', {
+	      url: serviceUrl,
+	      method: 'GET',
+	      fpanel: this.formPanel
+		} );
 	}
-	
-	alert( "Loading: " + serviceUrl );
-	
-    this.formPanel.getForm().doAction( 'sonatypeLoad', {
-      url: serviceUrl,
-      method: 'GET',
-      fpanel: this.formPanel
-	} );
-	  
-    // TODO: setup the content of the panel for this artifact/path/whatever.
-//    this.formPanel.form.setValues( data );
-    
-    if ( this.sp.checkPermission( 'nexus:artifact', this.sp.READ) ) {
-        // TODO: setup any link to the file...not sure what we need here, though.
-//	    var linkLabel = document.getElementById( this.linkLabelId );
-//	    var linkDiv = document.getElementById( this.linkDivId );
-//	    var linkHtml = this.formatDownloadLink( data );
-//	    if ( empty || linkHtml.length == 0 ) {
-//	    	linkLabel.innerHTML = '';
-//	    } else {
-//	    	linkLabel.innerHTML = 'Download: ';
-//	    	linkDiv.innerHTML =  linkHtml;
-//	    }
-    }
   }
 } );
 
-//Sonatype.Events.addListener( 'fileNodeClickedEvent', function( node, passthru ) {
-//  if ( passthru 
-//      && passthru.container
-//      && passthru.container.artifactContainer ) 
-//  {
-//	  // FIXME: These are all ZERO when using the repo browser!!!
-//	  alert( passthru.container.artifactContainer.items.getCount() );
-//      passthru.container.artifactContainer.expand();
-//  }
-//});
-
 Sonatype.Events.addListener('artifactContainerInit', function(artifactContainer) {
-  alert( "new artifact container created.");
-  
   artifactContainer.add( new Sonatype.repoServer.ArtifactAuditPanel( { 
     name: 'ArtifactAuditPanel',
     tabTitle: 'Audit Information',

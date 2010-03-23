@@ -17,6 +17,8 @@
 
 package com.redhat.tools.nexus.audit.serial;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.sonatype.nexus.artifact.Gav;
 import org.sonatype.nexus.artifact.IllegalArtifactCoordinateException;
 
@@ -29,6 +31,7 @@ import com.google.gson.JsonDeserializer;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParseException;
+import com.google.gson.JsonPrimitive;
 import com.google.gson.JsonSerializationContext;
 import com.google.gson.JsonSerializer;
 import com.google.gson.reflect.TypeToken;
@@ -61,6 +64,14 @@ public final class SerialUtils
 
     private static final String DATE_FORMAT = "yyyy-MM-dd HH:mm:ss Z";
 
+    private static final String[] PARSABLE_DATE_FORMATS = { FULL_DATE_FORMAT, DATE_FORMAT, "MMM dd, yyyy hh:mm:ss a" };
+
+    public static final Date UNKNOWN_DATE = new Date( 0 );
+
+    private static final String UNKNOWN_DATE_VALUE = "unknown";
+
+    private static final Logger logger = LoggerFactory.getLogger( SerialUtils.class );
+
     private static final TypeToken<TreeMap<Date, File>> DATE_TO_FILE_MAP_TT = new TypeToken<TreeMap<Date, File>>()
     {
     };
@@ -73,6 +84,9 @@ public final class SerialUtils
     public static Gson getGson()
     {
         return new GsonBuilder().setPrettyPrinting()
+                                .registerTypeAdapter(
+                                                      Date.class,
+                                                      new CustomFormatDateConverter( DATE_FORMAT, PARSABLE_DATE_FORMATS ) )
                                 .registerTypeAdapter( Gav.class, new GavCreator() )
                                 .registerTypeAdapter( DATE_TO_FILE_MAP_TT.getType(),
                                                       new DateToFileMapTypeAdapter( DATE_FORMAT, "session" ) )
@@ -93,7 +107,7 @@ public final class SerialUtils
         final XStream xs = new XStream();
 
         xs.setMode( XStream.NO_REFERENCES );
-        xs.registerConverter( new CustomFormatDateConverter( DATE_FORMAT ) );
+        xs.registerConverter( new CustomFormatDateConverter( DATE_FORMAT, PARSABLE_DATE_FORMATS ) );
 
         return xs;
     }
@@ -296,34 +310,72 @@ public final class SerialUtils
     }
 
     public static final class CustomFormatDateConverter
-        implements Converter
+        implements JsonSerializer<Date>, JsonDeserializer<Date>, /*InstanceCreator<Date>,*/Converter
     {
 
         private final String format;
 
-        public CustomFormatDateConverter( final String format )
+        private final String[] parsableDateFormats;
+
+        public CustomFormatDateConverter( final String format, final String[] parsableDateFormats )
         {
             this.format = format;
+            this.parsableDateFormats = parsableDateFormats;
         }
 
         public void marshal( final Object source, final HierarchicalStreamWriter writer,
                              final MarshallingContext context )
         {
-            writer.setValue( new SimpleDateFormat( format ).format( (Date) source ) );
+            writer.setValue( doFormat( (Date) source ) );
+        }
+
+        private String doFormat( final Date source )
+        {
+            String result;
+            if ( source.equals( UNKNOWN_DATE ) )
+            {
+                result = UNKNOWN_DATE_VALUE;
+            }
+            else
+            {
+                result = new SimpleDateFormat( format ).format( source );
+            }
+
+            return result;
+        }
+
+        private Date doUnFormat( final String value )
+        {
+            if ( UNKNOWN_DATE_VALUE.equals( value.toLowerCase().trim() ) )
+            {
+                return UNKNOWN_DATE;
+            }
+            else
+            {
+                for ( final String fmt : parsableDateFormats )
+                {
+                    try
+                    {
+                        return new SimpleDateFormat( fmt ).parse( value );
+                    }
+                    catch ( final ParseException e )
+                    {
+                        if ( logger.isDebugEnabled() )
+                        {
+                            logger.debug( String.format( "Failed to parse date: '%s' using format: '%s'\nReason: %s",
+                                                         value, fmt, e.getMessage() ) );
+                        }
+                    }
+                }
+
+                throw new IllegalArgumentException( String.format( "Cannot parse date: '%s'", value ) );
+            }
         }
 
         public Object unmarshal( final HierarchicalStreamReader reader, final UnmarshallingContext context )
         {
             final String value = reader.getValue();
-            try
-            {
-                return new SimpleDateFormat( format ).parseObject( value );
-            }
-            catch ( final ParseException e )
-            {
-                throw new IllegalArgumentException( String.format( "Cannot parse date: '%s' using format: '%s'", value,
-                                                                   format ), e );
-            }
+            return doUnFormat( value );
         }
 
         @SuppressWarnings( "unchecked" )
@@ -331,6 +383,28 @@ public final class SerialUtils
         {
             return Date.class.isAssignableFrom( type );
         }
+
+        @Override
+        public JsonElement serialize( final Date src, final Type typeOfSrc, final JsonSerializationContext context )
+        {
+            final String value = doFormat( src );
+            return new JsonPrimitive( value );
+        }
+
+        @Override
+        public Date deserialize( final JsonElement json, final Type typeOfT, final JsonDeserializationContext context )
+            throws JsonParseException
+        {
+            final String value = json.getAsJsonPrimitive().getAsString();
+            return doUnFormat( value );
+        }
+        //
+        //        @Override
+        //        public Date createInstance( final Type type )
+        //        {
+        //            // TODO Implement InstanceCreator<Date>.createInstance
+        //            throw new UnsupportedOperationException( "Not Implemented." );
+        //        }
 
     }
 

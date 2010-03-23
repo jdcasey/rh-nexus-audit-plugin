@@ -65,11 +65,6 @@ public class JsonCaptureStore
 
     private File workDir;
 
-    public JsonCaptureStore()
-    {
-        System.out.println( "\n\n\n\nStarting JSON capture store!\nInstance: " + this + "\n\n\n\n" );
-    }
-
     public CaptureSessionRef closeCurrentLog( final String user, final String buildTag )
         throws CaptureStoreException
     {

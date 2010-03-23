@@ -18,9 +18,11 @@
 package com.redhat.tools.nexus.audit;
 
 import static com.redhat.tools.nexus.request.RequestUtils.mediaTypeOf;
+import static com.redhat.tools.nexus.request.RequestUtils.query;
 import static com.redhat.tools.nexus.request.RequestUtils.requestAttribute;
 
 import org.restlet.Context;
+import org.restlet.data.Form;
 import org.restlet.data.MediaType;
 import org.restlet.data.Request;
 import org.restlet.data.Response;
@@ -34,6 +36,7 @@ import org.sonatype.plexus.rest.resource.PathProtectionDescriptor;
 import org.sonatype.plexus.rest.resource.PlexusResource;
 
 import com.redhat.tools.nexus.audit.model.AuditInfo;
+import com.redhat.tools.nexus.audit.protocol.AuditInfoResponse;
 import com.redhat.tools.nexus.audit.serial.store.AuditStore;
 import com.redhat.tools.nexus.audit.serial.store.AuditStoreException;
 import com.redhat.tools.nexus.response.WebResponseSerializer;
@@ -69,8 +72,8 @@ public class AuditInfoByPathResource
     @Override
     public PathProtectionDescriptor getResourceProtection()
     {
-        //        return new PathProtectionDescriptor( "/rh-audit/log/*/**", "authcBasic,perms[nexus:rh-audit-log]" );
-        return new PathProtectionDescriptor( "/audit/log/*/path/**", "authcBasic" );
+        return new PathProtectionDescriptor( "/audit/log/*/path/**", String.format( "authcBasic,perms[%s]",
+                                                                                    AuditConstants.PRIV_AUDIT_ACCESS ) );
     }
 
     @Override
@@ -93,7 +96,8 @@ public class AuditInfoByPathResource
                                          "You must include a target-path to retrieve its audit log." );
         }
 
-        logger.info( String.format( "Looking up audit information:\nRepository: %s\nTarget Path: %s", repoId, path ) );
+        final Form query = query( request );
+        final String quiet = query.getFirstValue( AuditConstants.PARAM_QUIET, "false" );
 
         Object data = null;
         try
@@ -116,7 +120,11 @@ public class AuditInfoByPathResource
             throw new ResourceException( Status.SERVER_ERROR_INTERNAL, message );
         }
 
-        logger.info( String.format( "Responding with: %s", data ) );
+        if ( data == null && Boolean.valueOf( quiet ) )
+        {
+            data = AuditInfoResponse.getUnknown( repoId );
+        }
+
         final MediaType mt = mediaTypeOf( request, variant );
         return responseSerializer.serialize( data, mt, request, AuditConstants.AUDIT_TEMPLATE_BASEPATH );
     }

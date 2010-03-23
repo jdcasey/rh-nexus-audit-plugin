@@ -38,6 +38,7 @@ import org.sonatype.plexus.rest.resource.PathProtectionDescriptor;
 import org.sonatype.plexus.rest.resource.PlexusResource;
 
 import com.redhat.tools.nexus.audit.model.AuditInfo;
+import com.redhat.tools.nexus.audit.protocol.AuditInfoResponse;
 import com.redhat.tools.nexus.audit.serial.store.AuditStore;
 import com.redhat.tools.nexus.audit.serial.store.AuditStoreException;
 import com.redhat.tools.nexus.response.WebResponseSerializer;
@@ -73,8 +74,8 @@ public class AuditInfoByGAVResource
     @Override
     public PathProtectionDescriptor getResourceProtection()
     {
-        //        return new PathProtectionDescriptor( "/rh-audit/log/*/**", "authcBasic,perms[nexus:rh-audit-log]" );
-        return new PathProtectionDescriptor( "/audit/log/*/gav/*/*/*", "authcBasic" );
+        return new PathProtectionDescriptor( "/audit/log/*/gav/*/*/*", String.format( "authcBasic,perms[%s]",
+                                                                                      AuditConstants.PRIV_AUDIT_ACCESS ) );
     }
 
     @Override
@@ -97,9 +98,7 @@ public class AuditInfoByGAVResource
         final String classifier = query.getFirstValue( AuditConstants.PARAM_CLASSIFIER );
         final String extension = query.getFirstValue( AuditConstants.PARAM_EXTENSION, "jar" );
 
-        logger.info( String.format( "Looking up audit information:\nRepository: %s\nGroup-Id: %s\nArtifact-Id: %s"
-            + "\nVersion: %s\nClassifier: %s\nExtension: %s", repoId, groupId, artifactId, version, classifier,
-                                    extension ) );
+        final String quiet = query.getFirstValue( AuditConstants.PARAM_QUIET, "false" );
 
         Object data = null;
         try
@@ -138,7 +137,11 @@ public class AuditInfoByGAVResource
             throw new ResourceException( Status.SERVER_ERROR_INTERNAL, message );
         }
 
-        logger.info( String.format( "Responding with: %s", data ) );
+        if ( data == null && Boolean.valueOf( quiet ) )
+        {
+            data = AuditInfoResponse.getUnknown( repoId );
+        }
+
         final MediaType mt = mediaTypeOf( request, variant );
         return responseSerializer.serialize( data, mt, request, AuditConstants.AUDIT_TEMPLATE_BASEPATH );
     }

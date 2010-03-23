@@ -35,14 +35,12 @@ public class DeploymentAuditEventInspector
 
     public boolean accepts( final Event<?> evt )
     {
-        // first is needed to determine when logging should start...see inspect() below.
+        // first event type is necessary to determine when logging should start...see inspect() below.
         return evt instanceof NexusStartedEvent || evt instanceof RepositoryItemEventStore;
     }
 
     public void inspect( final Event<?> evt )
     {
-        logger.info( "Processing event for deployment info: " + evt );
-
         if ( evt instanceof NexusStartedEvent )
         {
             // some spurious storage events before nexus starts...not sure why, but skip 'em.
@@ -61,23 +59,17 @@ public class DeploymentAuditEventInspector
             final String path = item.getPath();
             final String owner = item.getAttributes().get( AccessManager.REQUEST_USER );
 
-            logger.info( String.format( "Adding deployment audit info for: %s in repository: %s\nDeploying user: %s",
-                                        path, repoId, owner ) );
-
             final AuditInfo audit = new AuditInfo( owner, new Date(), path, repoId );
 
-            boolean result = false;
             try
             {
-                result = store.saveAuditInformation( audit );
+                store.saveAuditInformation( audit );
             }
             catch ( final AuditStoreException e )
             {
                 logger.error( String.format( "Failed to save audit record.\nStorage Item Path: %s" + "\nOwner: %s"
                     + "\nRepository-Id: %s" + "\nReason: %s", path, owner, repoId, e.getMessage() ), e );
             }
-
-            logger.info( "Result: " + result );
         }
     }
 

@@ -22,6 +22,7 @@ import static com.redhat.tools.nexus.request.PathUtils.buildUri;
 import com.google.gson.annotations.SerializedName;
 import com.redhat.tools.nexus.audit.model.AuditInfo;
 import com.redhat.tools.nexus.audit.serial.SerialConstants;
+import com.redhat.tools.nexus.audit.serial.SerialUtils;
 import com.thoughtworks.xstream.annotations.XStreamAlias;
 
 @XStreamAlias( SerialConstants.AUDIT_INFO_ROOT )
@@ -52,8 +53,8 @@ public class AuditInfoResponse
     public AuditInfoResponse( final AuditInfo auditInfo, final String appUrl, final String remoteBase )
     {
         data = auditInfo;
-        url = buildUri( appUrl, AUDIT_SVC, auditInfo.getReferencedPath() );
-        targetUrl = buildUri( remoteBase, auditInfo.getReferencedPath() );
+        url = appUrl == null ? null : buildUri( appUrl, AUDIT_SVC, auditInfo.getReferencedPath() );
+        targetUrl = remoteBase == null ? null : buildUri( remoteBase, auditInfo.getReferencedPath() );
     }
 
     public String getUrl()
@@ -69,6 +70,11 @@ public class AuditInfoResponse
     public AuditInfo getData()
     {
         return data;
+    }
+
+    public static AuditInfoResponse getUnknown( final String repoId )
+    {
+        return new AuditInfoResponse( new AuditInfo( "unknown", SerialUtils.UNKNOWN_DATE, null, repoId ), null, null );
     }
 
 }
