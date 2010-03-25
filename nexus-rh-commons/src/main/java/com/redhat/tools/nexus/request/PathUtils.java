@@ -1,7 +1,5 @@
 package com.redhat.tools.nexus.request;
 
-import static org.codehaus.plexus.util.StringUtils.isNotEmpty;
-
 import java.io.File;
 
 public final class PathUtils
@@ -17,11 +15,19 @@ public final class PathUtils
 
     public static String joinPath( final char separator, final String basePath, final String... parts )
     {
-        return concat( separator, basePath, concat( separator, parts ) );
+        return basePath == null ? null : concat( separator, basePath, concat( separator, parts ) );
     }
 
+    /**
+     * NOTE: This doesn't normalize mixed-file-separator cases, where '/' is mixed with '\' in paths.
+     */
     public static File joinFile( final File dir, final String... parts )
     {
+        if ( dir == null )
+        {
+            return null;
+        }
+
         final String path = concat( PATH_SLASH, parts );
 
         final File f = new File( dir, path );
@@ -34,9 +40,15 @@ public final class PathUtils
         final StringBuilder builder = new StringBuilder();
         for ( final String part : parts )
         {
+            if ( part == null )
+            {
+                continue;
+            }
+
             if ( builder.length() > 0 )
             {
-                if ( part.length() > 0 && part.charAt( 0 ) != separator )
+                if ( builder.charAt( builder.length() - 1 ) != separator && part.length() > 0
+                    && part.charAt( 0 ) != separator )
                 {
                     builder.append( separator );
                 }
@@ -58,37 +70,7 @@ public final class PathUtils
 
     public static String buildUri( final String applicationUrl, final String... parts )
     {
-        final StringBuilder sb = new StringBuilder();
-        if ( isNotEmpty( applicationUrl ) )
-        {
-            if ( applicationUrl.endsWith( "/" ) )
-            {
-                sb.append( applicationUrl.substring( 0, applicationUrl.length() - 1 ) );
-            }
-            else
-            {
-                sb.append( applicationUrl );
-            }
-        }
-        else
-        {
-            sb.append( '/' );
-        }
-
-        for ( final String part : parts )
-        {
-            if ( isNotEmpty( part ) )
-            {
-                if ( sb.charAt( sb.length() - 1 ) != '/' && part.charAt( 0 ) != '/' )
-                {
-                    sb.append( '/' );
-                }
-
-                sb.append( part );
-            }
-        }
-
-        return sb.length() == 0 ? null : sb.toString();
+        return joinPath( '/', applicationUrl, parts );
     }
 
 }

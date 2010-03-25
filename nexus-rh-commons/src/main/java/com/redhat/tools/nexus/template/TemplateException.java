@@ -1,4 +1,4 @@
-package com.redhat.tools.nexus.response.template;
+package com.redhat.tools.nexus.template;
 
 public class TemplateException
     extends Exception
@@ -45,7 +45,14 @@ public class TemplateException
         }
         else
         {
-            return String.format( super.getMessage(), params );
+            try
+            {
+                return String.format( super.getMessage(), params );
+            }
+            catch ( final Throwable t )
+            {
+                return super.getMessage();
+            }
         }
     }
 

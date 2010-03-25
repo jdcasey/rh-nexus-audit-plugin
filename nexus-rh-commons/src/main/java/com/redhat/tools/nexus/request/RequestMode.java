@@ -32,7 +32,7 @@ public enum RequestMode
             }
         }
 
-        return null;
+        return DEFAULT;
     }
 
 }

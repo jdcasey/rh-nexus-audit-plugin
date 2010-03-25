@@ -2,25 +2,34 @@ package com.redhat.tools.nexus.request;
 
 import org.restlet.data.MediaType;
 
+import java.util.Arrays;
+
 public enum OutputFormat
 {
 
-    PLAIN( MediaType.TEXT_PLAIN ),
-    XML( MediaType.APPLICATION_XML ),
-    JSON( MediaType.APPLICATION_JSON ),
-    RSS( MediaType.APPLICATION_RSS_XML ),
-    ATOM( MediaType.APPLICATION_ATOM_XML );
+    plain( MediaType.TEXT_PLAIN, "text" ),
+    xml( MediaType.APPLICATION_XML, MediaType.TEXT_XML.getName() ),
+    json( MediaType.APPLICATION_JSON );
 
     private MediaType mt;
 
-    private OutputFormat( final MediaType mt )
+    private final String[] synonyms;
+
+    private OutputFormat( final MediaType mt, final String... synonyms )
     {
         this.mt = mt;
+        this.synonyms = synonyms;
+        Arrays.sort( this.synonyms );
     }
 
     public MediaType mediaType()
     {
         return mt;
+    }
+
+    public String[] synonyms()
+    {
+        return synonyms;
     }
 
     public static OutputFormat find( final String fmt )
@@ -29,14 +38,19 @@ public enum OutputFormat
         {
             final MediaType mt = MediaType.valueOf( fmt );
 
-            if ( mt != null )
+            for ( final OutputFormat format : values() )
             {
-                for ( final OutputFormat format : values() )
+                if ( mt != null && format.mediaType().equals( mt ) )
                 {
-                    if ( format.mediaType().equals( mt ) )
-                    {
-                        return format;
-                    }
+                    return format;
+                }
+                else if ( fmt.toLowerCase().equals( format.name() ) )
+                {
+                    return format;
+                }
+                else if ( format.synonyms != null && Arrays.binarySearch( format.synonyms, fmt.toLowerCase() ) > -1 )
+                {
+                    return format;
                 }
             }
         }

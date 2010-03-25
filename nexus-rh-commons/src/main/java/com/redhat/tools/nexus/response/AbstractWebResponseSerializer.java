@@ -28,8 +28,8 @@ import org.restlet.resource.ResourceException;
 import org.restlet.resource.StringRepresentation;
 
 import com.google.gson.Gson;
-import com.redhat.tools.nexus.response.template.TemplateException;
-import com.redhat.tools.nexus.response.template.TemplateFormatter;
+import com.redhat.tools.nexus.template.TemplateException;
+import com.redhat.tools.nexus.template.TemplateFormatter;
 import com.thoughtworks.xstream.XStream;
 
 import javax.inject.Inject;

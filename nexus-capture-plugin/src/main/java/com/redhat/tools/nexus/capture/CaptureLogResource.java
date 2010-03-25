@@ -1,7 +1,7 @@
 package com.redhat.tools.nexus.capture;
 
 import static com.redhat.tools.nexus.request.RequestUtils.mediaTypeOf;
-import static com.redhat.tools.nexus.request.RequestUtils.parseUrlDate;
+import static com.redhat.tools.nexus.request.RequestUtils.parseDate;
 
 import org.restlet.Context;
 import org.restlet.data.MediaType;
@@ -21,7 +21,7 @@ import com.redhat.tools.nexus.capture.store.CaptureStore;
 import com.redhat.tools.nexus.capture.store.CaptureStoreException;
 import com.redhat.tools.nexus.protocol.ProtocolConstants;
 import com.redhat.tools.nexus.response.WebResponseSerializer;
-import com.redhat.tools.nexus.response.template.TemplateFormatter;
+import com.redhat.tools.nexus.template.TemplateFormatter;
 
 import javax.inject.Inject;
 import javax.inject.Named;
@@ -85,7 +85,7 @@ public class CaptureLogResource
         Object data = null;
         try
         {
-            final Date date = parseUrlDate( dateValue );
+            final Date date = parseDate( dateValue );
 
             final CaptureSessionRef ref = new CaptureSessionRef( user, buildTag, date );
 

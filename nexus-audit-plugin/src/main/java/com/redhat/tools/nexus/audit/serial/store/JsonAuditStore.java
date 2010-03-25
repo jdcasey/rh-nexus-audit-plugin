@@ -58,30 +58,6 @@ public class JsonAuditStore
         return getAuditInformation( auditFile );
     }
 
-    private AuditInfo getAuditInformation( final File auditFile )
-        throws AuditStoreException
-    {
-        if ( auditFile.exists() && auditFile.isFile() && auditFile.canRead() )
-        {
-            FileReader reader = null;
-            try
-            {
-                reader = new FileReader( auditFile );
-                return getGson().fromJson( reader, AuditInfo.class );
-            }
-            catch ( final FileNotFoundException e )
-            {
-                throw new AuditStoreException( "Cannot open audit file: %s\nReason: %s", e, auditFile, e.getMessage() );
-            }
-            finally
-            {
-                IOUtils.closeQuietly( reader );
-            }
-        }
-
-        return null;
-    }
-
     @Override
     public boolean saveAuditInformation( final AuditInfo auditInfo )
         throws AuditStoreException
@@ -123,6 +99,30 @@ public class JsonAuditStore
     protected String getAuditFileExtension()
     {
         return "json";
+    }
+
+    private AuditInfo getAuditInformation( final File auditFile )
+        throws AuditStoreException
+    {
+        if ( auditFile.exists() && auditFile.isFile() && auditFile.canRead() )
+        {
+            FileReader reader = null;
+            try
+            {
+                reader = new FileReader( auditFile );
+                return getGson().fromJson( reader, AuditInfo.class );
+            }
+            catch ( final FileNotFoundException e )
+            {
+                throw new AuditStoreException( "Cannot open audit file: %s\nReason: %s", e, auditFile, e.getMessage() );
+            }
+            finally
+            {
+                IOUtils.closeQuietly( reader );
+            }
+        }
+
+        return null;
     }
 
 }

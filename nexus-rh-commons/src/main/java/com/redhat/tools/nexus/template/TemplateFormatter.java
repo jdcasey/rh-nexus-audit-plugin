@@ -1,4 +1,4 @@
-package com.redhat.tools.nexus.response.template;
+package com.redhat.tools.nexus.template;
 
 import org.sonatype.plugin.Managed;
 

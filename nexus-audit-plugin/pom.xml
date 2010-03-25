@@ -105,7 +105,7 @@
       <!-- #ITSet BEGINS -->
       <!-- Nexus IT setup (dependencies below are needed if you have extensive ITs and you want to use Nexus Environment) -->
       <!-- There are dependencies connected to this set of plugin, see above! -->
-      <!-- <plugin>
+      <plugin>
         <groupId>org.sonatype.plugins</groupId>
         <artifactId>nexus-test-environment-maven-plugin</artifactId>
       </plugin>
@@ -113,7 +113,7 @@
       <plugin>
         <groupId>org.codehaus.mojo</groupId>
         <artifactId>failsafe-maven-plugin</artifactId>
-      </plugin> -->
+      </plugin>
       <!-- #ITSet ENDS -->
 
     </plugins>

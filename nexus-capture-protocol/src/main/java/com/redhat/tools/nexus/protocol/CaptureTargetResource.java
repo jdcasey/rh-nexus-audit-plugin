@@ -1,6 +1,6 @@
 package com.redhat.tools.nexus.protocol;
 
-import static com.redhat.tools.nexus.request.PathUtils.buildUri;
+import static com.redhat.tools.nexus.protocol.ProtocolUtils.buildUri;
 
 import org.sonatype.nexus.artifact.Gav;
 

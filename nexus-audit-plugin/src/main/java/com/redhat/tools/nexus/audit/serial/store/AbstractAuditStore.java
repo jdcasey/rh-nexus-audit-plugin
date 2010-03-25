@@ -207,7 +207,7 @@ public abstract class AbstractAuditStore
             final SnapshotArtifactRepositoryMetadata m = new SnapshotArtifactRepositoryMetadata( a );
 
             final String mPath = repoLayout.pathOfRemoteRepositoryMetadata( m );
-            final File mappingFile = getStoreFile( repoId, mPath );
+            final File mappingFile = getResolvedStoreFile( repoId, mPath );
 
             Reader reader = null;
             String version = null;

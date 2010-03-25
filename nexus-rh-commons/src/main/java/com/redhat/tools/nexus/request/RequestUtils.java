@@ -13,14 +13,23 @@ import org.slf4j.LoggerFactory;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.Date;
+import java.util.List;
 
 public final class RequestUtils
 {
 
     public static final String FULL_DATE_FORMAT = "yyyy-MM-dd+HH-mm-ssZ";
 
-    private static final String[] URL_DATE_FORMATs = { FULL_DATE_FORMAT, "yyyy-MM-dd+HH-mm-ss", "yyyy-MM-dd" };
+    // NOTE: Restlet Reference.getQueryAsForm() renders any date string that contains a '+' to one that uses ' ' in its place.
+    // To work around this, we need to include both formats in this array, to cope with both cases coming from Restlet and those
+    // that don't.
+    private static final String[] URL_DATE_FORMATs =
+        { FULL_DATE_FORMAT, "yyyy-MM-dd HH-mm-ssZ", "yyyy-MM-dd+HH-mm-ss", "yyyy-MM-dd HH-mm-ss", "yyyy-MM-dd",
+            "MMM dd, yyyy hh:mm:ss a" };
 
     public static final String PARAM_MODE = "mode";
 
@@ -36,7 +45,11 @@ public final class RequestUtils
         throws ResourceException
     {
         final Object val = request.getAttributes().get( param );
-        logger.info( String.format( "%s attribute value: %s", param, val ) );
+
+        if ( logger.isDebugEnabled() )
+        {
+            logger.debug( String.format( "%s attribute value: %s", param, val ) );
+        }
 
         final String value = val == null ? null : val.toString();
         if ( value == null || value.trim().length() < 1 )
@@ -54,7 +67,7 @@ public final class RequestUtils
         try
         {
             final String value = query( request ).getFirstValue( param );
-            before = parseUrlDate( value );
+            before = parseDate( value );
         }
         catch ( final ParseException e )
         {
@@ -63,9 +76,11 @@ public final class RequestUtils
                                                                                                       .getName(),
                                e.getMessage() );
 
-            logger.error( message, e );
-
-            e.printStackTrace();
+            if ( logger.isDebugEnabled() )
+            {
+                logger.debug( message, e );
+                e.printStackTrace();
+            }
 
             throw new ResourceException( Status.CLIENT_ERROR_BAD_REQUEST, message );
         }
@@ -73,7 +88,12 @@ public final class RequestUtils
         return before;
     }
 
-    public static Date parseUrlDate( final String value )
+    public static String formatUrlDate( final Date date )
+    {
+        return new SimpleDateFormat( FULL_DATE_FORMAT ).format( date );
+    }
+
+    public static Date parseDate( final String value )
         throws ParseException
     {
         Date d = null;
@@ -86,10 +106,17 @@ public final class RequestUtils
                 try
                 {
                     d = new SimpleDateFormat( format ).parse( value );
+                    originalError = null;
                     break;
                 }
                 catch ( final ParseException e )
                 {
+                    if ( logger.isDebugEnabled() )
+                    {
+                        logger.debug( String.format( "Failed to parse date: '%s' using format: '%s'\nReason: %s",
+                                                     value, format, e.getMessage() ) );
+                    }
+
                     if ( originalError == null )
                     {
                         originalError = e;
@@ -133,7 +160,7 @@ public final class RequestUtils
 
         final Form query = query( request );
 
-        String fmt = query.getFirstValue( PARAM_FORMAT );
+        final String fmt = query.getFirstValue( PARAM_FORMAT );
         OutputFormat format = OutputFormat.find( fmt );
 
         if ( format != null )
@@ -149,12 +176,35 @@ public final class RequestUtils
         if ( mt == null )
         {
             final Form headers = headers( request );
-            fmt = headers.getFirstValue( "Accept" );
-            format = OutputFormat.find( fmt );
+            final String[] formatHeaders = headers.getFirstValue( "Accept" ).split( "," );
 
-            if ( mt == null && format != null )
+            List<String> formats = new ArrayList<String>( Arrays.asList( formatHeaders ) );
+            Collections.reverse( formats );
+
+            final List<String> tmp = new ArrayList<String>( formats.size() );
+            for ( final String f : formats )
             {
-                mt = format.mediaType();
+                final int idx = f.indexOf( ';' );
+                if ( idx > 0 )
+                {
+                    tmp.add( f.substring( 0, idx - 1 ).trim() );
+                }
+                else
+                {
+                    tmp.add( f.trim() );
+                }
+            }
+            formats = tmp;
+
+            for ( final String f : formats )
+            {
+                format = OutputFormat.find( f );
+
+                if ( format != null )
+                {
+                    mt = format.mediaType();
+                    break;
+                }
             }
         }
 
@@ -166,9 +216,7 @@ public final class RequestUtils
         final Form query = query( request );
         final String mode = query.getFirstValue( PARAM_MODE );
 
-        final RequestMode m = RequestMode.find( mode );
-
-        return m == null ? RequestMode.DEFAULT : m;
+        return RequestMode.find( mode );
     }
 
     public static Form headers( final Request request )

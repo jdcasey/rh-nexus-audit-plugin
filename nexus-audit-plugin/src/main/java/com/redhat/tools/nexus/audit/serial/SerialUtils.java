@@ -17,8 +17,8 @@
 
 package com.redhat.tools.nexus.audit.serial;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import static com.redhat.tools.nexus.request.RequestUtils.parseDate;
+
 import org.sonatype.nexus.artifact.Gav;
 import org.sonatype.nexus.artifact.IllegalArtifactCoordinateException;
 
@@ -35,6 +35,8 @@ import com.google.gson.JsonPrimitive;
 import com.google.gson.JsonSerializationContext;
 import com.google.gson.JsonSerializer;
 import com.google.gson.reflect.TypeToken;
+import com.redhat.tools.nexus.audit.model.AuditInfo;
+import com.redhat.tools.nexus.audit.protocol.AuditInfoResponse;
 import com.thoughtworks.xstream.XStream;
 import com.thoughtworks.xstream.converters.Converter;
 import com.thoughtworks.xstream.converters.MarshallingContext;
@@ -47,9 +49,7 @@ import java.io.IOException;
 import java.lang.reflect.Type;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
 import java.util.Date;
-import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 
@@ -64,29 +64,18 @@ public final class SerialUtils
 
     private static final String DATE_FORMAT = "yyyy-MM-dd HH:mm:ss Z";
 
-    private static final String[] PARSABLE_DATE_FORMATS = { FULL_DATE_FORMAT, DATE_FORMAT, "MMM dd, yyyy hh:mm:ss a" };
-
     public static final Date UNKNOWN_DATE = new Date( 0 );
 
     private static final String UNKNOWN_DATE_VALUE = "unknown";
-
-    private static final Logger logger = LoggerFactory.getLogger( SerialUtils.class );
 
     private static final TypeToken<TreeMap<Date, File>> DATE_TO_FILE_MAP_TT = new TypeToken<TreeMap<Date, File>>()
     {
     };
 
-    public static String formatUrlDate( final Date date )
-    {
-        return new SimpleDateFormat( FULL_DATE_FORMAT ).format( date );
-    }
-
     public static Gson getGson()
     {
         return new GsonBuilder().setPrettyPrinting()
-                                .registerTypeAdapter(
-                                                      Date.class,
-                                                      new CustomFormatDateConverter( DATE_FORMAT, PARSABLE_DATE_FORMATS ) )
+                                .registerTypeAdapter( Date.class, new CustomFormatDateConverter( DATE_FORMAT ) )
                                 .registerTypeAdapter( Gav.class, new GavCreator() )
                                 .registerTypeAdapter( DATE_TO_FILE_MAP_TT.getType(),
                                                       new DateToFileMapTypeAdapter( DATE_FORMAT, "session" ) )
@@ -97,7 +86,8 @@ public final class SerialUtils
     {
         final XStream xs = createXStream();
 
-        // REST resource DTOs
+        xs.processAnnotations( AuditInfo.class );
+        xs.processAnnotations( AuditInfoResponse.class );
 
         return xs;
     }
@@ -107,12 +97,12 @@ public final class SerialUtils
         final XStream xs = new XStream();
 
         xs.setMode( XStream.NO_REFERENCES );
-        xs.registerConverter( new CustomFormatDateConverter( DATE_FORMAT, PARSABLE_DATE_FORMATS ) );
+        xs.registerConverter( new CustomFormatDateConverter( DATE_FORMAT ) );
 
         return xs;
     }
 
-    public static final class GavCreator
+    private static final class GavCreator
         implements InstanceCreator<Gav>
     {
         public Gav createInstance( final Type type )
@@ -130,7 +120,7 @@ public final class SerialUtils
 
     }
 
-    public static final class DateToFileMapTypeAdapter
+    private static final class DateToFileMapTypeAdapter
         implements JsonSerializer<TreeMap<Date, File>>, JsonDeserializer<TreeMap<Date, File>>,
         InstanceCreator<TreeMap<Date, File>>, Converter
     {
@@ -309,18 +299,15 @@ public final class SerialUtils
 
     }
 
-    public static final class CustomFormatDateConverter
-        implements JsonSerializer<Date>, JsonDeserializer<Date>, /*InstanceCreator<Date>,*/Converter
+    private static final class CustomFormatDateConverter
+        implements JsonSerializer<Date>, JsonDeserializer<Date>, Converter
     {
 
         private final String format;
 
-        private final String[] parsableDateFormats;
-
-        public CustomFormatDateConverter( final String format, final String[] parsableDateFormats )
+        public CustomFormatDateConverter( final String format )
         {
             this.format = format;
-            this.parsableDateFormats = parsableDateFormats;
         }
 
         public void marshal( final Object source, final HierarchicalStreamWriter writer,
@@ -352,20 +339,13 @@ public final class SerialUtils
             }
             else
             {
-                for ( final String fmt : parsableDateFormats )
+                try
                 {
-                    try
-                    {
-                        return new SimpleDateFormat( fmt ).parse( value );
-                    }
-                    catch ( final ParseException e )
-                    {
-                        if ( logger.isDebugEnabled() )
-                        {
-                            logger.debug( String.format( "Failed to parse date: '%s' using format: '%s'\nReason: %s",
-                                                         value, fmt, e.getMessage() ) );
-                        }
-                    }
+                    return parseDate( value );
+                }
+                catch ( final ParseException e )
+                {
+                    // logged in parseDate, above
                 }
 
                 throw new IllegalArgumentException( String.format( "Cannot parse date: '%s'", value ) );
@@ -398,58 +378,7 @@ public final class SerialUtils
             final String value = json.getAsJsonPrimitive().getAsString();
             return doUnFormat( value );
         }
-        //
-        //        @Override
-        //        public Date createInstance( final Type type )
-        //        {
-        //            // TODO Implement InstanceCreator<Date>.createInstance
-        //            throw new UnsupportedOperationException( "Not Implemented." );
-        //        }
 
     }
 
-    public static final class StringListConverter
-        implements Converter
-    {
-        private final String itemName;
-
-        public StringListConverter( final String itemName )
-        {
-            this.itemName = itemName;
-        }
-
-        @SuppressWarnings( "unchecked" )
-        public void marshal( final Object source, final HierarchicalStreamWriter writer,
-                             final MarshallingContext context )
-        {
-            final List<String> values = (List<String>) source;
-
-            for ( final String value : values )
-            {
-                writer.startNode( itemName );
-                writer.setValue( value );
-                writer.endNode();
-            }
-        }
-
-        public Object unmarshal( final HierarchicalStreamReader reader, final UnmarshallingContext context )
-        {
-            final List<String> result = new ArrayList<String>();
-
-            reader.moveDown();
-            while ( reader.hasMoreChildren() )
-            {
-                result.add( reader.getValue() );
-            }
-            reader.moveUp();
-
-            return result;
-        }
-
-        @SuppressWarnings( "unchecked" )
-        public boolean canConvert( final Class type )
-        {
-            return List.class.isAssignableFrom( type );
-        }
-    }
 }

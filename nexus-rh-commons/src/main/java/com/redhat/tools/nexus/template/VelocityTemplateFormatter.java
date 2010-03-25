@@ -1,4 +1,4 @@
-package com.redhat.tools.nexus.response.template;
+package com.redhat.tools.nexus.template;
 
 import static com.redhat.tools.nexus.request.PathUtils.joinFile;
 import static com.redhat.tools.nexus.request.PathUtils.joinPath;

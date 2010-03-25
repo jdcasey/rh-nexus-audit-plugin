@@ -198,27 +198,6 @@ public class JsonCaptureStore
         return session;
     }
 
-    private CaptureSession readSession( final File sessionFile )
-        throws CaptureStoreException
-    {
-        FileReader reader = null;
-        try
-        {
-            reader = new FileReader( sessionFile );
-
-            return getGson().fromJson( reader, CaptureSession.class );
-        }
-        catch ( final IOException e )
-        {
-            throw new CaptureStoreException( "Failed to read capture-session from disk."
-                + "\nFile Path: {0}\nReason: {1}", e, sessionFile.getAbsolutePath(), e.getMessage() );
-        }
-        finally
-        {
-            IOUtil.close( reader );
-        }
-    }
-
     public void logResolved( final String user, final String buildTag, final String captureSource,
                              final List<String> processedRepositories, final String path, final StorageItem item )
         throws CaptureStoreException
@@ -239,6 +218,27 @@ public class JsonCaptureStore
         final Gav gav = toGav( path );
         session.add( new CaptureTarget( processedRepositories, path, gav ) );
         output( session );
+    }
+
+    private CaptureSession readSession( final File sessionFile )
+        throws CaptureStoreException
+    {
+        FileReader reader = null;
+        try
+        {
+            reader = new FileReader( sessionFile );
+
+            return getGson().fromJson( reader, CaptureSession.class );
+        }
+        catch ( final IOException e )
+        {
+            throw new CaptureStoreException( "Failed to read capture-session from disk."
+                + "\nFile Path: {0}\nReason: {1}", e, sessionFile.getAbsolutePath(), e.getMessage() );
+        }
+        finally
+        {
+            IOUtil.close( reader );
+        }
     }
 
     private synchronized CaptureSession getSession( final String user, final String buildTag,

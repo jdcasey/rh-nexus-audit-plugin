@@ -36,11 +36,13 @@
     <dependency>
         <groupId>org.restlet</groupId>
         <artifactId>org.restlet</artifactId>
+        <optional>true</optional>
     </dependency>
     <dependency>
       <groupId>${project.groupId}</groupId>
       <artifactId>nexus-rh-commons</artifactId>
       <version>${project.version}</version>
+      <optional>true</optional>
     </dependency>
   </dependencies>
 </project>

@@ -1,15 +1,6 @@
 package com.redhat.tools.nexus.protocol;
 
-import java.io.File;
-import java.io.IOException;
-import java.lang.reflect.Type;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
-import java.util.TreeMap;
+import static org.codehaus.plexus.util.StringUtils.isNotEmpty;
 
 import org.sonatype.nexus.artifact.Gav;
 import org.sonatype.nexus.artifact.IllegalArtifactCoordinateException;
@@ -33,10 +24,19 @@ import com.thoughtworks.xstream.converters.UnmarshallingContext;
 import com.thoughtworks.xstream.io.HierarchicalStreamReader;
 import com.thoughtworks.xstream.io.HierarchicalStreamWriter;
 
+import java.io.File;
+import java.io.IOException;
+import java.lang.reflect.Type;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+import java.util.Map;
+import java.util.TreeMap;
+
 public final class ProtocolUtils
 {
-
-    private static final String DATE_FORMAT = "yyyy-MM-dd HH:mm:ss Z";
 
     private static final TypeToken<TreeMap<Date, File>> DATE_TO_FILE_MAP_TT = new TypeToken<TreeMap<Date, File>>()
     {
@@ -46,17 +46,67 @@ public final class ProtocolUtils
     {
     }
 
+    /**
+     * Provided here in addition to {@link com.redhat.tools.nexus.request.PathUtils#buildUri(String, String...)} in order to allow
+     * decoupling this protocol jar from rh-commons, which brings in restlet and other heavy deps.
+     */
+    public static String buildUri( final String applicationUrl, final String... parts )
+    {
+        if ( applicationUrl == null )
+        {
+            return null;
+        }
+
+        final StringBuilder sb = new StringBuilder();
+        if ( isNotEmpty( applicationUrl ) )
+        {
+            if ( applicationUrl.endsWith( "/" ) )
+            {
+                sb.append( applicationUrl.substring( 0, applicationUrl.length() - 1 ) );
+            }
+            else
+            {
+                sb.append( applicationUrl );
+            }
+        }
+        else
+        {
+            sb.append( '/' );
+        }
+
+        for ( final String part : parts )
+        {
+            if ( isNotEmpty( part ) )
+            {
+                if ( sb.charAt( sb.length() - 1 ) != '/' && part.charAt( 0 ) != '/' )
+                {
+                    sb.append( '/' );
+                }
+
+                sb.append( part );
+            }
+        }
+
+        return sb.length() == 0 ? null : sb.toString();
+    }
+
+    /**
+     * Provided here in addition to {@link com.redhat.tools.nexus.request.RequestUtils#formatUrlDate(Date)} in order to allow
+     * decoupling this protocol jar from rh-commons, which brings in restlet and other heavy deps.
+     */
     public static String formatUrlDate( final Date date )
     {
-        return new SimpleDateFormat( ProtocolConstants.FULL_DATE_FORMAT ).format( date );
+        return date == null ? null : new SimpleDateFormat( ProtocolConstants.FULL_DATE_FORMAT ).format( date );
     }
 
     public static Gson getGson()
     {
         return new GsonBuilder().setPrettyPrinting()
                                 .registerTypeAdapter( Gav.class, new GavCreator() )
-                                .registerTypeAdapter( DATE_TO_FILE_MAP_TT.getType(),
-                                                      new DateToFileMapTypeAdapter( DATE_FORMAT, "session" ) )
+                                .registerTypeAdapter(
+                                                      DATE_TO_FILE_MAP_TT.getType(),
+                                                      new DateToFileMapTypeAdapter( ProtocolConstants.FULL_DATE_FORMAT,
+                                                                                    "session" ) )
                                 .create();
     }
 
@@ -80,7 +130,7 @@ public final class ProtocolUtils
         final XStream xs = new XStream();
 
         xs.setMode( XStream.NO_REFERENCES );
-        xs.registerConverter( new CustomFormatDateConverter( DATE_FORMAT ) );
+        xs.registerConverter( new CustomFormatDateConverter( ProtocolConstants.FULL_DATE_FORMAT ) );
 
         return xs;
     }
@@ -97,7 +147,7 @@ public final class ProtocolUtils
             catch ( final IllegalArtifactCoordinateException e )
             {
                 throw new IllegalStateException( String.format( "Failed to create deserialization target: GAV."
-                                + "\nReason: %1$s", e.getMessage() ), e );
+                    + "\nReason: %1$s", e.getMessage() ), e );
             }
         }
 
@@ -240,10 +290,10 @@ public final class ProtocolUtils
                         }
                         catch ( final ParseException e )
                         {
-                            throw new IllegalArgumentException( String.format(
+                            throw new IllegalArgumentException(
+                                                                String.format(
                                                                                "Cannot parse date: '%s' using format: '%s'",
-                                                                               value, format ),
-                                                                e );
+                                                                               value, format ), e );
                         }
                     }
                     else if ( reader.getNodeName().equals( FILE_PROP ) )

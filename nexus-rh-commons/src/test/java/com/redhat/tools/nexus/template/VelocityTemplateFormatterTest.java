@@ -1,9 +1,13 @@
-package com.redhat.tools.nexus.response.template;
+package com.redhat.tools.nexus.template;
 
 import static org.junit.Assert.assertEquals;
 
 import org.apache.velocity.app.VelocityEngine;
 import org.junit.Test;
+
+import com.redhat.tools.nexus.template.TemplateException;
+import com.redhat.tools.nexus.template.TemplateFormatter;
+import com.redhat.tools.nexus.template.VelocityTemplateFormatter;
 
 import edu.emory.mathcs.backport.java.util.Collections;
 
