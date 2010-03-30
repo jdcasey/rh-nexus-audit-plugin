@@ -21,7 +21,7 @@
   <parent>
     <groupId>com.redhat.tools.nexus.maven</groupId>
     <artifactId>nexus-rh-maven-tooling</artifactId>
-    <version>1.0-SNAPSHOT</version>
+    <version>1.0</version>
   </parent>
   
   <artifactId>nexus-rh-maven-plugin</artifactId>
@@ -34,6 +34,7 @@
       <groupId>org.apache.maven</groupId>
       <artifactId>maven-plugin-api</artifactId>
       <version>2.1.0</version>
+      <scope>provided</scope>
     </dependency>
     <dependency>
 	   	<groupId>org.apache.maven.plugins</groupId>
@@ -243,12 +244,5 @@
       </build>
     </profile>
   </profiles>
-  
-  <distributionManagement>
-    <site>
-      <id>sonatype.org-sites</id>
-      <url>${pluginsSiteBaseUrl}/${project.parent.artifactId}/${project.artifactId}</url>
-    </site>
-  </distributionManagement>
   
 </project>

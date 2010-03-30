@@ -5,11 +5,12 @@
   <parent>
     <groupId>com.redhat.tools.nexus</groupId>
     <artifactId>nexus-at-redhat</artifactId>
-    <version>1.0-SNAPSHOT</version>
+    <version>1</version>
   </parent>
   
   <groupId>com.redhat.tools.maven</groupId>
   <artifactId>capture-maven-plugin</artifactId>
+  <version>1.0</version>
   <packaging>maven-plugin</packaging>
   
   <name>Nexus:Capture Maven Plugin</name>
@@ -43,7 +44,7 @@
     <dependency>
     	<groupId>com.redhat.tools.nexus</groupId>
     	<artifactId>nexus-capture-protocol</artifactId>
-    	<version>${project.version}</version>
+    	<version>1.0</version>
     </dependency>
     <dependency>
    	  <groupId>org.sonatype.nexus</groupId>

@@ -7,10 +7,11 @@
   <parent>
     <groupId>com.redhat.tools.nexus</groupId>
     <artifactId>nexus-at-redhat</artifactId>
-    <version>1.0-SNAPSHOT</version>
+    <version>1</version>
   </parent>
   
   <artifactId>nexus-capture-plugin</artifactId>
+  <version>1.0</version>
   <name>Capture Plugin</name>
 
   <packaging>nexus-plugin</packaging>
@@ -69,12 +70,12 @@
     <dependency>
     	<groupId>${project.groupId}</groupId>
     	<artifactId>nexus-capture-protocol</artifactId>
-    	<version>${project.version}</version>
+    	<version>1.0</version>
     </dependency>
     <dependency>
       <groupId>${project.groupId}</groupId>
   	  <artifactId>nexus-rh-commons</artifactId>
-      <version>${project.version}</version>
+      <version>1.0</version>
     </dependency>
     <dependency>
     	<groupId>com.google.code.gson</groupId>

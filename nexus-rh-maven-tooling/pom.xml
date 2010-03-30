@@ -26,7 +26,7 @@
   
   <groupId>com.redhat.tools.nexus.maven</groupId>
   <artifactId>nexus-rh-maven-tooling</artifactId>
-  <version>1.0-SNAPSHOT</version>
+  <version>1.0</version>
   
   <packaging>pom</packaging>
   <name>Red Hat Nexus Maven Tooling</name>
