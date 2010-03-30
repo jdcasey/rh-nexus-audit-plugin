@@ -69,9 +69,9 @@ class AuditInfo
             puts "In: #{Dir.pwd}"
             `svn info #{filename}`.each_line do |line|
               part = line.chomp
-              if ( part =~ /.*Last Changed Author:\s+([-_0-9a-zA-Z]+).*/ )
+              if ( part =~ /.*Last Changed Author:\s+([-_+0-9a-zA-Z]+).*/ )
                 info.owner = $1
-              elsif ( part =~ /.*Last Changed Date:\s+([-:0-9]+ [-:0-9]+ [-:0-9]+).*/ )
+              elsif ( part =~ /.*Last Changed Date:\s+([-:+0-9]+ [-:+0-9]+ [-:+0-9]+).*/ )
                 info.date = $1
               end
             end
