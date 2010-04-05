@@ -8,6 +8,7 @@ import org.sonatype.nexus.artifact.IllegalArtifactCoordinateException;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.InstanceCreator;
+import com.redhat.tools.nexus.serial.CustomFormatDateConverter;
 import com.thoughtworks.xstream.XStream;
 import com.thoughtworks.xstream.converters.Converter;
 import com.thoughtworks.xstream.converters.MarshallingContext;
@@ -16,7 +17,6 @@ import com.thoughtworks.xstream.io.HierarchicalStreamReader;
 import com.thoughtworks.xstream.io.HierarchicalStreamWriter;
 
 import java.lang.reflect.Type;
-import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -126,45 +126,6 @@ public final class ProtocolUtils
                 throw new IllegalStateException( String.format( "Failed to create deserialization target: GAV."
                     + "\nReason: %1$s", e.getMessage() ), e );
             }
-        }
-
-    }
-
-    public static final class CustomFormatDateConverter
-        implements Converter
-    {
-
-        private final String format;
-
-        public CustomFormatDateConverter( final String format )
-        {
-            this.format = format;
-        }
-
-        public void marshal( final Object source, final HierarchicalStreamWriter writer,
-                             final MarshallingContext context )
-        {
-            writer.setValue( new SimpleDateFormat( format ).format( (Date) source ) );
-        }
-
-        public Object unmarshal( final HierarchicalStreamReader reader, final UnmarshallingContext context )
-        {
-            final String value = reader.getValue();
-            try
-            {
-                return new SimpleDateFormat( format ).parseObject( value );
-            }
-            catch ( final ParseException e )
-            {
-                throw new IllegalArgumentException( String.format( "Cannot parse date: '%s' using format: '%s'", value,
-                                                                   format ), e );
-            }
-        }
-
-        @SuppressWarnings( "unchecked" )
-        public boolean canConvert( final Class type )
-        {
-            return Date.class.isAssignableFrom( type );
         }
 
     }

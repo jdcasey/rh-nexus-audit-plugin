@@ -6,9 +6,10 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.reflect.TypeToken;
 import com.redhat.tools.nexus.capture.config.CaptureConfigModel;
-import com.redhat.tools.nexus.protocol.DateToFileMapTypeAdapter;
 import com.redhat.tools.nexus.protocol.ProtocolUtils;
 import com.redhat.tools.nexus.protocol.ProtocolUtils.GavCreator;
+import com.redhat.tools.nexus.serial.CustomFormatDateConverter;
+import com.redhat.tools.nexus.serial.DateToFileMapTypeAdapter;
 import com.thoughtworks.xstream.XStream;
 
 import java.io.File;
@@ -94,7 +95,7 @@ public final class ModelSerializationUtils
         final XStream xs = new XStream();
 
         xs.setMode( XStream.NO_REFERENCES );
-        xs.registerConverter( new ProtocolUtils.CustomFormatDateConverter( DATE_FORMAT ) );
+        xs.registerConverter( new CustomFormatDateConverter( DATE_FORMAT ) );
 
         return xs;
     }
