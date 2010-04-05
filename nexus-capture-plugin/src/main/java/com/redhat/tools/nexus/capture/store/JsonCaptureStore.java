@@ -337,6 +337,7 @@ public class JsonCaptureStore
         throws IOException
     {
         final File catalogFile = new File( workDir(), CATALOG_FILENAME );
+        logger.info( String.format( "\n\n\n\nReading catalogs from file: %s", catalogFile ) );
         if ( catalogFile.exists() && catalogFile.length() > 0 )
         {
             FileReader reader = null;
@@ -361,6 +362,10 @@ public class JsonCaptureStore
             {
                 IOUtil.close( reader );
             }
+        }
+        else
+        {
+            logger.info( "Catalogs file not available." );
         }
     }
 
