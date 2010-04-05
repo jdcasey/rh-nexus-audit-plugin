@@ -54,7 +54,7 @@ public class ModelloCaptureConfiguration
     }
 
     @Override
-    public void save()
+    public synchronized void save()
         throws InvalidConfigurationException
     {
         if ( configModel == null )
@@ -96,7 +96,7 @@ public class ModelloCaptureConfiguration
         save();
     }
 
-    private void read()
+    private synchronized void read()
         throws InvalidConfigurationException
     {
         if ( configModel != null )

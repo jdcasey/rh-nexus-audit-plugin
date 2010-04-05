@@ -102,10 +102,8 @@ public class CaptureResolverResource
 
         Object result = null;
 
-        if ( logger.isDebugEnabled() )
-        {
-            logger.debug( "AUDIT REPO: Using build-tag: '{}' and capture-source: '{}'", buildTag, capture );
-        }
+        logger.info( String.format( "CAPTURE REPO: Using user: '%s' build-tag: '%s' and capture-source: '%s'", user,
+                                    buildTag, capture ) );
 
         try
         {
@@ -144,11 +142,8 @@ public class CaptureResolverResource
                     }
                     catch ( final AuthorizationException authzEx )
                     {
-                        if ( logger.isDebugEnabled() )
-                        {
-                            logger.debug( "User: '" + user
-                                + "' does not have permission to resolve dependencies from capture source." );
-                        }
+                        logger.info( "User: '" + user
+                            + "' does not have permission to resolve dependencies from capture source." );
 
                         // NOTE: Not recording this...
                         result = handleNotFound( e, context, request, response, variant, req );
