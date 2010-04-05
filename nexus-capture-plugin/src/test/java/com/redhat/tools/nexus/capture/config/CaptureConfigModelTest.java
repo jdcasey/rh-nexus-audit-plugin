@@ -1,40 +1,36 @@
 package com.redhat.tools.nexus.capture.config;
 
-import static com.redhat.tools.nexus.capture.model.ModelSerializationUtils.getGson;
-import static com.redhat.tools.nexus.capture.model.ModelSerializationUtils.getXStreamForConfig;
 import static junit.framework.Assert.assertEquals;
 
+import org.codehaus.plexus.util.xml.pull.XmlPullParserException;
 import org.junit.Test;
 
-import com.redhat.tools.nexus.capture.config.CaptureConfigModel;
+import com.redhat.tools.nexus.capture.config.model.CaptureConfigModel;
+import com.redhat.tools.nexus.capture.config.model.io.xpp3.CaptureConfigXpp3Reader;
+import com.redhat.tools.nexus.capture.config.model.io.xpp3.CaptureConfigXpp3Writer;
+
+import java.io.IOException;
+import java.io.StringReader;
+import java.io.StringWriter;
 
 public class CaptureConfigModelTest
 {
 
     @Test
-    public void roundTripInJSON()
+    public void roundTripInModello()
+        throws IOException, XmlPullParserException
     {
-        final CaptureConfigModel model = new CaptureConfigModel().setCaptureSourceRepoId( "public" );
-        final String json = getGson().toJson( model );
+        final CaptureConfigModel model = new CaptureConfigModel();
+        model.setCaptureSource( "public" );
 
-        System.out.println( json );
+        final StringWriter sw = new StringWriter();
+        new CaptureConfigXpp3Writer().write( sw, model );
 
-        final CaptureConfigModel modelResult = getGson().fromJson( json, CaptureConfigModel.class );
+        System.out.println( sw.toString() );
 
-        assertEquals( model.getCaptureSourceRepoId(), modelResult.getCaptureSourceRepoId() );
-    }
+        final CaptureConfigModel modelResult = new CaptureConfigXpp3Reader().read( new StringReader( sw.toString() ) );
 
-    @Test
-    public void roundTripInXML()
-    {
-        final CaptureConfigModel model = new CaptureConfigModel().setCaptureSourceRepoId( "public" );
-        final String xml = getXStreamForConfig().toXML( model );
-
-        System.out.println( xml );
-
-        final CaptureConfigModel modelResult = (CaptureConfigModel) getXStreamForConfig().fromXML( xml );
-
-        assertEquals( model.getCaptureSourceRepoId(), modelResult.getCaptureSourceRepoId() );
+        assertEquals( model.getCaptureSource(), modelResult.getCaptureSource() );
     }
 
 }
