@@ -96,12 +96,18 @@ public final class RequestUtils
     public static Date parseDate( final String value )
         throws ParseException
     {
+        return parseDate( value, URL_DATE_FORMATs );
+    }
+
+    public static Date parseDate( final String value, final String[] formats )
+        throws ParseException
+    {
         Date d = null;
 
         ParseException originalError = null;
         if ( isNotEmpty( value ) )
         {
-            for ( final String format : URL_DATE_FORMATs )
+            for ( final String format : formats )
             {
                 try
                 {

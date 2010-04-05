@@ -1,18 +1,35 @@
 package com.redhat.tools.nexus.capture.model;
 
+import org.sonatype.nexus.artifact.Gav;
+
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.gson.reflect.TypeToken;
+import com.redhat.tools.nexus.capture.config.CaptureConfigModel;
+import com.redhat.tools.nexus.protocol.DateToFileMapTypeAdapter;
+import com.redhat.tools.nexus.protocol.ProtocolUtils;
+import com.redhat.tools.nexus.protocol.ProtocolUtils.GavCreator;
+import com.thoughtworks.xstream.XStream;
+
+import java.io.File;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
-
-import com.google.gson.Gson;
-import com.redhat.tools.nexus.capture.config.CaptureConfigModel;
-import com.redhat.tools.nexus.protocol.ProtocolUtils;
-import com.thoughtworks.xstream.XStream;
+import java.util.TreeMap;
 
 public final class ModelSerializationUtils
 {
 
     private static final String DATE_FORMAT = "yyyy-MM-dd HH:mm:ss Z";
+
+    // NOTE: Restlet Reference.getQueryAsForm() renders any date string that contains a '+' to one that uses ' ' in its place.
+    // To work around this, we need to include both formats in this array, to cope with both cases coming from Restlet and those
+    // that don't.
+    private static final String[] DATE_FORMATS = { DATE_FORMAT };
+
+    private static final TypeToken<TreeMap<Date, File>> DATE_TO_FILE_MAP_TT = new TypeToken<TreeMap<Date, File>>()
+    {
+    };
 
     private ModelSerializationUtils()
     {
@@ -20,7 +37,13 @@ public final class ModelSerializationUtils
 
     public static Gson getGson()
     {
-        return ProtocolUtils.getGson();
+        return new GsonBuilder().setPrettyPrinting()
+                                .registerTypeAdapter( Gav.class, new GavCreator() )
+                                .registerTypeAdapter(
+                                                      DATE_TO_FILE_MAP_TT.getType(),
+                                                      new DateToFileMapTypeAdapter( DATE_FORMAT, DATE_FORMATS,
+                                                                                    "session" ) )
+                                .create();
     }
 
     public static Date normalizeDate( final Date d )
@@ -33,7 +56,7 @@ public final class ModelSerializationUtils
         catch ( final ParseException e )
         {
             throw new IllegalStateException( String.format( "Format-Parse round trip for java.util.Date failed."
-                            + "\nFormat: %s\nDate: %s\nReason: %s", DATE_FORMAT, d, e.getMessage() ), e );
+                + "\nFormat: %s\nDate: %s\nReason: %s", DATE_FORMAT, d, e.getMessage() ), e );
         }
     }
 
@@ -44,8 +67,9 @@ public final class ModelSerializationUtils
         xs.registerLocalConverter( CaptureTarget.class, "processedRepositories",
                                    new ProtocolUtils.StringListConverter( "repository" ) );
 
-        xs.registerLocalConverter( CaptureSessionCatalog.class, "sessions",
-                                   new ProtocolUtils.DateToFileMapTypeAdapter( DATE_FORMAT, "session" ) );
+        xs.registerLocalConverter( CaptureSessionCatalog.class, "sessions", new DateToFileMapTypeAdapter( DATE_FORMAT,
+                                                                                                          DATE_FORMATS,
+                                                                                                          "session" ) );
 
         // Model/Query classes
         xs.processAnnotations( CaptureSession.class );
