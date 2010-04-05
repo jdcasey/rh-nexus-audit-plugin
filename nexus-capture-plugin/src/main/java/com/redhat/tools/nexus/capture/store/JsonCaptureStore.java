@@ -351,6 +351,8 @@ public class JsonCaptureStore
                 {
                     for ( final CaptureSessionCatalog cat : cats )
                     {
+                        logger.info( String.format( "Read from filesystem...catalog for User: %s, Build-Tag: %s",
+                                                    cat.getUser(), cat.getBuildTag() ) );
                         catalogs.put( key( cat.getUser(), cat.getBuildTag() ), cat );
                     }
                 }
