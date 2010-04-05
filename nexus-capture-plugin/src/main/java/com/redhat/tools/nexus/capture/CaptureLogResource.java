@@ -89,6 +89,7 @@ public class CaptureLogResource
 
             final CaptureSessionRef ref = new CaptureSessionRef( user, buildTag, date );
 
+            logger.info( String.format( "Retrieving log for\nUser: %s\nBuild-Tag: %s\nDate: %s", user, buildTag, date ) );
             final CaptureSession session = captureStore.readLog( ref );
             if ( session != null )
             {
@@ -96,6 +97,7 @@ public class CaptureLogResource
             }
             else
             {
+                logger.info( "Log not found." );
                 throw new ResourceException( Status.CLIENT_ERROR_NOT_FOUND );
             }
         }
@@ -123,6 +125,7 @@ public class CaptureLogResource
         }
 
         final MediaType mt = mediaTypeOf( request, variant );
+        logger.info( "Serializing to: " + ( mt == null ? "Unknown" : mt.getName() ) );
         return responseSerializer.serialize( data, mt, request, LOG_TEMPLATE_BASEPATH );
     }
 

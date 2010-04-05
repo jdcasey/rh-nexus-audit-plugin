@@ -28,8 +28,8 @@ public final class RequestUtils
     // To work around this, we need to include both formats in this array, to cope with both cases coming from Restlet and those
     // that don't.
     private static final String[] URL_DATE_FORMATs =
-        { FULL_DATE_FORMAT, "yyyy-MM-dd HH-mm-ssZ", "yyyy-MM-dd+HH-mm-ss", "yyyy-MM-dd HH-mm-ss", "yyyy-MM-dd",
-            "MMM dd, yyyy hh:mm:ss a" };
+        { FULL_DATE_FORMAT, "yyyy-MM-dd HH-mm-ssZ", "yyyy-MM-dd_HH-mm-ssZ", "yyyy-MM-dd+HH-mm-ss",
+            "yyyy-MM-dd HH-mm-ss", "yyyy-MM-dd", "MMM dd, yyyy hh:mm:ss a" };
 
     public static final String PARAM_MODE = "mode";
 

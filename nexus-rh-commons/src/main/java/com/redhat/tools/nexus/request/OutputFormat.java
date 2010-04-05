@@ -58,4 +58,9 @@ public enum OutputFormat
         return null;
     }
 
+    public String mimeType()
+    {
+        return mt.getName();
+    }
+
 }
