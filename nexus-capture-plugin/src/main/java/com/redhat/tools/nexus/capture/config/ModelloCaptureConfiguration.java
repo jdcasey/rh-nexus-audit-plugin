@@ -1,6 +1,5 @@
 package com.redhat.tools.nexus.capture.config;
 
-import static com.redhat.tools.nexus.capture.model.ModelSerializationUtils.getXStreamForConfig;
 import static org.codehaus.plexus.util.IOUtil.close;
 
 import org.slf4j.Logger;
@@ -12,6 +11,8 @@ import org.sonatype.nexus.proxy.repository.GroupRepository;
 import org.sonatype.nexus.proxy.repository.Repository;
 
 import com.redhat.tools.nexus.capture.config.model.CaptureConfigModel;
+import com.redhat.tools.nexus.capture.config.model.io.xpp3.CaptureConfigXpp3Reader;
+import com.redhat.tools.nexus.capture.config.model.io.xpp3.CaptureConfigXpp3Writer;
 
 import javax.inject.Inject;
 import javax.inject.Named;
@@ -25,8 +26,8 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 
-@Named( "xml" )
-public class XMLCaptureConfiguration
+@Named( "modello" )
+public class ModelloCaptureConfiguration
     implements CaptureConfiguration
 {
 
@@ -45,7 +46,7 @@ public class XMLCaptureConfiguration
     @Override
     public CaptureConfigModel getModel()
     {
-        initialize();
+        read();
 
         return configModel;
     }
@@ -54,7 +55,7 @@ public class XMLCaptureConfiguration
     public void save()
         throws InvalidConfigurationException
     {
-        initialize();
+        read();
 
         if ( configModel == null )
         {
@@ -69,7 +70,7 @@ public class XMLCaptureConfiguration
         try
         {
             writer = new FileWriter( configFile );
-            writer.write( getXStreamForConfig().toXML( configModel ) );
+            new CaptureConfigXpp3Writer().write( writer, configModel );
         }
         catch ( final IOException e )
         {
@@ -86,7 +87,7 @@ public class XMLCaptureConfiguration
     public void updateModel( final CaptureConfigModel model )
         throws InvalidConfigurationException
     {
-        initialize();
+        read();
 
         if ( model == null )
         {
@@ -97,7 +98,7 @@ public class XMLCaptureConfiguration
         save();
     }
 
-    private void initialize()
+    private void read()
     {
         if ( configModel != null )
         {
@@ -112,7 +113,7 @@ public class XMLCaptureConfiguration
             try
             {
                 reader = new FileReader( configFile );
-                configModel = (CaptureConfigModel) getXStreamForConfig().fromXML( reader );
+                configModel = new CaptureConfigXpp3Reader().read( reader );
             }
             catch ( final Exception e )
             {

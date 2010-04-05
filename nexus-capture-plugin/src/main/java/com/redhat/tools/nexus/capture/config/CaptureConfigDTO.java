@@ -1,5 +1,6 @@
 package com.redhat.tools.nexus.capture.config;
 
+import com.redhat.tools.nexus.capture.config.model.CaptureConfigModel;
 import com.thoughtworks.xstream.annotations.XStreamAlias;
 
 @XStreamAlias( "captureConfig" )

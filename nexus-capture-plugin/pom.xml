@@ -98,6 +98,20 @@
       </plugin>
       
       <plugin>
+				<groupId>org.codehaus.modello</groupId>
+        <artifactId>modello-maven-plugin</artifactId>
+        <configuration>
+					<version>1.0.1</version>
+					<models>
+						<model>src/main/mdo/capture-config.xml</model>
+					</models>
+					<packagedVersions>
+						<packagedVersion>1.0.0</packagedVersion>
+					</packagedVersions>
+				</configuration>
+			</plugin>
+      
+      <plugin>
         <groupId>net.sf.alchim</groupId>
         <artifactId>yuicompressor-maven-plugin</artifactId>
         <configuration>

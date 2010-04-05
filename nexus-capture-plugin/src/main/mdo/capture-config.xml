@@ -1,0 +1,53 @@
+<model xsd.namespace="http://www.sonatype.org/xsd/nexus-lvo-plugin-1.0.0" xsd.target-namespace="http://www.sonatype.org/xsd/nexus-lvo-plugin-1.0.0">
+
+  <id>capture</id>
+
+  <name>CaptureConfig</name>
+
+  <description>
+        <![CDATA[
+        <p>Nexus Capture Plugin Configuration.</p>
+        ]]>
+  </description>
+
+  <defaults>
+    <default>
+      <key>package</key>
+      <value>com.redhat.tools.nexus.capture.config.model</value>
+    </default>
+  </defaults>
+
+  <classes>
+    <class rootElement="true" xml.tagName="captureConfig">
+      <name>CaptureConfigModel</name>
+      <version>1.0.0+</version>
+      <description>The root element of Nexus Capture Plugin configuration.</description>
+      <fields>
+        <field>
+          <name>version</name>
+          <version>1.0.0+</version>
+          <defaultValue>1</defaultValue>
+          <description>The version of the persisted model.</description>
+          <type>String</type>
+          <required>true</required>
+        </field>
+        <field>
+          <name>captureSource</name>
+          <version>1.0.0+</version>
+          <description>The repositoryId of the capture source repository, for resolving external (captured) artifacts.</description>
+          <defaultValue>public</defaultValue>
+          <type>String</type>
+          <required>true</required>
+        </field>
+      </fields>
+      <codeSegments>
+        <codeSegment>
+          <version>1.0.0</version>
+          <code><![CDATA[
+    public static final String MODEL_VERSION = "1.0.0";
+]]></code>
+        </codeSegment>
+      </codeSegments>
+    </class>
+  </classes>
+</model>

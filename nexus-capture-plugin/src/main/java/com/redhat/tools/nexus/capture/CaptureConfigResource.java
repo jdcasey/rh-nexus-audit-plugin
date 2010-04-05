@@ -28,7 +28,7 @@ public class CaptureConfigResource
 {
 
     @Inject
-    @Named( "xml" )
+    @Named( "modello" )
     private CaptureConfiguration configuration;
 
     private final Logger logger = LoggerFactory.getLogger( getClass() );

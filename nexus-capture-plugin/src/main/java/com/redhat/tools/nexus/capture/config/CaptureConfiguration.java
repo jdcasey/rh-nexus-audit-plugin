@@ -2,6 +2,8 @@ package com.redhat.tools.nexus.capture.config;
 
 import org.sonatype.plugin.Managed;
 
+import com.redhat.tools.nexus.capture.config.model.CaptureConfigModel;
+
 import javax.inject.Singleton;
 
 @Managed

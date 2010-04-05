@@ -5,7 +5,6 @@ import org.sonatype.nexus.artifact.Gav;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.reflect.TypeToken;
-import com.redhat.tools.nexus.capture.config.CaptureConfigModel;
 import com.redhat.tools.nexus.protocol.ProtocolUtils;
 import com.redhat.tools.nexus.protocol.ProtocolUtils.GavCreator;
 import com.redhat.tools.nexus.serial.CustomFormatDateConverter;
@@ -84,8 +83,7 @@ public final class ModelSerializationUtils
     public static XStream getXStreamForConfig()
     {
         final XStream xs = createXStream();
-
-        xs.processAnnotations( CaptureConfigModel.class );
+        //        xs.processAnnotations( CaptureConfigModel.class );
 
         return xs;
     }

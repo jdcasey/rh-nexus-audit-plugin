@@ -51,7 +51,7 @@ public class CaptureResolverResource
     private CaptureStore captureStore;
 
     @Inject
-    @Named( "xml" )
+    @Named( "modello" )
     private CaptureConfiguration configuration;
 
     @Override
@@ -85,7 +85,7 @@ public class CaptureResolverResource
         final String buildTag =
             request.getAttributes().get( CaptureResourceConstants.ATTR_BUILD_TAG_REPO_ID ).toString();
 
-        final String capture = configuration.getModel().getCaptureSourceRepoId();
+        final String capture = configuration.getModel().getCaptureSource();
 
         final Subject subject = SecurityUtils.getSubject();
         final String user = subject.getPrincipal().toString();
