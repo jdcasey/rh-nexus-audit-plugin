@@ -155,19 +155,34 @@ public class JsonCaptureStore
     public CaptureSession readLog( final CaptureSessionRef ref )
         throws CaptureStoreException
     {
-        CaptureSession session = sessions.get( ref.key() );
+        final String key = ref.key();
+        logger.info( String.format( "Retrieving session for key: %s", key ) );
+
+        CaptureSession session = sessions.get( key );
 
         if ( session == null || !ref.getDate().equals( session.getStartDate() ) )
         {
-            final CaptureSessionCatalog catalog = catalogs.get( ref.key() );
+            logger.info( "Not found in memory. Looking in catalogs..." );
+            final CaptureSessionCatalog catalog = catalogs.get( key );
             if ( catalog != null )
             {
                 final TreeMap<Date, File> sessions = catalog.getSessions();
                 final File f = sessions.get( ref.getDate() );
+
+                logger.info( String.format( "Looking for session file: %s for date: %s in catalog.", f, ref.getDate() ) );
                 if ( f != null && f.exists() )
                 {
+                    logger.info( "Found it." );
                     session = readSession( f );
                 }
+                else
+                {
+                    logger.info( "File is missing or no matching session was found in catalog." );
+                }
+            }
+            else
+            {
+                logger.info( "Catalog not found." );
             }
         }
 
