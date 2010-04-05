@@ -7,7 +7,7 @@
   <parent>
     <groupId>com.redhat.tools.nexus</groupId>
     <artifactId>nexus-at-redhat</artifactId>
-    <version>1</version>
+    <version>2-SNAPSHOT</version>
   </parent>
   
   <artifactId>nexus-capture-plugin</artifactId>
