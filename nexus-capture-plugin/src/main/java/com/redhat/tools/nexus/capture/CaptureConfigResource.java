@@ -62,10 +62,17 @@ public class CaptureConfigResource
     public Object get( final Context context, final Request request, final Response response, final Variant variant )
         throws ResourceException
     {
-        logger.info( String.format( "Retrieving capture config with: %s",
-                                    getXStreamForConfig().toXML( configuration.getModel() ) ) );
+        try
+        {
+            logger.info( String.format( "Retrieving capture config with: %s",
+                                        getXStreamForConfig().toXML( configuration.getModel() ) ) );
 
-        return new CaptureConfigDTO( configuration.getModel() );
+            return new CaptureConfigDTO( configuration.getModel() );
+        }
+        catch ( final InvalidConfigurationException e )
+        {
+            throw new ResourceException( Status.SERVER_ERROR_INTERNAL, e.getMessage() );
+        }
     }
 
     @Override
@@ -78,6 +85,8 @@ public class CaptureConfigResource
             try
             {
                 configuration.updateModel( ( (CaptureConfigDTO) payload ).getData() );
+
+                return new CaptureConfigDTO( configuration.getModel() );
             }
             catch ( final InvalidConfigurationException e )
             {
@@ -89,8 +98,6 @@ public class CaptureConfigResource
             throw new ResourceException( Status.CLIENT_ERROR_BAD_REQUEST,
                                          "No configuration data was provided in request." );
         }
-
-        return new CaptureConfigDTO( configuration.getModel() );
     }
 
 }

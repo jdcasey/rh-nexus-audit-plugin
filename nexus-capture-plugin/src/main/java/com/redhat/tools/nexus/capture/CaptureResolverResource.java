@@ -6,6 +6,7 @@ import org.jsecurity.subject.Subject;
 import org.restlet.Context;
 import org.restlet.data.Request;
 import org.restlet.data.Response;
+import org.restlet.data.Status;
 import org.restlet.resource.ResourceException;
 import org.restlet.resource.Variant;
 import org.slf4j.Logger;
@@ -24,6 +25,7 @@ import org.sonatype.plexus.rest.resource.PathProtectionDescriptor;
 import org.sonatype.plexus.rest.resource.PlexusResource;
 
 import com.redhat.tools.nexus.capture.config.CaptureConfiguration;
+import com.redhat.tools.nexus.capture.config.InvalidConfigurationException;
 import com.redhat.tools.nexus.capture.store.CaptureStore;
 import com.redhat.tools.nexus.capture.store.CaptureStoreException;
 import com.redhat.tools.nexus.protocol.ProtocolConstants;
@@ -85,7 +87,15 @@ public class CaptureResolverResource
         final String buildTag =
             request.getAttributes().get( CaptureResourceConstants.ATTR_BUILD_TAG_REPO_ID ).toString();
 
-        final String capture = configuration.getModel().getCaptureSource();
+        String capture;
+        try
+        {
+            capture = configuration.getModel().getCaptureSource();
+        }
+        catch ( final InvalidConfigurationException e )
+        {
+            throw new ResourceException( Status.SERVER_ERROR_INTERNAL, e.getMessage() );
+        }
 
         final Subject subject = SecurityUtils.getSubject();
         final String user = subject.getPrincipal().toString();

@@ -17,5 +17,6 @@ public interface CaptureConfiguration
     void updateModel( CaptureConfigModel model )
         throws InvalidConfigurationException;
 
-    CaptureConfigModel getModel();
+    CaptureConfigModel getModel()
+        throws InvalidConfigurationException;
 }

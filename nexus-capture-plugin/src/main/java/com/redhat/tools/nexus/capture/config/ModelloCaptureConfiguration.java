@@ -2,6 +2,7 @@ package com.redhat.tools.nexus.capture.config;
 
 import static org.codehaus.plexus.util.IOUtil.close;
 
+import org.codehaus.plexus.util.xml.pull.XmlPullParserException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.sonatype.nexus.configuration.application.ApplicationConfiguration;
@@ -45,6 +46,7 @@ public class ModelloCaptureConfiguration
 
     @Override
     public CaptureConfigModel getModel()
+        throws InvalidConfigurationException
     {
         read();
 
@@ -55,8 +57,6 @@ public class ModelloCaptureConfiguration
     public void save()
         throws InvalidConfigurationException
     {
-        read();
-
         if ( configModel == null )
         {
             logger.warn( "Capture configuration is empty, and will NOT be saved." );
@@ -87,8 +87,6 @@ public class ModelloCaptureConfiguration
     public void updateModel( final CaptureConfigModel model )
         throws InvalidConfigurationException
     {
-        read();
-
         if ( model == null )
         {
             throw new InvalidConfigurationException( "Capture configuration is missing or invalid." );
@@ -99,6 +97,7 @@ public class ModelloCaptureConfiguration
     }
 
     private void read()
+        throws InvalidConfigurationException
     {
         if ( configModel != null )
         {
@@ -115,9 +114,17 @@ public class ModelloCaptureConfiguration
                 reader = new FileReader( configFile );
                 configModel = new CaptureConfigXpp3Reader().read( reader );
             }
-            catch ( final Exception e )
+            catch ( final IOException e )
             {
-                throw new Error( "[NEXUS-3308] FAILURE to initialize XML configuration: " + e.getMessage(), e );
+                throw new InvalidConfigurationException(
+                                                         "Failed to initialize capture configuration on disk.\nReason: %s",
+                                                         e, e.getMessage() );
+            }
+            catch ( final XmlPullParserException e )
+            {
+                throw new InvalidConfigurationException(
+                                                         "Failed to initialize capture configuration on disk.\nReason: %s",
+                                                         e, e.getMessage() );
             }
             finally
             {
