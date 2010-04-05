@@ -29,10 +29,10 @@
       <id>nexus</id>
       <url>http://localhost:8081/nexus/content/repositories/releases</url>
     </repository>
-    <snapshots>
+    <snapshotRepository>
       <id>nexus</id>
       <url>http://localhost:8081/nexus/content/repositories/snapshots</url>
-    </snapshots>
+    </snapshotRepository>
   </distributionManagement>
   
   <dependencyManagement>
