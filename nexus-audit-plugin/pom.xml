@@ -67,9 +67,8 @@
     <!-- #ITSet ENDS -->
 
     <dependency>
-      <groupId>${project.groupId}</groupId>
+      <groupId>com.redhat.tools.nexus</groupId>
       <artifactId>nexus-rh-commons</artifactId>
-      <version>1.1-SNAPSHOT</version>
     </dependency>
   </dependencies>
 
