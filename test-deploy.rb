@@ -3,8 +3,8 @@
 # We may need nexus to be available in order to build...
 exit 1 unless system( "mvn clean install" )
 
-version = "1.0-SNAPSHOT"
-plugins = ["nexus-capture-plugin", "nexus-audit-plugin"]
+version = "1.1-SNAPSHOT"
+plugins = ["nexus-audit-plugin"]
 
 exit 5 unless system( "~/apps/nexus/current/bin/jsw/macosx-universal-32/nexus stop" )
 
