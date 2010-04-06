@@ -1,9 +1,0 @@
-#if($data.url)
-
-Capture session CLOSED. URL: $data.url
-
-#else
-
-There is no current capture session to close.
-
-#end

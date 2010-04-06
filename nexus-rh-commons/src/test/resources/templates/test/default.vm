@@ -1,2 +1,0 @@
-#foreach( $host in $data )$host
-#end
