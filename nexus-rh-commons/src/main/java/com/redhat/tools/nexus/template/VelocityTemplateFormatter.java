@@ -166,7 +166,7 @@ public class VelocityTemplateFormatter
 
         if ( templatesDir == null && configuration != null )
         {
-            templatesDir = joinFile( configuration.getConfigurationDirectory(), "capture" );
+            templatesDir = joinFile( configuration.getConfigurationDirectory(), "templates" );
             try
             {
                 final File d = templatesDir.getCanonicalFile();
@@ -174,6 +174,11 @@ public class VelocityTemplateFormatter
             }
             catch ( final IOException e )
             {
+            }
+
+            if ( !templatesDir.exists() )
+            {
+                templatesDir.mkdirs();
             }
         }
     }
