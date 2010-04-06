@@ -44,7 +44,7 @@
     <dependency>
     	<groupId>com.redhat.tools.nexus</groupId>
     	<artifactId>nexus-capture-protocol</artifactId>
-    	<version>1.0</version>
+    	<version>1.1-SNAPSHOT</version>
     </dependency>
     <dependency>
    	  <groupId>org.sonatype.nexus</groupId>
