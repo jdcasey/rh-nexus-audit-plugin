@@ -205,11 +205,10 @@ public abstract class AbstractAuditStore
                 artifactFactory.createArtifactWithClassifier( gav.getGroupId(), gav.getArtifactId(), gav.getVersion(),
                                                               gav.getExtension(), gav.getClassifier() );
 
-            logger.info( "\n\nResolving snapshot metadata for: '" + a.getId() + "'\n\n" );
             final SnapshotArtifactRepositoryMetadata m = new SnapshotArtifactRepositoryMetadata( a );
 
             final String mPath = repoLayout.pathOfRemoteRepositoryMetadata( m );
-            final File mappingFile = getResolvedStoreFile( repoId, mPath );
+            final File mappingFile = getMetadataFile( repoId, mPath );
 
             Reader reader = null;
             String version = null;
@@ -262,6 +261,47 @@ public abstract class AbstractAuditStore
         }
 
         return gav;
+    }
+
+    private File getMetadataFile( final String repoId, final String path )
+        throws AuditStoreException
+    {
+        final MavenRepository repository = getRepository( repoId );
+        final ResourceStoreRequest request = new ResourceStoreRequest( path, false );
+
+        URL url;
+        try
+        {
+            url = repository.getLocalStorage().getAbsoluteUrlFromBase( repository, request );
+        }
+        catch ( final StorageException e )
+        {
+            throw new AuditStoreException(
+                                           "Failed to retrieve local-storage URL.\nPath: %s\nRepository-Id: %s\nReason: %s",
+                                           e, request.getRequestPath(), repository.getId(), e.getMessage() );
+        }
+
+        File file;
+
+        try
+        {
+            file = new File( url.toURI() );
+        }
+        catch ( final Throwable t )
+        {
+            file = new File( url.getPath() );
+        }
+
+        try
+        {
+            file = file.getCanonicalFile();
+        }
+        catch ( final IOException e )
+        {
+            file = file.getAbsoluteFile();
+        }
+
+        return file;
     }
 
     private File getResolvedStoreFile( final String repoId, final String path )
