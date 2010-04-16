@@ -23,6 +23,7 @@ import org.apache.maven.artifact.factory.ArtifactFactory;
 import org.apache.maven.artifact.repository.layout.ArtifactRepositoryLayout;
 import org.apache.maven.artifact.repository.metadata.Metadata;
 import org.apache.maven.artifact.repository.metadata.SnapshotArtifactRepositoryMetadata;
+import org.apache.maven.artifact.repository.metadata.Versioning;
 import org.apache.maven.artifact.repository.metadata.io.xpp3.MetadataXpp3Reader;
 import org.codehaus.plexus.util.IOUtil;
 import org.codehaus.plexus.util.ReaderFactory;
@@ -50,6 +51,7 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.Reader;
 import java.net.URL;
+import java.util.List;
 
 public abstract class AbstractAuditStore
     implements AuditStore
@@ -194,6 +196,7 @@ public abstract class AbstractAuditStore
         return gav;
     }
 
+    @SuppressWarnings( "unchecked" )
     private Gav resolveSnapshotsInGav( final String repoId, final Gav src )
         throws AuditStoreException
     {
@@ -222,9 +225,23 @@ public abstract class AbstractAuditStore
                 final Metadata metadata = mappingReader.read( reader, false );
                 if ( metadata != null && metadata.getVersioning() != null )
                 {
-                    version = metadata.getVersioning().getLatest();
+                    final Versioning versioning = metadata.getVersioning();
+                    version = versioning.getLatest();
 
                     logger.info( String.format( "latest version is: '%s'", version ) );
+                    if ( version == null )
+                    {
+                        final List<String> versions = versioning.getVersions();
+                        logger.info( String.format( "latest version missing; checking versions list with %d entries.",
+                                                    ( versions == null ? 0 : versions.size() ) ) );
+
+                        if ( versions != null && !versions.isEmpty() )
+                        {
+                            logger.info( String.format( "using version from top of versions list: '%s'", version ) );
+                            version = versions.get( 0 );
+                        }
+                    }
+
                     if ( version != null )
                     {
                         logger.info( String.format( "resolved snapshot to: '%s'", version ) );
