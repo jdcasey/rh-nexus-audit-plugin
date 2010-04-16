@@ -64,8 +64,11 @@ public class JsonAuditStore
     {
         final File auditFile = getStoreFile( auditInfo );
 
-        logger.info( String.format( "Attempting to write audit info for: %s\nAudit File: %s",
-                                    auditInfo.getReferencedPath(), auditFile ) );
+        if ( logger.isDebugEnabled() )
+        {
+            logger.debug( String.format( "Attempting to write audit info for: %s\nAudit File: %s",
+                                         auditInfo.getReferencedPath(), auditFile ) );
+        }
 
         final File dir = auditFile.getParentFile();
         if ( dir != null && !dir.exists() )
