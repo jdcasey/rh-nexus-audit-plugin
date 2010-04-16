@@ -211,7 +211,10 @@ public abstract class AbstractAuditStore
                 artifactFactory.createArtifactWithClassifier( gav.getGroupId(), gav.getArtifactId(), gav.getVersion(),
                                                               gav.getExtension(), gav.getClassifier() );
 
-            logger.info( String.format( "Resolving snapshot version in: '%s'", a.getId() ) );
+            if ( logger.isDebugEnabled() )
+            {
+                logger.debug( String.format( "Resolving snapshot version in: '%s'", a.getId() ) );
+            }
             final SnapshotArtifactRepositoryMetadata m = new SnapshotArtifactRepositoryMetadata( a );
 
             final String mPath = repoLayout.pathOfRemoteRepositoryMetadata( m );
@@ -233,8 +236,12 @@ public abstract class AbstractAuditStore
 
                     if ( snapshot != null )
                     {
-                        logger.info( String.format( "found snapshot metadata. timestamp: '%s'; build-number: '%s'",
-                                                    snapshot.getTimestamp(), snapshot.getBuildNumber() ) );
+                        if ( logger.isDebugEnabled() )
+                        {
+                            logger.debug( String.format(
+                                                         "found snapshot metadata. timestamp: '%s'; build-number: '%s'",
+                                                         snapshot.getTimestamp(), snapshot.getBuildNumber() ) );
+                        }
 
                         long timestamp;
                         int buildnumber;
@@ -260,7 +267,10 @@ public abstract class AbstractAuditStore
 
                         version = sb.toString();
 
-                        logger.info( String.format( "resolved snapshot to: '%s'", version ) );
+                        if ( logger.isDebugEnabled() )
+                        {
+                            logger.debug( String.format( "resolved snapshot to: '%s'", version ) );
+                        }
 
                         gav =
                             new Gav( gav.getGroupId(), gav.getArtifactId(), version, gav.getClassifier(),
