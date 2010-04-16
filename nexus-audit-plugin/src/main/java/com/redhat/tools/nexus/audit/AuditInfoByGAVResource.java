@@ -134,7 +134,7 @@ public class AuditInfoByGAVResource
             logger.error( message, e );
             e.printStackTrace();
 
-            throw new ResourceException( Status.SERVER_ERROR_INTERNAL, message );
+            throw new ResourceException( Status.SERVER_ERROR_INTERNAL, "<pre>" + message + "</pre>" );
         }
 
         if ( data == null && Boolean.valueOf( quiet ) )

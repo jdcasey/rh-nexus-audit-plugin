@@ -204,6 +204,8 @@ public abstract class AbstractAuditStore
             final Artifact a =
                 artifactFactory.createArtifactWithClassifier( gav.getGroupId(), gav.getArtifactId(), gav.getVersion(),
                                                               gav.getExtension(), gav.getClassifier() );
+
+            logger.info( "\n\nResolving snapshot metadata for: '" + a.getId() + "'\n\n" );
             final SnapshotArtifactRepositoryMetadata m = new SnapshotArtifactRepositoryMetadata( a );
 
             final String mPath = repoLayout.pathOfRemoteRepositoryMetadata( m );
