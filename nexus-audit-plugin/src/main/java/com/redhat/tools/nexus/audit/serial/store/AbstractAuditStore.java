@@ -22,6 +22,7 @@ import org.apache.maven.artifact.ArtifactUtils;
 import org.apache.maven.artifact.factory.ArtifactFactory;
 import org.apache.maven.artifact.repository.layout.ArtifactRepositoryLayout;
 import org.apache.maven.artifact.repository.metadata.Metadata;
+import org.apache.maven.artifact.repository.metadata.Snapshot;
 import org.apache.maven.artifact.repository.metadata.SnapshotArtifactRepositoryMetadata;
 import org.apache.maven.artifact.repository.metadata.Versioning;
 import org.apache.maven.artifact.repository.metadata.io.xpp3.MetadataXpp3Reader;
@@ -226,19 +227,32 @@ public abstract class AbstractAuditStore
                 if ( metadata != null && metadata.getVersioning() != null )
                 {
                     final Versioning versioning = metadata.getVersioning();
-                    version = versioning.getLatest();
+                    final Snapshot snapshot = versioning.getSnapshot();
+                    if ( snapshot != null )
+                    {
+                        logger.info( String.format( "found snapshot metadata. timestamp: '%s'; build-number: '%s'",
+                                                    snapshot.getTimestamp(), snapshot.getBuildNumber() ) );
 
-                    logger.info( String.format( "latest version is: '%s'", version ) );
+                        version = snapshot.getTimestamp() + "-" + snapshot.getBuildNumber();
+                    }
+
                     if ( version == null )
                     {
-                        final List<String> versions = versioning.getVersions();
-                        logger.info( String.format( "latest version missing; checking versions list with %d entries.",
-                                                    ( versions == null ? 0 : versions.size() ) ) );
+                        version = versioning.getLatest();
 
-                        if ( versions != null && !versions.isEmpty() )
+                        logger.info( String.format( "latest version is: '%s'", version ) );
+                        if ( version == null )
                         {
-                            logger.info( String.format( "using version from top of versions list: '%s'", version ) );
-                            version = versions.get( 0 );
+                            final List<String> versions = versioning.getVersions();
+                            logger.info( String.format(
+                                                        "latest version missing; checking versions list with %d entries.",
+                                                        ( versions == null ? 0 : versions.size() ) ) );
+
+                            if ( versions != null && !versions.isEmpty() )
+                            {
+                                logger.info( String.format( "using version from top of versions list: '%s'", version ) );
+                                version = versions.get( 0 );
+                            }
                         }
                     }
 
