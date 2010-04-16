@@ -19,6 +19,8 @@ package com.redhat.tools.nexus.audit.serial;
 
 import static com.redhat.tools.nexus.request.RequestUtils.parseDate;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.sonatype.nexus.artifact.Gav;
 import org.sonatype.nexus.artifact.IllegalArtifactCoordinateException;
 
@@ -303,6 +305,8 @@ public final class SerialUtils
         implements JsonSerializer<Date>, JsonDeserializer<Date>, Converter
     {
 
+        private static final Logger logger = LoggerFactory.getLogger( CustomFormatDateConverter.class );
+
         private final String format;
 
         public CustomFormatDateConverter( final String format )
@@ -328,20 +332,22 @@ public final class SerialUtils
                 result = new SimpleDateFormat( format ).format( source );
             }
 
+            logger.info( String.format( "Serialized date: '%s' to string: '%s'", source, result ) );
             return result;
         }
 
         private Date doUnFormat( final String value )
         {
+            Date d;
             if ( UNKNOWN_DATE_VALUE.equals( value.toLowerCase().trim() ) )
             {
-                return UNKNOWN_DATE;
+                d = UNKNOWN_DATE;
             }
             else
             {
                 try
                 {
-                    return parseDate( value );
+                    d = parseDate( value );
                 }
                 catch ( final ParseException e )
                 {
@@ -350,6 +356,10 @@ public final class SerialUtils
 
                 throw new IllegalArgumentException( String.format( "Cannot parse date: '%s'", value ) );
             }
+
+            logger.info( String.format( "Deserialized date string: '%s' to: '%s'", value, d ) );
+
+            return d;
         }
 
         public Object unmarshal( final HierarchicalStreamReader reader, final UnmarshallingContext context )
