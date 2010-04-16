@@ -205,6 +205,7 @@ public abstract class AbstractAuditStore
                 artifactFactory.createArtifactWithClassifier( gav.getGroupId(), gav.getArtifactId(), gav.getVersion(),
                                                               gav.getExtension(), gav.getClassifier() );
 
+            logger.info( String.format( "Resolving snapshot version in: '%s'", a.getId() ) );
             final SnapshotArtifactRepositoryMetadata m = new SnapshotArtifactRepositoryMetadata( a );
 
             final String mPath = repoLayout.pathOfRemoteRepositoryMetadata( m );
@@ -223,8 +224,10 @@ public abstract class AbstractAuditStore
                 {
                     version = metadata.getVersioning().getLatest();
 
+                    logger.info( String.format( "latest version is: '%s'", version ) );
                     if ( version != null )
                     {
+                        logger.info( String.format( "resolved snapshot to: '%s'", version ) );
                         gav =
                             new Gav( gav.getGroupId(), gav.getArtifactId(), version, gav.getClassifier(),
                                      gav.getExtension(), null, null, null, false, false, null, false, null );
