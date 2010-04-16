@@ -34,7 +34,7 @@ public final class AuditConstants
 
     public static final String PARAM_EXTENSION = "t";
 
-    public static final String AUDIT_TEMPLATE_BASEPATH = "audit/log";
+    public static final String AUDIT_TEMPLATE_BASEPATH = "templates/audit/log";
 
     public static final String PARAM_QUIET = "q";
 
