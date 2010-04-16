@@ -59,6 +59,8 @@ public class DeploymentAuditEventInspector
             final String path = item.getPath();
             final String owner = item.getAttributes().get( AccessManager.REQUEST_USER );
 
+            logger.info( String.format( "Updating audit log for: '%s'; owner: '%s'", path, owner ) );
+
             final AuditInfo audit = new AuditInfo( owner, new Date(), path, repoId );
 
             try
