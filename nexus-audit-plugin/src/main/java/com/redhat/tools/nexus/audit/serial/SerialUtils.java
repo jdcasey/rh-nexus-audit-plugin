@@ -17,8 +17,6 @@
 
 package com.redhat.tools.nexus.audit.serial;
 
-import static com.redhat.tools.nexus.request.RequestUtils.parseDate;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.sonatype.nexus.artifact.Gav;
@@ -347,14 +345,13 @@ public final class SerialUtils
             {
                 try
                 {
-                    d = parseDate( value, new String[] { format } );
+                    d = new SimpleDateFormat( format ).parse( value );
                 }
                 catch ( final ParseException e )
                 {
-                    // logged in parseDate, above
+                    throw new IllegalArgumentException( String.format( "Cannot parse date: '%s' using format: '%s'",
+                                                                       value, format ) );
                 }
-
-                throw new IllegalArgumentException( String.format( "Cannot parse date: '%s'", value ) );
             }
 
             logger.info( String.format( "Deserialized date string: '%s' to: '%s'", value, d ) );
