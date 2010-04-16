@@ -330,7 +330,10 @@ public final class SerialUtils
                 result = new SimpleDateFormat( format ).format( source );
             }
 
-            logger.info( String.format( "Serialized date: '%s' to string: '%s'", source, result ) );
+            if ( logger.isDebugEnabled() )
+            {
+                logger.debug( String.format( "Serialized date: '%s' to string: '%s'", source, result ) );
+            }
             return result;
         }
 
@@ -354,7 +357,10 @@ public final class SerialUtils
                 }
             }
 
-            logger.info( String.format( "Deserialized date string: '%s' to: '%s'", value, d ) );
+            if ( logger.isDebugEnabled() )
+            {
+                logger.debug( String.format( "Deserialized date string: '%s' to: '%s'", value, d ) );
+            }
 
             return d;
         }
