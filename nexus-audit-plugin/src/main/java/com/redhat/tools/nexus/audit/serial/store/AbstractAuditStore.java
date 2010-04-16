@@ -52,7 +52,6 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.Reader;
 import java.net.URL;
-import java.util.List;
 
 public abstract class AbstractAuditStore
     implements AuditStore
@@ -233,32 +232,19 @@ public abstract class AbstractAuditStore
                         logger.info( String.format( "found snapshot metadata. timestamp: '%s'; build-number: '%s'",
                                                     snapshot.getTimestamp(), snapshot.getBuildNumber() ) );
 
-                        version = snapshot.getTimestamp() + "-" + snapshot.getBuildNumber();
-                    }
+                        final StringBuilder sb = new StringBuilder();
+                        sb.append( metadata.getVersion().substring( 0, metadata.getVersion().indexOf( "SNAPSHOT" ) ) )
+                          .append( snapshot.getTimestamp() )
+                          .append( "-" )
+                          .append( snapshot.getBuildNumber() );
 
-                    if ( version == null )
-                    {
-                        version = versioning.getLatest();
-
-                        logger.info( String.format( "latest version is: '%s'", version ) );
-                        if ( version == null )
-                        {
-                            final List<String> versions = versioning.getVersions();
-                            logger.info( String.format(
-                                                        "latest version missing; checking versions list with %d entries.",
-                                                        ( versions == null ? 0 : versions.size() ) ) );
-
-                            if ( versions != null && !versions.isEmpty() )
-                            {
-                                logger.info( String.format( "using version from top of versions list: '%s'", version ) );
-                                version = versions.get( 0 );
-                            }
-                        }
+                        version = sb.toString();
                     }
 
                     if ( version != null )
                     {
                         logger.info( String.format( "resolved snapshot to: '%s'", version ) );
+
                         gav =
                             new Gav( gav.getGroupId(), gav.getArtifactId(), version, gav.getClassifier(),
                                      gav.getExtension(), null, null, null, false, false, null, false, null );
