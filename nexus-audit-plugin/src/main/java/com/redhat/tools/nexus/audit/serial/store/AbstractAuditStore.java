@@ -52,10 +52,14 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.Reader;
 import java.net.URL;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 
 public abstract class AbstractAuditStore
     implements AuditStore
 {
+
+    private static final String TIMESTAMP_FORMAT = "yyyyMMdd.HHmmss";
 
     private final Logger logger = LoggerFactory.getLogger( getClass() );
 
@@ -196,7 +200,6 @@ public abstract class AbstractAuditStore
         return gav;
     }
 
-    @SuppressWarnings( "unchecked" )
     private Gav resolveSnapshotsInGav( final String repoId, final Gav src )
         throws AuditStoreException
     {
@@ -227,10 +230,27 @@ public abstract class AbstractAuditStore
                 {
                     final Versioning versioning = metadata.getVersioning();
                     final Snapshot snapshot = versioning.getSnapshot();
+
                     if ( snapshot != null )
                     {
                         logger.info( String.format( "found snapshot metadata. timestamp: '%s'; build-number: '%s'",
                                                     snapshot.getTimestamp(), snapshot.getBuildNumber() ) );
+
+                        long timestamp;
+                        int buildnumber;
+
+                        try
+                        {
+                            timestamp =
+                                Long.valueOf( new SimpleDateFormat( TIMESTAMP_FORMAT ).parse( snapshot.getTimestamp() )
+                                                                                      .getTime() );
+                            buildnumber = snapshot.getBuildNumber();
+                        }
+                        catch ( final ParseException e )
+                        {
+                            throw new AuditStoreException( "Cannot parse snapshot timestamp from metadata: '%s'", e,
+                                                           snapshot.getTimestamp() );
+                        }
 
                         final StringBuilder sb = new StringBuilder();
                         sb.append( metadata.getVersion().substring( 0, metadata.getVersion().indexOf( "SNAPSHOT" ) ) )
@@ -239,15 +259,12 @@ public abstract class AbstractAuditStore
                           .append( snapshot.getBuildNumber() );
 
                         version = sb.toString();
-                    }
 
-                    if ( version != null )
-                    {
                         logger.info( String.format( "resolved snapshot to: '%s'", version ) );
 
                         gav =
                             new Gav( gav.getGroupId(), gav.getArtifactId(), version, gav.getClassifier(),
-                                     gav.getExtension(), null, null, null, false, false, null, false, null );
+                                     gav.getExtension(), buildnumber, timestamp, null, true, false, null, false, null );
                     }
                 }
             }
