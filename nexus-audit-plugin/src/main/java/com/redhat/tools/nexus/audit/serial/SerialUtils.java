@@ -347,7 +347,7 @@ public final class SerialUtils
             {
                 try
                 {
-                    d = parseDate( value );
+                    d = parseDate( value, new String[] { format } );
                 }
                 catch ( final ParseException e )
                 {
