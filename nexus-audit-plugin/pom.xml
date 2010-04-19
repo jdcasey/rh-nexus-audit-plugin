@@ -7,7 +7,7 @@
   <parent>
     <groupId>com.redhat.tools.nexus.audit</groupId>
     <artifactId>nexus-audit-parent</artifactId>
-    <version>1.2</version>
+    <version>1.3-SNAPSHOT</version>
   </parent>
   
   <artifactId>nexus-audit-plugin</artifactId>
