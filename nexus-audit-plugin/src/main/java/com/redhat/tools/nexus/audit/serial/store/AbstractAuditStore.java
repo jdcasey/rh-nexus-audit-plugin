@@ -86,10 +86,10 @@ public abstract class AbstractAuditStore
         return repoRegistry;
     }
 
-    protected File getStoreFile( final AuditInfo info )
+    protected File getStoreFile( final AuditInfo info, final boolean resolveExistingSnapshot )
         throws AuditStoreException
     {
-        final Gav gav = resolveSnapshotGav( info.getRepositoryId(), info.getReferencedPath() );
+        final Gav gav = resolveSnapshotGav( info.getRepositoryId(), info.getReferencedPath(), resolveExistingSnapshot );
 
         File auditFile;
         if ( gav != null )
@@ -104,17 +104,17 @@ public abstract class AbstractAuditStore
         return auditFile;
     }
 
-    protected File getStoreFile( final String repoId, final Gav gav )
+    protected File getStoreFile( final String repoId, final Gav gav, final boolean resolveExistingSnapshot )
         throws AuditStoreException
     {
-        final Gav resolved = resolveSnapshotsInGav( repoId, gav );
+        final Gav resolved = resolveSnapshotsInGav( repoId, gav, resolveExistingSnapshot );
         return getResolvedStoreFile( repoId, resolved == null ? gav : resolved );
     }
 
-    protected File getStoreFile( final String repoId, final String path )
+    protected File getStoreFile( final String repoId, final String path, final boolean resolveExistingSnapshot )
         throws AuditStoreException
     {
-        final Gav resolved = resolveSnapshotGav( repoId, path );
+        final Gav resolved = resolveSnapshotGav( repoId, path, resolveExistingSnapshot );
         if ( resolved == null )
         {
             return getResolvedStoreFile( repoId, path );
@@ -178,7 +178,7 @@ public abstract class AbstractAuditStore
         return new File( artifactPath + ".audit." + getAuditFileExtension() );
     }
 
-    private Gav resolveSnapshotGav( final String repoId, final String path )
+    private Gav resolveSnapshotGav( final String repoId, final String path, final boolean resolveExistingSnapshot )
         throws AuditStoreException
     {
         Gav gav = null;
@@ -194,18 +194,18 @@ public abstract class AbstractAuditStore
 
         if ( gav != null )
         {
-            gav = resolveSnapshotsInGav( repoId, gav );
+            gav = resolveSnapshotsInGav( repoId, gav, resolveExistingSnapshot );
         }
 
         return gav;
     }
 
-    private Gav resolveSnapshotsInGav( final String repoId, final Gav src )
+    private Gav resolveSnapshotsInGav( final String repoId, final Gav src, final boolean resolveExistingSnapshot )
         throws AuditStoreException
     {
         Gav gav = src;
 
-        if ( ArtifactUtils.isSnapshot( gav.getVersion() ) )
+        if ( resolveExistingSnapshot && ArtifactUtils.isSnapshot( gav.getVersion() ) )
         {
             final Artifact a =
                 artifactFactory.createArtifactWithClassifier( gav.getGroupId(), gav.getArtifactId(), gav.getVersion(),
@@ -243,8 +243,8 @@ public abstract class AbstractAuditStore
                                                          snapshot.getTimestamp(), snapshot.getBuildNumber() ) );
                         }
 
-                        long timestamp;
-                        int buildnumber;
+                        Long timestamp = gav.getSnapshotTimeStamp();
+                        Integer buildnumber = gav.getSnapshotBuildNumber();
 
                         if ( snapshot.getTimestamp() != null )
                         {

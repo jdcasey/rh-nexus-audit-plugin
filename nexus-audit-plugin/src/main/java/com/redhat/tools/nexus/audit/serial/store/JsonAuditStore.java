@@ -46,7 +46,7 @@ public class JsonAuditStore
     public AuditInfo getAuditInformation( final String path, final String repoId )
         throws AuditStoreException
     {
-        final File auditFile = getStoreFile( repoId, path );
+        final File auditFile = getStoreFile( repoId, path, true );
         return getAuditInformation( auditFile );
     }
 
@@ -54,7 +54,7 @@ public class JsonAuditStore
     public AuditInfo getAuditInformation( final Gav gav, final String repoId )
         throws AuditStoreException
     {
-        final File auditFile = getStoreFile( repoId, gav );
+        final File auditFile = getStoreFile( repoId, gav, true );
         return getAuditInformation( auditFile );
     }
 
@@ -62,7 +62,7 @@ public class JsonAuditStore
     public boolean saveAuditInformation( final AuditInfo auditInfo )
         throws AuditStoreException
     {
-        final File auditFile = getStoreFile( auditInfo );
+        final File auditFile = getStoreFile( auditInfo, false );
 
         if ( logger.isDebugEnabled() )
         {
