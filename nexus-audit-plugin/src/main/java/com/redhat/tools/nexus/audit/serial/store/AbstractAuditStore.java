@@ -246,35 +246,40 @@ public abstract class AbstractAuditStore
                         long timestamp;
                         int buildnumber;
 
-                        try
+                        if ( snapshot.getTimestamp() != null )
                         {
-                            timestamp =
-                                Long.valueOf( new SimpleDateFormat( TIMESTAMP_FORMAT ).parse( snapshot.getTimestamp() )
-                                                                                      .getTime() );
-                            buildnumber = snapshot.getBuildNumber();
+                            try
+                            {
+                                timestamp =
+                                    Long.valueOf( new SimpleDateFormat( TIMESTAMP_FORMAT ).parse(
+                                                                                                  snapshot.getTimestamp() )
+                                                                                          .getTime() );
+                                buildnumber = snapshot.getBuildNumber();
+                            }
+                            catch ( final ParseException e )
+                            {
+                                throw new AuditStoreException( "Cannot parse snapshot timestamp from metadata: '%s'",
+                                                               e, snapshot.getTimestamp() );
+                            }
+
+                            final StringBuilder sb = new StringBuilder();
+                            sb.append( metadata.getVersion().substring( 0, metadata.getVersion().indexOf( "SNAPSHOT" ) ) )
+                              .append( snapshot.getTimestamp() )
+                              .append( "-" )
+                              .append( snapshot.getBuildNumber() );
+
+                            version = sb.toString();
+
+                            if ( logger.isDebugEnabled() )
+                            {
+                                logger.debug( String.format( "resolved snapshot to: '%s'", version ) );
+                            }
+
+                            gav =
+                                new Gav( gav.getGroupId(), gav.getArtifactId(), version, gav.getClassifier(),
+                                         gav.getExtension(), buildnumber, timestamp, null, true, false, null, false,
+                                         null );
                         }
-                        catch ( final ParseException e )
-                        {
-                            throw new AuditStoreException( "Cannot parse snapshot timestamp from metadata: '%s'", e,
-                                                           snapshot.getTimestamp() );
-                        }
-
-                        final StringBuilder sb = new StringBuilder();
-                        sb.append( metadata.getVersion().substring( 0, metadata.getVersion().indexOf( "SNAPSHOT" ) ) )
-                          .append( snapshot.getTimestamp() )
-                          .append( "-" )
-                          .append( snapshot.getBuildNumber() );
-
-                        version = sb.toString();
-
-                        if ( logger.isDebugEnabled() )
-                        {
-                            logger.debug( String.format( "resolved snapshot to: '%s'", version ) );
-                        }
-
-                        gav =
-                            new Gav( gav.getGroupId(), gav.getArtifactId(), version, gav.getClassifier(),
-                                     gav.getExtension(), buildnumber, timestamp, null, true, false, null, false, null );
                     }
                 }
             }
@@ -300,11 +305,6 @@ public abstract class AbstractAuditStore
             {
                 IOUtil.close( reader );
             }
-        }
-        else
-        {
-            // let the process work...
-            gav = null;
         }
 
         return gav;
