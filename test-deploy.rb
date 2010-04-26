@@ -3,7 +3,7 @@
 require 'yaml'
 require 'pp'
 
-version = '1.3-SNAPSHOT'
+version = '1.4-SNAPSHOT'
 plugins = ['nexus-audit-plugin']
 
 config_file = File.expand_path( "~/.nxtools/config" )
