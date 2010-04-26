@@ -5,14 +5,14 @@
 
   <groupId>com.redhat.tools.nexus.audit</groupId>
   <name>Nexus-Audit Parent</name>
-  <version>1.3-SNAPSHOT</version>
+  <version>1.3</version>
 
   <artifactId>nexus-audit-parent</artifactId>
   <packaging>pom</packaging>
   
   <properties>
     <!-- Set the Nexus version here, against which you build the plugin -->
-    <nexus-version>1.5.0</nexus-version>
+    <nexus-version>1.6.0</nexus-version>
     <slf4j-version>1.5.6</slf4j-version>
   </properties>
   
