@@ -72,11 +72,9 @@ public abstract class AbstractAuditStore
     private GavCalculator gavCalculator;
 
     @Inject
-    @Named( "default" )
     private ArtifactRepositoryLayout repoLayout;
 
     @Inject
-    @Named( "default" )
     private ArtifactFactory artifactFactory;
 
     protected abstract String getAuditFileExtension();
