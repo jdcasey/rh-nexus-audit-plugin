@@ -20,6 +20,8 @@ import javax.inject.Inject;
 import javax.inject.Named;
 
 import java.util.Date;
+import java.util.HashSet;
+import java.util.Set;
 
 @Named( "deploymentAuditInspector" )
 public class DeploymentAuditEventInspector
@@ -28,6 +30,21 @@ public class DeploymentAuditEventInspector
 {
 
     private static final Logger logger = LoggerFactory.getLogger( DeploymentAuditEventInspector.class );
+
+    private static final Set<String> UNTRACKED_PATH_TOKENS;
+
+    static
+    {
+        final Set<String> tokens = new HashSet<String>();
+        tokens.add( ".audit.json" );
+        tokens.add( ".meta" );
+        tokens.add( ".index" );
+        tokens.add( ".md5" );
+        tokens.add( ".sha1" );
+        tokens.add( ".asc" );
+
+        UNTRACKED_PATH_TOKENS = tokens;
+    }
 
     private boolean startLogging;
 
@@ -86,7 +103,20 @@ public class DeploymentAuditEventInspector
     private boolean isTrackable( final RepositoryItemEventStore evtStore )
     {
         final StorageItem item = evtStore.getItem();
-        return !item.getPath().endsWith( ".audit.json" ) && isBlank( item.getRemoteUrl() );
+        final String path = item.getPath();
+
+        // don't track audit information for anything with a path matching an untracked token. 
+        // These are things like checksums, index files, Nexus metadata, etc.
+        for ( final String token : UNTRACKED_PATH_TOKENS )
+        {
+            if ( path.indexOf( token ) > -1 )
+            {
+                return false;
+            }
+        }
+
+        // don't track audit information on proxied files.
+        return isBlank( item.getRemoteUrl() );
     }
 
 }
