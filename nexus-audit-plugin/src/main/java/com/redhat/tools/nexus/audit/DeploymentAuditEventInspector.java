@@ -1,5 +1,7 @@
 package com.redhat.tools.nexus.audit;
 
+import static org.apache.commons.lang.StringUtils.isBlank;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.sonatype.nexus.proxy.access.AccessManager;
@@ -53,7 +55,10 @@ public class DeploymentAuditEventInspector
             final RepositoryItemEventStore evtStore = (RepositoryItemEventStore) evt;
             final StorageItem item = evtStore.getItem();
 
-            // TODO: Limit logging to actual deployments, NOT cache actions for proxies.
+            if ( !isTrackable( evtStore ) )
+            {
+                return;
+            }
 
             final String repoId = item.getRepositoryId();
             final String path = item.getPath();
@@ -76,6 +81,12 @@ public class DeploymentAuditEventInspector
                     + "\nRepository-Id: %s" + "\nReason: %s", path, owner, repoId, e.getMessage() ), e );
             }
         }
+    }
+
+    private boolean isTrackable( final RepositoryItemEventStore evtStore )
+    {
+        final StorageItem item = evtStore.getItem();
+        return !item.getPath().endsWith( ".audit.json" ) && isBlank( item.getRemoteUrl() );
     }
 
 }
