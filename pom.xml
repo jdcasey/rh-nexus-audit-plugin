@@ -5,7 +5,7 @@
 
   <groupId>com.redhat.tools.nexus.audit</groupId>
   <name>Nexus-Audit Parent</name>
-  <version>1.4-SNAPSHOT</version>
+  <version>1.4</version>
 
   <artifactId>nexus-audit-parent</artifactId>
   <packaging>pom</packaging>
