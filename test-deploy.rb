@@ -3,7 +3,6 @@
 require 'yaml'
 require 'pp'
 
-version = '1.4-SNAPSHOT'
 plugins = ['nexus-audit-plugin']
 
 config_file = File.expand_path( "~/.nxtools/config" )
@@ -29,11 +28,13 @@ stop_cmd << "#{config['nexus-bin']}/nexus stop"
 exit 5 unless system( stop_cmd )
 
 plugins.each do |plugin|
-  exit 2 unless system( "rm -rf #{config['nexus-home']}/sonatype-work/nexus/plugin-repository/#{plugin}-#{version}" )
+  exit 2 unless system( "rm -rf #{config['nexus-home']}/sonatype-work/nexus/plugin-repository/#{plugin}-*" )
 end
 
 plugins.each do |plugin|
-	exit 3 unless system( "unzip #{plugin}/target/#{plugin}-#{version}-bundle.zip -d  #{config['nexus-home']}/sonatype-work/nexus/plugin-repository" )
+  `ls #{plugin}/target/#{plugin}-*-bundle.zip`.each do |line|
+  	exit 3 unless system( "unzip #{line.chomp} -d  #{config['nexus-home']}/sonatype-work/nexus/plugin-repository" )
+  end
 end
 
 start_cmd = ''
