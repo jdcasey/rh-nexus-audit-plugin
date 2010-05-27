@@ -41,6 +41,7 @@ import org.sonatype.nexus.proxy.maven.ArtifactStoreRequest;
 import org.sonatype.nexus.proxy.maven.MavenRepository;
 import org.sonatype.nexus.proxy.registry.RepositoryRegistry;
 import org.sonatype.nexus.proxy.repository.Repository;
+import org.sonatype.nexus.proxy.repository.RepositoryWritePolicy;
 
 import com.redhat.tools.nexus.audit.model.AuditInfo;
 
@@ -82,6 +83,21 @@ public abstract class AbstractAuditStore
     protected RepositoryRegistry getRepositoryRegistry()
     {
         return repoRegistry;
+    }
+
+    protected boolean canStore( final AuditInfo info )
+        throws AuditStoreException
+    {
+        final MavenRepository repository = getRepository( info.getRepositoryId() );
+        final File auditFile = getResolvedStoreFile( info.getRepositoryId(), info.getReferencedPath() );
+
+        if ( RepositoryWritePolicy.ALLOW_WRITE != repository.getWritePolicy() && auditFile.exists() )
+        {
+            logger.info( "Cannot overwrite audit information at: " + auditFile );
+            return false;
+        }
+
+        return true;
     }
 
     protected File getStoreFile( final AuditInfo info, final boolean resolveExistingSnapshot )

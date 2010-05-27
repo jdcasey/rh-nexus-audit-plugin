@@ -62,6 +62,11 @@ public class JsonAuditStore
     public boolean saveAuditInformation( final AuditInfo auditInfo )
         throws AuditStoreException
     {
+        if ( !canStore( auditInfo ) )
+        {
+            return false;
+        }
+
         final File auditFile = getStoreFile( auditInfo, false );
 
         if ( logger.isDebugEnabled() )
